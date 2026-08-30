@@ -1,0 +1,55 @@
+:root {
+  --ink: #0e1a24;
+  --paper: #eef2f5;
+  --rule: #c6d2da;
+  --accent: #a8175c;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 320px;
+  grid-template-areas: "head head" "map panel";
+  height: 100vh;
+}
+
+header {
+  grid-area: head;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: #fff;
+}
+
+h1 {
+  margin: 0;
+  font: 700 16px/1 var(--mono);
+  letter-spacing: .18em;
+}
+
+.gloss { font: 11px var(--mono); color: #6b7c89; }
+
+#map { grid-area: map; }
+
+#panel {
+  grid-area: panel;
+  border-left: 1px solid var(--rule);
+  background: #fff;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.empty { font: 12px var(--mono); color: #6b7c89; }
+
+@media (max-width: 720px) {
+  body { grid-template-columns: 1fr; grid-template-areas: "head" "map" "panel"; }
+}

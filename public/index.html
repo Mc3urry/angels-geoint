@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ANGELS &mdash; Surveillance Aircraft Candidates</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <style>
+    body { margin: 0; font: 15px/1.6 system-ui, sans-serif; }
+    #map { height: 70vh; }
+    main { max-width: 44rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <main>
+    <h1>Surveillance aircraft candidates</h1>
+    <p><em>Placeholder. Publish in November.</em></p>
+    <p>
+      This page is deliberately standalone &mdash; no dependency on the ANGELS
+      app, so it loads fast and cannot break when the app does.
+    </p>
+    <h2>Method</h2>
+    <p>Describe the classifier, the training data, and the features.</p>
+    <h2>Limitations</h2>
+    <p>
+      State these prominently. These are <strong>candidates</strong>, produced
+      by a statistical classifier over public flight data. Nothing here asserts
+      what any aircraft was doing.
+    </p>
+  </main>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script>
+    const map = new maplibregl.Map({
+      container: "map",
+      style: "https://tiles.openfreemap.org/styles/positron",
+      bounds: [-77.2, 38.7, -76.0, 39.8],
+      fitBoundsOptions: { padding: 40 },
+    });
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.on("load", () => {
+      fetch("candidates.geojson").then(r => r.json()).then(data => {
+        if (!data.features.length) return;
+        map.addSource("candidates", { type: "geojson", data });
+        map.addLayer({
+          id: "candidates", type: "circle", source: "candidates",
+          paint: {
+            "circle-radius": 5,
+            "circle-color": "#a8175c",
+            "circle-opacity": 0.8,
+          },
+        });
+      });
+    });
+  </script>
+</body>
+</html>
