@@ -40,7 +40,7 @@ sar = ["rasterio>=1.3"]
 # Phase 5.
 forensics = ["pvlib>=0.11", "pillow>=10.0"]
 
-dev = ["pytest>=8.0", "hypothesis>=6.100", "ruff>=0.5"]
+dev = ["pytest>=8.0", "hypothesis>=6.100", "ruff>=0.5", "httpx>=0.27"]
 
 [tool.setuptools.packages.find]
 include = ["angels*"]

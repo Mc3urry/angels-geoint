@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import logging.handlers
 import signal
 import sys
 import time
@@ -38,6 +39,7 @@ from dotenv import load_dotenv
 
 from angels.adapters.aviation.opensky import TokenManager, fetch_states
 from angels.config import AOI_AIR, RAW, REGION_NAME
+from angels.core.uptime import AlreadyRunning, CollectorLock, HeartbeatLog
 
 log = logging.getLogger("ingest")
 
@@ -101,6 +103,11 @@ class Ingester:
         self.rows = 0
         self.errors = 0
         self.running = True
+        # Records that we were alive and asking, separately from what came
+        # back. Without it, a missing hour is indistinguishable from an hour
+        # in which every aircraft went dark -- and you cannot work out which
+        # after the fact.
+        self.hb = HeartbeatLog(root, collector="aviation", interval_s=interval)
 
     def poll_once(self) -> int:
         t, rows = fetch_states(self.bbox, self.tokens)
@@ -129,16 +136,27 @@ class Ingester:
 
         log.info("polling %s (air box) every %.0fs -> %s",
                  REGION_NAME, self.interval, self.root / "aviation")
+        log.info("session %s", self.hb.session_id)
+        self.hb.start(bbox=list(self.bbox), region=REGION_NAME)
+
         try:
             while self.running:
                 try:
                     n = self.poll_once()
+                    self.hb.poll(ok=True, n=n)
                     log.info("poll %d: %d aircraft", self.polls, n)
                 except Exception as exc:
                     # Never let one bad poll end a multi-day run. A transient
                     # 5xx or a dropped connection at hour 40 should cost you
                     # ten seconds, not the whole archive.
+                    #
+                    # A FAILED poll is still a heartbeat: we were awake and we
+                    # asked. That distinguishes "the API refused us" from
+                    # "the laptop was asleep", which are different stories
+                    # about the same empty hour.
                     self.errors += 1
+                    self.polls += 1
+                    self.hb.poll(ok=False, error=str(exc)[:200])
                     log.warning("poll failed (%d total): %s", self.errors, exc)
 
                 if self.polls and self.polls % self.flush_every == 0:
@@ -149,6 +167,10 @@ class Ingester:
                     time.sleep(self.interval)
         finally:
             self.flush()
+            # A session with a start and no stop is a crash, and that is
+            # itself information -- it says the downtime began abruptly
+            # rather than by choice.
+            self.hb.stop(reason="signal" if not self.running else "complete")
             log.info("done: %d polls, %d rows, %d errors",
                      self.polls, self.rows, self.errors)
 
@@ -162,13 +184,30 @@ def main() -> int:
                     help="polls per parquet file (default 30)")
     ap.add_argument("--once", action="store_true", help="one poll, then exit")
     ap.add_argument("--minutes", type=float, help="stop after this long")
+    ap.add_argument("--force", action="store_true",
+                    help="start even if another collector holds the lock. "
+                         "Only when you are certain that one is dead.")
     ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("--log-file", type=Path,
+                    help="also write logs here, rotating at 5 MB. Required in "
+                         "practice when running under Task Scheduler, which "
+                         "gives the process no console to print to.")
     args = ap.parse_args()
+
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
+    if args.log_file:
+        args.log_file.parent.mkdir(parents=True, exist_ok=True)
+        # Rotate, because this runs for months. Five files of 5 MB is a few
+        # weeks of history, which is enough to answer "what happened last
+        # Tuesday" without ever needing attention.
+        handlers.append(logging.handlers.RotatingFileHandler(
+            args.log_file, maxBytes=5_000_000, backupCount=5, encoding="utf-8"))
 
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(asctime)s %(levelname)-7s %(message)s",
-        datefmt="%H:%M:%S",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=handlers,
     )
 
     max_polls = 1 if args.once else None
@@ -181,7 +220,22 @@ def main() -> int:
         log.error("%s", exc)
         return 1
 
-    ing.run(max_polls=max_polls)
+    # Two collectors is not obviously broken -- both work, both write, and
+    # nothing errors. You just burn quota twice and duplicate every row, and
+    # you might not notice for a week. Worth making impossible rather than
+    # remembering not to do.
+    lock = CollectorLock(RAW, "aviation", session_id=ing.hb.session_id,
+                         force=args.force)
+    try:
+        lock.acquire()
+    except AlreadyRunning as exc:
+        log.error("%s", exc)
+        return 2
+
+    try:
+        ing.run(max_polls=max_polls)
+    finally:
+        lock.release()
     return 0
 
 

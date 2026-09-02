@@ -16,9 +16,16 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Data: keep the folder structure, ignore everything in it.
+# Order matters -- the directory re-include must come before the .gitkeep
+# re-include, or git cannot descend far enough to see the file.
 data/**
 !data/**/
 !data/**/.gitkeep
+
+# Logs
+*.log
+*.log.*
 
 # Models
 *.pkl

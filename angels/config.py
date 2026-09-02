@@ -26,6 +26,8 @@ import os
 from datetime import timezone
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # -- paths -----------------------------------------------------------------
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -113,6 +115,17 @@ NMI_TO_M = 1852.0
 
 # -- credentials -----------------------------------------------------------
 # Real values live in .env, which is gitignored. See .env.example.
+#
+# Loaded HERE rather than in each entry point. Every script and the API import
+# this module, so doing it once means nothing can forget -- which is exactly
+# what happened when only the ingest script called load_dotenv() and the API
+# returned 503 for want of credentials that were sitting on disk the whole
+# time.
+#
+# override=False so a real environment variable still wins over the file,
+# which is what you want in CI or a container.
+
+load_dotenv(ROOT / ".env", override=False)
 
 OPENSKY_CLIENT_ID = os.getenv("OPENSKY_CLIENT_ID", "")
 OPENSKY_CLIENT_SECRET = os.getenv("OPENSKY_CLIENT_SECRET", "")

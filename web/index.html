@@ -11,13 +11,16 @@
   <header>
     <h1>ANGELS</h1>
     <span class="gloss">radar returns with no attributable source</span>
+    <div id="range">
+      <button data-hours="1">1h</button>
+      <button data-hours="2" class="on">2h</button>
+      <button data-hours="6">6h</button>
+      <button data-hours="24">24h</button>
+    </div>
   </header>
 
   <div id="map"></div>
-
-  <aside id="panel">
-    <p class="empty">No candidates yet. Phase 2.</p>
-  </aside>
+  <aside id="panel"><p class="empty">starting…</p></aside>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script type="module" src="app.js"></script>

@@ -1,3 +1,17 @@
+"""OpenSky ingest: ADS-B reports and (later) MLAT observations.
+
+Two OpenSky things, easy to conflate:
+
+  * API CLIENT -- self-serve, instant. OAuth2 client credentials, tokens expire
+    after 30 minutes. Basic auth with username and password is no longer
+    accepted. Gives live state vectors. This module uses it today.
+  * HISTORICAL / TRINO -- an application with a human review step. State
+    vectors back to 2013, plus the MLAT tables. Needed from Phase 2 on, and
+    what `observations()` below will use once approved.
+
+Filter on partition columns in every Trino query or they will suspend your
+account. That is not a soft limit.
+"""
 
 from __future__ import annotations
 
@@ -6,11 +20,13 @@ import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Iterable, Sequence
+from pathlib import Path
+from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
 from angels.adapters.aviation.plausibility import AviationPlausibility
+from angels.config import RAW
 from angels.core.models import Domain, Observation, Position, Report, Track
 
 log = logging.getLogger(__name__)
@@ -230,6 +246,137 @@ def split_into_tracks(reports: Iterable[Report], *,
 
 
 # --------------------------------------------------------------------------
+# reading back the archive
+# --------------------------------------------------------------------------
+
+def archive_row_to_report(d: Mapping[str, Any], *,
+                          uncertainty_m: float = 10.0) -> Report | None:
+    """One Parquet row (named columns) to a Report.
+
+    The twin of row_to_report, which takes the API's bare array. These two MUST
+    agree -- tests/test_opensky.py asserts they produce identical Reports for
+    equivalent input, because a drift between them would mean live data and
+    archived data silently disagree.
+    """
+    lat, lon = d.get("latitude"), d.get("longitude")
+    if lat is None or lon is None:
+        return None
+
+    ts = d.get("time_position")
+    if ts is None:
+        ts = d.get("last_contact")
+    if ts is None:
+        return None
+
+    alt = d.get("geo_altitude")
+    if alt is None:
+        alt = d.get("baro_altitude")
+
+    return Report(
+        platform_id=d["icao24"],
+        position=Position(
+            lat=float(lat),
+            lon=float(lon),
+            t=datetime.fromtimestamp(int(ts), tz=timezone.utc),
+            uncertainty_m=uncertainty_m,
+            speed_mps=d.get("velocity"),
+            heading_deg=d.get("true_track"),
+            alt_m=alt,
+        ),
+        source="adsb",
+    )
+
+
+def read_archive(root: Path, t_start: datetime, t_end: datetime,
+                 bbox: tuple[float, float, float, float],
+                 *, include_on_ground: bool = False,
+                 limit: int | None = None) -> list[Report]:
+    """Reports from the Parquet the ingest script has been writing.
+
+    The live endpoint only ever returns *now*, so any time window has to come
+    from stored data. DuckDB reads the hour-partitioned files directly and
+    pushes the filters down, so a narrow window never scans the whole archive
+    -- which is the entire reason for partitioning by hour.
+    """
+    import duckdb  # adapter-local: core must stay stdlib-only
+
+    pattern = (root / "aviation" / "hour=*" / "*.parquet").as_posix()
+    lomin, lamin, lomax, lamax = bbox
+
+    where = [
+        f"last_contact >= {int(t_start.timestamp())}",
+        f"last_contact <= {int(t_end.timestamp())}",
+        f"longitude BETWEEN {lomin} AND {lomax}",
+        f"latitude BETWEEN {lamin} AND {lamax}",
+        "latitude IS NOT NULL",
+    ]
+    if not include_on_ground:
+        where.append("NOT on_ground")
+
+    sql = (f"SELECT * FROM read_parquet('{pattern}') "
+           f"WHERE {' AND '.join(where)} ORDER BY icao24, last_contact")
+    if limit:
+        sql += f" LIMIT {int(limit)}"
+
+    try:
+        rows = duckdb.sql(sql).df().to_dict("records")
+    except Exception as exc:
+        # An empty archive is not an error -- the poller may not have run yet.
+        log.warning("archive read failed (%s); returning nothing", exc)
+        return []
+
+    out = [archive_row_to_report(r) for r in rows]
+    return [r for r in out if r is not None]
+
+
+def latest_states(root: Path, t_start: datetime, t_end: datetime,
+                  bbox: tuple[float, float, float, float],
+                  *, include_on_ground: bool = False) -> list[dict[str, Any]]:
+    """The most recent fix for each aircraft in the window.
+
+    Separate from read_archive because it answers a different question and is
+    polled far more often. The map re-fetches positions every few seconds but
+    track geometry only occasionally -- one row per aircraft rather than
+    hundreds keeps that cheap.
+
+    Carries callsign, heading and speed, which Track deliberately does not:
+    callsign is an aviation concept and core.models stays domain-blind. The
+    front end also needs heading and speed to dead-reckon between polls.
+    """
+    import duckdb
+
+    pattern = (root / "aviation" / "hour=*" / "*.parquet").as_posix()
+    lomin, lamin, lomax, lamax = bbox
+
+    where = [
+        f"last_contact >= {int(t_start.timestamp())}",
+        f"last_contact <= {int(t_end.timestamp())}",
+        f"longitude BETWEEN {lomin} AND {lomax}",
+        f"latitude BETWEEN {lamin} AND {lamax}",
+        "latitude IS NOT NULL",
+    ]
+    if not include_on_ground:
+        where.append("NOT on_ground")
+
+    # One row per aircraft: the newest. DISTINCT ON is a DuckDB nicety that
+    # avoids a window function and a subquery.
+    sql = f"""
+        SELECT DISTINCT ON (icao24)
+               icao24, callsign, latitude, longitude, last_contact,
+               velocity, true_track, geo_altitude, baro_altitude,
+               vertical_rate, squawk, origin_country
+        FROM read_parquet('{pattern}')
+        WHERE {' AND '.join(where)}
+        ORDER BY icao24, last_contact DESC
+    """
+    try:
+        return duckdb.sql(sql).df().to_dict("records")
+    except Exception as exc:
+        log.warning("latest_states failed (%s); returning nothing", exc)
+        return []
+
+
+# --------------------------------------------------------------------------
 # the adapter
 # --------------------------------------------------------------------------
 
@@ -240,6 +387,8 @@ class AviationAdapter:
     domain: Domain = "air"
     plausibility: AviationPlausibility = field(default_factory=AviationPlausibility)
     tokens: TokenManager | None = None
+    archive_root: Path = RAW
+    max_gap_s: float = 900.0
     _client: httpx.Client | None = None
 
     def _tok(self) -> TokenManager:
@@ -256,18 +405,17 @@ class AviationAdapter:
                bbox: tuple[float, float, float, float]) -> list[Track]:
         """Reports over a window, grouped into tracks.
 
-        PHASE 1 reads the Parquet archive that scripts/ingest_aviation.py is
-        accumulating -- the live endpoint only ever returns *now*, so a time
-        window has to come from stored data.
+        Reads the Parquet archive that scripts/ingest_aviation.py accumulates.
+        The live endpoint only ever returns *now*, so a time window has to come
+        from stored data.
 
-        PHASE 2 swaps this for a Trino query against state_vectors_data4 once
-        historical access is approved. The signature does not change, which is
-        the point.
+        PHASE 2 swaps the body for a Trino query against state_vectors_data4
+        once historical access is approved. The signature does not change,
+        which is the point.
         """
-        raise NotImplementedError(
-            "Phase 1: read from data/raw parquet. "
-            "Phase 2: Trino query on state_vectors_data4."
-        )
+        reports = read_archive(self.archive_root, t_start, t_end, bbox)
+        return split_into_tracks(reports, max_gap_s=self.max_gap_s,
+                                 domain=self.domain)
 
     def observations(self, t_start: datetime, t_end: datetime,
                      bbox: tuple[float, float, float, float]

@@ -49,14 +49,64 @@ pointless.
 
 ## Quickstart
 
+macOS / Linux:
+
 ```bash
 make dev          # editable install with test deps
 make test         # should be green immediately
-make serve        # API on :8000
-make web          # static front end on :5173
+make ingest       # poll OpenSky into the archive  (own terminal)
+make serve        # API on :8000                   (own terminal)
+make web          # front end on :5173             (own terminal)
 ```
 
-Then copy `.env.example` to `.env` and fill in your OpenSky credentials.
+Windows -- `make` is not present by default, so use the PowerShell equivalent:
+
+```powershell
+.\tasks.ps1 dev
+.\tasks.ps1 test
+.\tasks.ps1 ingest      # own terminal
+.\tasks.ps1 serve       # own terminal
+.\tasks.ps1 web         # own terminal
+.\tasks.ps1 status      # how much archive exists
+```
+
+Or call the tools directly on any platform:
+
+```
+pip install -e ".[dev]"
+pytest -q
+python scripts/ingest_aviation.py --interval 30
+uvicorn angels.api.main:app --reload
+python -m http.server 5173 --directory web
+```
+
+Then copy `.env.example` to `.env` and fill in your OpenSky credentials, and
+open http://localhost:5173.
+
+### Running it properly (Windows)
+
+The collector and the viewer have different lifetimes, and conflating them
+loses data. Collection cannot be backfilled -- an hour you did not collect is
+gone -- so it runs permanently in the background. The viewer is something you
+open when you want to look at it.
+
+```powershell
+.\collector.ps1 install     # register as a logon task; survives reboots
+.\collector.ps1 status      # is it running, and what has landed on disk
+.\collector.ps1 logs        # tail
+
+.\app.ps1                   # start API + viewer, open the browser
+.\app.ps1 stop              # close the viewer; collection continues
+```
+
+The collector restarts itself if it dies and does not stop when you unplug the
+laptop. It cannot run while the machine is asleep -- nothing can fix that, but
+`angels/core/uptime.py` records the gap so the analysis knows the silence was
+ours rather than theirs.
+
+The map reads an archive that `ingest_aviation.py` builds over time -- the
+live API only ever returns *now*. An empty map usually means the poller has
+not been running, not that something is broken.
 
 ## Status
 
