@@ -37,7 +37,7 @@ import pyarrow.parquet as pq
 from dotenv import load_dotenv
 
 from angels.adapters.aviation.opensky import TokenManager, fetch_states
-from angels.config import AOI, AOI_NAME, RAW
+from angels.config import AOI_AIR, RAW, REGION_NAME
 
 log = logging.getLogger("ingest")
 
@@ -127,8 +127,8 @@ class Ingester:
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
 
-        log.info("polling %s every %.0fs -> %s",
-                 AOI_NAME, self.interval, self.root / "aviation")
+        log.info("polling %s (air box) every %.0fs -> %s",
+                 REGION_NAME, self.interval, self.root / "aviation")
         try:
             while self.running:
                 try:
@@ -176,7 +176,7 @@ def main() -> int:
         max_polls = max(1, int(args.minutes * 60 / args.interval))
 
     try:
-        ing = Ingester(AOI, RAW, args.interval, 1 if args.once else args.flush_every)
+        ing = Ingester(AOI_AIR, RAW, args.interval, 1 if args.once else args.flush_every)
     except RuntimeError as exc:
         log.error("%s", exc)
         return 1

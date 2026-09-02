@@ -79,3 +79,50 @@ def test_every_package_has_an_init() -> None:
         if d.is_dir() and any(d.glob("*.py")) and not (d / "__init__.py").exists():
             missing.append(str(d.relative_to(ROOT)))
     assert not missing, "missing __init__.py in:\n  " + "\n  ".join(missing)
+
+
+def test_every_module_imports() -> None:
+    """Import every module in the package.
+
+    Catches the class of break where a constant gets renamed in config.py and
+    an importer three directories away is left pointing at the old name. That
+    is invisible to every other test here, because nothing else touches those
+    modules -- you find out when you run the script, which is the worst time.
+    """
+    import importlib
+
+    broken: list[str] = []
+    for path in sorted((ROOT / "angels").rglob("*.py")):
+        rel = path.relative_to(ROOT).with_suffix("")
+        mod = ".".join(rel.parts)
+        if mod.endswith(".__init__"):
+            mod = mod[: -len(".__init__")]
+        try:
+            importlib.import_module(mod)
+        except ImportError as exc:
+            broken.append(f"{mod}: {exc}")
+
+    assert not broken, "modules that fail to import:\n  " + "\n  ".join(broken)
+
+
+def test_scripts_import() -> None:
+    """Same guard for scripts/, which is where stale imports actually bit.
+
+    Scripts are not part of the package, so they are loaded by path. Only
+    import failures are reported -- a script that needs credentials or network
+    at import time would be a separate design problem.
+    """
+    import importlib.util
+
+    broken: list[str] = []
+    for path in sorted((ROOT / "scripts").glob("*.py")):
+        spec = importlib.util.spec_from_file_location(f"_script_{path.stem}", path)
+        module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(module)
+        except ImportError as exc:
+            broken.append(f"scripts/{path.name}: {exc}")
+        except Exception:
+            pass  # not an import problem; not this test's business
+
+    assert not broken, "scripts that fail to import:\n  " + "\n  ".join(broken)

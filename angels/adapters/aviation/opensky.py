@@ -1,17 +1,3 @@
-"""OpenSky ingest: ADS-B reports and (later) MLAT observations.
-
-Two OpenSky things, easy to conflate:
-
-  * API CLIENT -- self-serve, instant. OAuth2 client credentials, tokens expire
-    after 30 minutes. Basic auth with username and password is no longer
-    accepted. Gives live state vectors. This module uses it today.
-  * HISTORICAL / TRINO -- an application with a human review step. State
-    vectors back to 2013, plus the MLAT tables. Needed from Phase 2 on, and
-    what `observations()` below will use once approved.
-
-Filter on partition columns in every Trino query or they will suspend your
-account. That is not a soft limit.
-"""
 
 from __future__ import annotations
 

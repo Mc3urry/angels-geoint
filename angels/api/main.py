@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from angels import __version__
-from angels.config import AOI, AOI_NAME
+from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME
 
 app = FastAPI(title="ANGELS", version=__version__,
               description="Radar returns with no attributable source.")
@@ -29,8 +29,12 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "version": __version__,
-            "aoi": AOI, "aoi_name": AOI_NAME}
+    return {
+        "status": "ok",
+        "version": __version__,
+        "region": REGION_NAME,
+        "bbox": {"region": REGION, "air": AOI_AIR, "sea": AOI_SEA},
+    }
 
 
 # PHASE 1: from angels.api.routes import tracks;   app.include_router(tracks.router)

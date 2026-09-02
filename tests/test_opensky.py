@@ -1,14 +1,3 @@
-"""Tests for the OpenSky adapter.
-
-All offline. Real state vectors are captured as fixtures so this suite runs
-without credentials, without a network, and without burning daily quota --
-which matters because you will run it hundreds of times.
-
-The rows below are the shape OpenSky actually returned over the Baltimore /
-DC box, including five aircraft parked on the ground at Reagan National. That
-ground cluster is the interesting case: it is what a naive loiter detector
-would happily report as five high-confidence events.
-"""
 
 from __future__ import annotations
 
