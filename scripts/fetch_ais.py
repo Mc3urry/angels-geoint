@@ -14,13 +14,24 @@ of dark vessels. So by default the dates are read out of the Sentinel-1
 filenames already on disk, which is the only copy of that information nobody
 has retyped.
 
+WHERE THE FILES ARE NOW
+
+MarineCadastre moved 2024 onward to daily GeoParquet in Azure blob storage:
+
+    https://ocmgeodatastor1.blob.core.windows.net/marinecadastre/ais2024/ais-2024-06-21.parquet
+
+The old coast.noaa.gov AIS_2024_MM_DD.zip files return 404, although NOAA's
+index page still lists them -- which is why the first failure looked like a
+missing day rather than a moved one. clip_ais.py reads both formats, so a zip
+already on disk (2024-09-25) is still used and never re-fetched.
+
 NO TERMS TO ACCEPT
 
 fetch_reference.py lists AIS as MANUAL because its AccessAIS custom-order tool
 requires a form. The BULK daily files do not -- they are public domain (CC0)
 and served as plain static files, which is why this script can exist at all.
 
-ABOUT 320 MB PER DAY
+ABOUT 300 MB PER DAY
 
 One day of all US waters, to extract a few hundred square miles of Chesapeake
 and Delaware Bay. That ratio is why clip_ais.py exists and why nothing
@@ -43,21 +54,26 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
 
 from angels.config import AIS_FRONTIER, RAW, REFERENCE
 
-BASE = "https://coast.noaa.gov/htdata/CMSP/AISDataHandler"
+BASE = "https://ocmgeodatastor1.blob.core.windows.net/marinecadastre"
 DEST = REFERENCE / "ais"
 
-# A national day is 250-400 MB. Anything far under that is a truncated
-# transfer or an error page saved with a .zip extension, and it would fail
+# A national day is 250-400 MB in either format. Anything far under that is a truncated
+# transfer or an error page saved under the expected name, and it would fail
 # later inside DuckDB with a message about Parquet rather than about the
 # download.
 MIN_PLAUSIBLE_BYTES = 100 * 1024 * 1024
 
 
 def url_for(day: date) -> str:
-    return f"{BASE}/{day.year}/AIS_{day:%Y_%m_%d}.zip"
+    return f"{BASE}/ais{day.year}/ais-{day:%Y-%m-%d}.parquet"
 
 
 def dest_for(day: date) -> Path:
+    return DEST / f"ais-{day:%Y-%m-%d}.parquet"
+
+
+def legacy_dest_for(day: date) -> Path:
+    """Where a day fetched before the move sits. Still a valid input."""
     return DEST / f"AIS_{day:%Y_%m_%d}.zip"
 
 
@@ -81,8 +97,8 @@ def dates_from_scenes(sar_dir: Path | None = None) -> list[date]:
 
 
 def already_have(day: date) -> bool:
-    p = dest_for(day)
-    return p.exists() and p.stat().st_size >= MIN_PLAUSIBLE_BYTES
+    return any(p.exists() and p.stat().st_size >= MIN_PLAUSIBLE_BYTES
+               for p in (dest_for(day), legacy_dest_for(day)))
 
 
 def download(day: date, *, timeout: float = 60.0) -> tuple[bool, str]:
@@ -91,7 +107,7 @@ def download(day: date, *, timeout: float = 60.0) -> tuple[bool, str]:
 
     url, out = url_for(day), dest_for(day)
     out.parent.mkdir(parents=True, exist_ok=True)
-    part = out.with_suffix(".zip.part")
+    part = out.with_name(out.name + ".part")
     have = part.stat().st_size if part.exists() else 0
 
     headers = {"Range": f"bytes={have}-"} if have else {}
@@ -101,8 +117,14 @@ def download(day: date, *, timeout: float = 60.0) -> tuple[bool, str]:
         with httpx.stream("GET", url, headers=headers, timeout=timeout,
                           follow_redirects=True) as r:
             if r.status_code == 404:
-                return False, ("404 -- not published. Check the frontier with "
-                               "scripts/check_ais_lag.py")
+                # Two different causes and only one is "too recent". A 404
+                # on a date inside the frontier means the store has moved
+                # again -- which is what the old message hid in 2026.
+                return False, (f"404 at {url}. If {day} is well before the "
+                               f"frontier ({AIS_FRONTIER}), MarineCadastre has "
+                               f"probably moved the files again; "
+                               f"scripts/check_ais_lag.py probes every known "
+                               f"location.")
             if have and r.status_code == 200:
                 # The server ignored the Range header and is sending the whole
                 # file. Appending would splice two copies together into
@@ -184,7 +206,7 @@ def main() -> int:
         return 0
 
     print(f"\n  fetching {len(todo)} day(s) -> {DEST}")
-    print(f"  about {len(todo) * 320 / 1024:.1f} GB at roughly 320 MB each\n")
+    print(f"  about {len(todo) * 300 / 1024:.1f} GB at roughly 300 MB each\n")
     for d in todo:
         print(f"    {d}  {url_for(d)}")
     if args.list:

@@ -300,7 +300,12 @@ def load(paths, *, t0: datetime | None = None, t1: datetime | None = None,
         where.append(f'"LON" BETWEEN {lomin} AND {lomax}')
         where.append(f'"LAT" BETWEEN {lamin} AND {lamax}')
 
-    sql = (f"SELECT {cols} FROM read_parquet([{src}])"
+    # union_by_name: days clipped from the legacy CSV and from the 2024
+    # GeoParquet agree on names but not on every type (Length is an integer
+    # in one and a float in the other). Without it DuckDB casts every file to
+    # the FIRST file's types, so which days were loaded would decide whether
+    # a 23.5 m vessel is 23.5 m long.
+    sql = (f"SELECT {cols} FROM read_parquet([{src}], union_by_name=true)"
            + (" WHERE " + " AND ".join(where) if where else "")
            + ' ORDER BY "MMSI", "BaseDateTime"')
 

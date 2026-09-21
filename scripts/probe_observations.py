@@ -81,7 +81,6 @@ import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 
-import httpx
 
 # Re-runs this script under the interpreter that has ANGELS installed, if the
 # one invoking it does not. See scripts/_bootstrap.py.
@@ -96,6 +95,12 @@ try:
 except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
     if _e.name != "_bootstrap":
         raise
+
+# Third-party imports come AFTER the bootstrap, never before: _bootstrap
+# re-executes this script under the project interpreter, and an import
+# placed above it runs first -- under whatever Python the user typed --
+# and dies with ModuleNotFoundError before the switch can happen.
+import httpx
 
 from angels.config import AOI_AIR, REGION_NAME, box_area_km2
 

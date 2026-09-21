@@ -151,3 +151,41 @@ def test_a_different_missing_module_is_not_swallowed(monkeypatch) -> None:
     with pytest.raises(ModuleNotFoundError) as e:
         _bootstrap.ensure()
     assert e.value.name == "rasterio"
+
+
+# -- every script switches interpreter BEFORE touching a third-party library --
+
+def _third_party_imports_before_bootstrap(path: Path) -> list[str]:
+    import ast
+    std = set(sys.stdlib_module_names) | {"__future__"}
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    early: list[str] = []
+    for node in tree.body:
+        if isinstance(node, ast.Try) and any(
+                isinstance(n, ast.Import) and any(a.name == "_bootstrap" for a in n.names)
+                for n in node.body):
+            return early
+        if isinstance(node, ast.Import):
+            early += [a.name for a in node.names if a.name.split(".")[0] not in std]
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            if node.module.split(".")[0] not in std:
+                early.append(node.module)
+    return []          # no bootstrap at all: a stub, checked elsewhere if ever needed
+
+
+SCRIPTS = sorted(p for p in (Path(__file__).resolve().parents[1] / "scripts").glob("*.py")
+                 if p.name != "_bootstrap.py")
+
+
+@pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)
+def test_no_third_party_import_runs_before_the_bootstrap(script: Path) -> None:
+    """THE BUG THIS CAUGHT. `python scripts\\clip_ais.py` died with
+    "No module named 'duckdb'" on 2026-09-22 because `import duckdb` sat above
+    the bootstrap block. The bootstrap re-executes a script under the project
+    interpreter -- but only once it is reached, and an import above it runs
+    first, under whatever Python the user typed. Five scripts had the same
+    ordering; the collector never showed it only because Task Scheduler
+    launches it with the right interpreter directly."""
+    early = _third_party_imports_before_bootstrap(script)
+    assert not early, (f"{script.name} imports {early} before the bootstrap; "
+                       f"move them below the `import _bootstrap` block")

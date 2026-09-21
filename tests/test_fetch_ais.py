@@ -71,16 +71,34 @@ def test_no_scenes_is_an_empty_list(tmp_path) -> None:
 
 # -- the URL ---------------------------------------------------------------
 
-def test_the_url_matches_the_bulk_layout() -> None:
-    assert mod.url_for(date(2024, 9, 25)).endswith(
-        "/2024/AIS_2024_09_25.zip")
+def test_the_url_is_the_azure_geoparquet_store() -> None:
+    """coast.noaa.gov's AIS_2024_*.zip now 404s though its index lists them.
+    The 2024 days live in Azure as GeoParquet."""
+    assert mod.url_for(date(2024, 6, 21)) == (
+        "https://ocmgeodatastor1.blob.core.windows.net/marinecadastre/"
+        "ais2024/ais-2024-06-21.parquet")
 
 
 def test_the_year_directory_tracks_the_date() -> None:
     """New Year's Eve and New Year's Day sit in different directories. A
     hardcoded year works for eleven months of testing."""
-    assert "/2024/" in mod.url_for(date(2024, 12, 31))
-    assert "/2025/" in mod.url_for(date(2025, 1, 1))
+    assert "/ais2024/" in mod.url_for(date(2024, 12, 31))
+    assert "/ais2025/" in mod.url_for(date(2025, 1, 1))
+
+
+def test_a_zip_fetched_before_the_move_still_counts(tmp_path, monkeypatch):
+    """2024-09-25 was downloaded as a zip. Re-fetching it as GeoParquet
+    would spend 300 MB on a day clip_ais.py can already read."""
+    monkeypatch.setattr(mod, "DEST", tmp_path)
+    d = date(2024, 9, 25)
+    with mod.legacy_dest_for(d).open("wb") as fh:
+        fh.truncate(mod.MIN_PLAUSIBLE_BYTES + 1)
+    assert mod.already_have(d)
+
+
+def test_the_partial_file_keeps_the_real_name_plus_part() -> None:
+    import inspect
+    assert 'out.name + ".part"' in inspect.getsource(mod.download)
 
 
 # -- what counts as downloaded ---------------------------------------------
