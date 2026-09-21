@@ -85,6 +85,37 @@ MIN_WATER_FRACTION = 0.02
 # constant placed there would be a coin toss wearing a decimal point.
 TYPICAL_OCEAN_CV = 0.07
 
+# A BRIGHT SHIP IS NOT AN ISLAND.
+#
+# The split is made on a 16x decimated overview, 160 m cells. A large steel
+# hull at 30-80x the sea's brightness lifts its whole cell above the land
+# threshold -- so the mask called every big ship "land", buffered it by
+# 600 m like a coastline, and the detector never looked at it. Measured on
+# the first two passes: a 188 m gas carrier, a 200 m cargo ship and a 146 m
+# government vessel, all plainly visible in the image, all in a mask hole.
+# It is the same bias the CFAR guard ring was sized to prevent, arriving by
+# another route: the brightest vessels vanish, and the smallest are fine.
+#
+# So a land component that is SMALL and ISOLATED -- no other land within
+# ISOLATION_CELLS of any of its cells -- goes back to water. Both conditions,
+# because each alone is wrong: small alone would unmask the pier heads and
+# bridge spans that join a coast; isolated alone would unmask real islands.
+# A bridge or pier connected to shore is one component with the shore, so it
+# stays land.
+#
+#   MAX_TARGET_CELLS   16 cells = 0.41 km2, a 640 m square. The largest hull
+#                      afloat is about 400 x 60 m; with its sidelobe cross it
+#                      lights a handful of cells, never sixteen.
+#   ISOLATION_CELLS    6 cells = 960 m of open water all round.
+#
+# What this does let through: rocks, lighthouses, platforms, the artificial
+# islands of the Chesapeake Bay Bridge-Tunnel, small islets. They are real
+# radar targets and will appear as detections on every pass -- which is
+# exactly how persistent.py is meant to recognise and remove them. Hiding
+# them in the mask would also hide every vessel within 600 m of them.
+MAX_TARGET_CELLS = 16
+ISOLATION_CELLS = 6
+
 
 @dataclass(frozen=True)
 class WaterMask:
@@ -105,6 +136,8 @@ class WaterMask:
     bimodal: bool
     texture: float = 0.0       # CV of the decimated scene; only set when the
                                # split failed and texture had to decide
+    released: int = 0          # small isolated "land" blobs returned to water
+                               # -- ships, mostly; see MAX_TARGET_CELLS
 
     def __str__(self) -> str:
         if not self.bimodal:
@@ -112,7 +145,8 @@ class WaterMask:
                     f"{self.texture:.2f} (land would exceed "
                     f"{MAX_OCEAN_CV})")
         return (f"{100 * self.water_fraction:.0f}% water, land/sea contrast "
-                f"{self.contrast:.1f}x, {self.decimation}x decimated")
+                f"{self.contrast:.1f}x, {self.decimation}x decimated, "
+                f"{self.released} bright offshore target(s) kept searchable")
 
     def tile(self, row0: int, col0: int, height: int, width: int) -> np.ndarray:
         """The mask for one full-resolution window, as a full-resolution bool.
@@ -233,6 +267,9 @@ def from_raster(src, *, decimation: int = 16,
             f"sea box entirely."
         )
 
+    land, released = release_isolated_targets(land)
+    sea = lit & ~land
+
     if buffer_m is None:
         buffer_m = cfar.BACKGROUND / 2 * pixel_m
 
@@ -258,4 +295,38 @@ def from_raster(src, *, decimation: int = 16,
                      shape=(src.height, src.width), threshold=thresh,
                      contrast=contrast, water_fraction=frac, bimodal=True,
                      texture=float(small[lit].std()
-                                   / max(small[lit].mean(), 1e-9)))
+                                   / max(small[lit].mean(), 1e-9)),
+                     released=released)
+
+
+def release_isolated_targets(land: np.ndarray, *,
+                             max_cells: int = MAX_TARGET_CELLS,
+                             isolation: int = ISOLATION_CELLS
+                             ) -> tuple[np.ndarray, int]:
+    """Return small, isolated "land" components to the sea.
+
+    See MAX_TARGET_CELLS for why. A component qualifies when it has at most
+    `max_cells` cells AND the square window of half-width `isolation` around
+    every one of its cells contains no land but its own. Returns the new land
+    mask and how many components were released.
+    """
+    if not land.any():
+        return land, 0
+    labels, n = cfar.label_clusters(land)
+    if n == 0:
+        return land, 0
+    sizes = np.bincount(labels.ravel(), minlength=n + 1)
+
+    # Land in the neighbourhood of each cell, counted once per cell. For an
+    # isolated component this equals its own size at every one of its cells
+    # (the window is wider than the component), and exceeds it wherever other
+    # land is near.
+    near, _ = cfar._window_sum(cfar._integral(land.astype(np.float64)),
+                               isolation)
+    worst = np.zeros(n + 1)
+    np.maximum.at(worst, labels[land], near[land])
+
+    ok = (sizes <= max_cells) & (worst <= sizes + 0.5)
+    ok[0] = False
+    out = land & ~ok[labels]
+    return out, int(ok.sum())

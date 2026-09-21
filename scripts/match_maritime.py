@@ -48,7 +48,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
 from angels.adapters.maritime.ais import AISReadError, tracks_at
 from angels.adapters.maritime.searched import SearchedArea
 from angels.config import AIS_FRONTIER, AOI_SEA, EVENTS, RAW
-from angels.core.detectors import matching
+from angels.core.detectors import calibration, matching
 from angels.core.models import Observation, Position
 
 AIS_STORE = RAW / "maritime"
@@ -227,16 +227,33 @@ def bucket_lengths(tracks) -> dict:
     return buckets
 
 
-def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
+def run_one(path: Path, *, k: float, window_s: float, verbose: bool,
+            min_snr: float = 0.0, min_pixels: int = 0
+            ) -> tuple[int, "calibration.Calibration | None"]:
+    """Match one scene. Returns (exit code, the scene's calibration or None
+    when the scene could not be scored).
+
+    min_snr / min_pixels gate the detections BEFORE matching, so the rate
+    and the unmatched count are both computed on the gated set. Choose them
+    with scripts/tune_detector.py, never by eye on the pass being reported.
+    """
     obs, meta = read_detections(path)
+    n_raw = len(obs)
+    if min_snr or min_pixels:
+        obs = [o for o in obs if o.attributes.get("snr", 0) >= min_snr
+               and o.attributes.get("pixels", 0) >= min_pixels]
     if not obs:
-        print(f"\n  {path.name}: no detections in this file\n")
-        return 0
+        print(f"\n  {path.name}: no detections in this file"
+              + (" after the gate" if n_raw else "") + "\n")
+        return 0, None
 
     t = obs[0].position.t
     print(f"\n  {meta.get('scene', path.stem)[:58]}")
     print(f"  acquired     {t:%Y-%m-%d %H:%M:%S} UTC")
-    print(f"  detections   {len(obs)}")
+    print(f"  detections   {len(obs)}"
+          + (f" of {n_raw} (gate: SNR >= {min_snr:g}, pixels >= "
+             f"{min_pixels})" if len(obs) != n_raw or min_snr or min_pixels
+             else ""))
     if "searched_km2" in meta:
         print(f"  searched     {meta['searched_km2']:,} km2 of water")
 
@@ -255,7 +272,7 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
         print("  forward half of the study.")
         print("\n  Run detect_ships.py on a scene from the observation window")
         print("  instead:  python scripts/detect_ships.py --path <2024 scene>\n")
-        return 3
+        return 3, None
 
     try:
         tracks = tracks_at(AIS_STORE, t, window_s=window_s, bbox=AOI_SEA)
@@ -264,7 +281,7 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
         print("\n  Not a sea with no vessels in it -- a store that could not")
         print("  be read. Download the national day for this date and run")
         print("  scripts/clip_ais.py before drawing any conclusion.\n")
-        return 2
+        return 2, None
 
     poly = meta.get("footprint")
     marginal: list = []
@@ -319,11 +336,13 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
                   "detection rate and")
             print("  no dark-vessel claim: nothing here could have been "
                   "matched either way.\n")
-            return 1
+            return 1, None
         print("\n  No AIS at this instant. Every detection would be")
         print("  'unmatched', which would be an artefact of an empty store")
-        print("  rather than a sea full of dark vessels. Check the date.\n")
-        return 1
+        print("  rather than a sea full of dark vessels. Fetch and clip the")
+        print(f"  AIS for {t:%Y-%m-%d}:")
+        print(f"    python scripts/fetch_ais.py --date {t:%Y-%m-%d} --clip\n")
+        return 1, None
 
     result = matching.associate(obs, tracks, t, k=k)
     events = matching.unmatched(obs, tracks, t, k=k)
@@ -334,12 +353,9 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
           f"(not counted as misses)")
 
     rate = result.detection_rate
-    if rate == rate and rate < 0.6:
-        print()
-        print(f"  WARNING: the radar found only {100 * rate:.0f}% of the")
-        print("  vessels that reported themselves here. Below about 60% an")
-        print("  unmatched detection says more about the detector than about")
-        print("  the sea. Fix detection before reporting dark vessels.")
+    cal = calibration.calibrate(result, tracks, obs, t,
+                                searched_km2=meta.get("searched_km2"), k=k)
+    print_calibration(cal)
 
     misses = summarise_misses(tracks, result)
     if any(misses.values()):
@@ -353,8 +369,9 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
         for c in sorted(result.pairs, key=lambda c: -c.slack)[:10]:
             tr = tracks[c.track_index]
             name = getattr(tr.reports[0], "name", None) or ""
+            flag = "  (not scored)" if c.track_index in cal.unscorable else ""
             print(f"    {tr.platform_id:>10}{c.distance_m:8.0f}"
-                  f"{c.slack:8.2f}  {name[:28]}")
+                  f"{c.slack:8.2f}  {name[:28]}{flag}")
 
     EVENTS.mkdir(parents=True, exist_ok=True)
     stem = path.stem.replace("sar-", "")
@@ -378,7 +395,14 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
             "n_reports_marginal": len(marginal),
             "unsearched_by_length": bucket_lengths(unsearched),
             "k_sigma_match": k,
+            "gate_min_snr": min_snr,
+            "gate_min_pixels": min_pixels,
+            "n_detections_before_gate": n_raw,
             "ais_window_s": window_s,
+            # The rate as it has to be read: by length class, with the
+            # tracks too loosely located to score set aside. See
+            # angels/core/detectors/calibration.py.
+            "calibration": cal.to_json(),
         },
         "features": [e.to_geojson() for e in events],
     }, indent=1), encoding="utf-8")
@@ -397,6 +421,8 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
                 "length_m": matching.vessel_length_m(tracks[j]),
                 "fix_uncertainty_m": round(fix.uncertainty_m, 1),
                 "reports_in_track": len(tracks[j]),
+                "length_class": calibration.length_class(tracks[j]),
+                "scored": j not in cal.unscorable,
             },
         } for j in result.unmatched_tracks
             if (fix := tracks[j].position_at(t)) is not None],
@@ -404,7 +430,57 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool) -> int:
 
     print(f"\n  wrote {dark.name}")
     print(f"  wrote {missed.name}")
-    return 0
+    return 0, cal
+
+
+def print_calibration(cal, *, pooled: bool = False) -> None:
+    """The detection rate by length class, and the warning that goes with it.
+
+    The warning is judged on vessels of at least DETECTABLE_LENGTH_M -- the
+    ones Sentinel-1 can be expected to see -- and only once there are enough
+    of them for the number to mean something.
+    """
+    L = calibration.DETECTABLE_LENGTH_M
+    print()
+    print("  detection rate by reported length" + (" (all passes pooled)"
+                                                   if pooled else ""))
+    for line in calibration.format_table(cal, indent="    "):
+        print(line)
+    if cal.n_unscorable:
+        print(f"    not scored   {cal.n_unscorable} located too loosely for a "
+              f"match to mean anything")
+        if cal.max_scorable_radius_m:
+            print(f"                 (radius over "
+                  f"{cal.max_scorable_radius_m:,.0f} m at this detection "
+                  f"density; {cal.n_unscorable_matched} of them 'matched')")
+        else:
+            print(f"                 ({cal.n_unscorable_matched} of them "
+                  f"'matched')")
+    if cal.expected_chance_matches >= 0.05:
+        print(f"    about {cal.expected_chance_matches:.1f} of the scored "
+              f"matches could be chance coincidences")
+
+    head = cal.headline
+    lo, hi = head.interval
+    if head.scored < 10:
+        print(f"\n  Only {head.scored} vessel(s) of {L:.0f} m or more were "
+              f"scored{' in total' if pooled else ' on this scene'} -- too few")
+        print("  to say how the detector does on the ships it should see."
+              + ("" if pooled else " Pool more passes."))
+    elif hi < 0.6:
+        print(f"\n  WARNING: even for vessels of {L:.0f} m or more the radar "
+              f"found {100 * head.rate:.0f}%")
+        print(f"  (95% range {100 * lo:.0f}-{100 * hi:.0f}%). Below about 60% "
+              f"an unmatched detection says")
+        print("  more about the detector than about the sea. Fix detection "
+              "before")
+        print("  reporting dark vessels.")
+    elif lo < 0.6:
+        print(f"\n  For vessels of {L:.0f} m or more the radar found "
+              f"{100 * head.rate:.0f}% (95% range "
+              f"{100 * lo:.0f}-{100 * hi:.0f}%) --")
+        print("  not yet distinguishable from the 60% line. More passes "
+              "will say which side it is on.")
 
 
 def main() -> int:
@@ -415,6 +491,11 @@ def main() -> int:
                     help="match radius in sigmas (3.0)")
     ap.add_argument("--window", type=float, default=1800.0,
                     help="seconds of AIS either side of the acquisition")
+    ap.add_argument("--min-snr", type=float, default=0.0,
+                    help="drop detections below this SNR before matching "
+                         "(choose with tune_detector.py)")
+    ap.add_argument("--min-pixels", type=int, default=0,
+                    help="drop detections smaller than this many pixels")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -461,9 +542,21 @@ def main() -> int:
                 return 1
 
     worst = 0
+    cals = []
     for f in files:
-        worst = max(worst, run_one(f, k=args.k, window_s=args.window,
-                                   verbose=args.verbose))
+        code, cal = run_one(f, k=args.k, window_s=args.window,
+                            verbose=args.verbose, min_snr=args.min_snr,
+                            min_pixels=args.min_pixels)
+        worst = max(worst, code)
+        if cal is not None:
+            cals.append(cal)
+
+    if len(cals) > 1:
+        pooled = cals[0]
+        for c in cals[1:]:
+            pooled = pooled + c
+        print(f"\n  ===== {len(cals)} scenes pooled =====")
+        print_calibration(pooled, pooled=True)
 
     print("\n  Read the two numbers together. Unmatched detections are a")
     print("  finding only in proportion to how much of the reported traffic")

@@ -340,3 +340,66 @@ def test_the_two_single_mode_cases_genuinely_overlap() -> None:
     assert min(lands) < 0.30, (
         f"but land reaches down to {min(lands):.2f}, inside the range a "
         f"weathered sea occupies -- so no threshold here is safe")
+
+
+# -- a bright ship is not an island ---------------------------------------
+
+def _with_blob(arr, r0, c0, h, w, level):
+    out = np.array(arr, dtype=np.float64)
+    out[r0:r0 + h, c0:c0 + w] = level
+    return out
+
+
+def test_a_bright_ship_at_sea_stays_searchable() -> None:
+    """THE BUG THIS FIXES. On the decimated overview a big hull at ~30x the
+    sea lifts its cell above the land threshold. The mask called it land,
+    buffered it 600 m, and a 188 m gas carrier in open water was never
+    looked at."""
+    scene = _with_blob(coastal_scene(), 300, 100, 6, 20, 120.0 * 30)
+    m = water.from_raster(FakeRaster(scene), decimation=8)
+    assert m.tile(300, 100, 6, 20).all(), "the ship's own pixels must be water"
+    assert m.released >= 1
+
+
+def test_without_the_release_the_ship_would_be_masked() -> None:
+    """Guards the test above against passing because the blob was never
+    bright enough to be called land in the first place."""
+    scene = _with_blob(coastal_scene(), 300, 100, 6, 20, 120.0 * 30)
+    raster = FakeRaster(scene)
+    small = raster.read(1, out_shape=(80, 80))
+    log = np.log1p(small)
+    thresh, _ = otsu(log[small > 0])
+    assert (log[300 // 8, 100 // 8:120 // 8] > thresh).any()
+
+
+def test_land_joined_to_the_coast_stays_land() -> None:
+    """A pier or bridge span is small but connected to shore -- one
+    component with the coast, so it is not released."""
+    scene = _with_blob(coastal_scene(), 300, 280, 8, 40, 2400.0)   # a pier
+    m = water.from_raster(FakeRaster(scene), decimation=8, buffer_m=0)
+    assert not m.tile(300, 290, 8, 20).any()
+
+
+def test_a_blob_near_the_coast_is_not_isolated() -> None:
+    """Small but within ISOLATION_CELLS of other land: stays land, because
+    near a shore a bright blob is as likely a jetty head as a ship."""
+    scene = _with_blob(coastal_scene(), 296, 288, 8, 8, 2400.0)   # 3 cells off
+    m = water.from_raster(FakeRaster(scene), decimation=8, buffer_m=0)
+    assert not m.tile(296, 288, 8, 8).any()
+
+
+def test_a_real_island_stays_land() -> None:
+    """Isolated but larger than any hull: an island, and masked as one."""
+    scene = _with_blob(coastal_scene(), 200, 60, 64, 64, 2400.0)  # 64 cells
+    m = water.from_raster(FakeRaster(scene), decimation=8, buffer_m=0)
+    assert not m.tile(216, 76, 32, 32).any()
+
+
+def test_release_counts_components_not_cells() -> None:
+    land = np.zeros((40, 40), dtype=bool)
+    land[5:7, 5:8] = True            # one 6-cell target
+    land[30, 30] = True              # one 1-cell target
+    land[:, 38:] = True              # a coast
+    out, n = water.release_isolated_targets(land)
+    assert n == 2
+    assert out[:, 38:].all() and not out[5:7, 5:8].any() and not out[30, 30]
