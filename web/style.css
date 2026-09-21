@@ -108,3 +108,117 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
   margin: 8px 0 12px; overflow-x: auto; white-space: pre;
 }
 #panel a { color: var(--accent); }
+
+/* --- domain filter ------------------------------------------------------ */
+
+#domains { display: flex; gap: 4px; margin-left: 20px; }
+#domains button {
+  font: 11px var(--mono);
+  padding: 4px 11px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink-2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+#domains button:hover:not(:disabled) { border-color: var(--ink-3); }
+#domains button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+/* Present and disabled, not absent. An absent control implies the domain was
+   never considered; a disabled one with a tooltip says it was scoped and is
+   blocked on sourcing. */
+#domains button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+/* --- the cold-start bar ------------------------------------------------- */
+
+.stat.warming .n { color: var(--ink-3); }
+.warmbar {
+  height: 2px;
+  background: var(--rule);
+  margin: 0 0 10px;
+  overflow: hidden;
+}
+.warmbar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width .6s linear;
+}
+
+/* --- evidence class ----------------------------------------------------- */
+
+.evidence {
+  margin: 16px 0 14px;
+  padding: 10px 11px;
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--accent);
+  background: #fbfcfd;
+}
+.evidence .lt {
+  display: block;
+  font: 700 9.5px var(--mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 5px;
+}
+.evidence p { margin: 0 0 6px; font: 10.5px/1.6 var(--mono); color: var(--ink-2); }
+.evidence p:last-child { margin-bottom: 0; }
+.evidence em { font-style: normal; color: var(--accent); }
+
+/* --- vessel legend ------------------------------------------------------ */
+/* The sea's counterpart to the altitude ramp. Rows are the filter: click to
+   hide or show a group. Text stays in ink colours; only the swatch carries
+   the hue, so identity never rests on coloured text. */
+
+.vrows { display: flex; flex-direction: column; gap: 2px; margin: 7px 0 6px; }
+.vrow {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: none;
+  font: 11px/1.35 var(--mono);
+  color: var(--ink-3);
+  text-align: left;
+  cursor: pointer;
+}
+.vrow:hover { border-color: var(--rule); background: #fbfcfd; }
+.vrow.on { color: var(--ink); }
+.vrow .nm small { display: block; font-size: 9.5px; color: var(--ink-3); margin-top: 1px; }
+.vrow b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.vrow .sw {
+  width: 12px; height: 12px; border-radius: 50%;
+  box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--rule);
+}
+.vrow .sw.hollow { background: #fff; box-shadow: inset 0 0 0 1.5px #6b7c89; }
+.vrow:not(.on) .sw { opacity: .25; }
+.vrow:not(.on) .nm { text-decoration: line-through; text-decoration-color: var(--rule); }
+
+.lnote { font: 9.5px/1.6 var(--mono); color: var(--ink-3); margin: 0; }
+
+/* symbol key: a glyph column and an explanation column */
+.vkey {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 9px 8px;
+  align-items: center;
+  margin-top: 8px;
+  font: 10px/1.5 var(--mono);
+  color: var(--ink-2);
+}
+.vkey .k { display: flex; align-items: center; justify-content: center; gap: 4px;
+  height: 22px; background: #c2c8ca; border-radius: 3px; }   /* the map's water */
+.vkey .glyph { width: 32px; height: 21px; }
+.vkey .dot { width: 8px; height: 8px; border-radius: 50%; background: #2a78d6;
+  box-shadow: 0 0 0 1.2px #fff; }
+.vkey .dot.s { width: 5px; height: 5px; }
+.vkey .dot.l { width: 13px; height: 13px; }
+.vkey .dot.faded { opacity: .3; }

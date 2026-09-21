@@ -11,6 +11,17 @@
   <header>
     <h1>ANGELS</h1>
     <span class="gloss">radar returns with no attributable source</span>
+
+    <!-- Domain filter. Land is present and disabled on purpose: an absent
+         control implies the domain was never considered, a disabled one with
+         a reason says it was considered and is blocked on sourcing. -->
+    <div id="domains">
+      <button data-domain="air" class="on">Air</button>
+      <button data-domain="sea">Sea</button>
+      <button data-domain="land" disabled
+              title="Transit and public-fleet GTFS-Realtime. Scoped, not yet built.">Land</button>
+    </div>
+
     <div id="range">
       <button data-hours="1">1h</button>
       <button data-hours="2" class="on">2h</button>

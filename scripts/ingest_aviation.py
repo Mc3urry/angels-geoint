@@ -5,10 +5,11 @@ review queue, this accumulates your own archive -- so you are not blocked on
 their approval, and by the end of the week you have real multi-day data to
 build tracks and detectors against.
 
-    python scripts/ingest_aviation.py                 # poll forever
-    python scripts/ingest_aviation.py --interval 15   # gentler on quota
-    python scripts/ingest_aviation.py --once          # single poll, then exit
-    python scripts/ingest_aviation.py --minutes 60    # run for an hour
+    python scripts/ingest_aviation.py                    # DC box, forever
+    python scripts/ingest_aviation.py --aoi conus        # national, forever
+    python scripts/ingest_aviation.py --interval 15      # gentler on quota
+    python scripts/ingest_aviation.py --once             # single poll, exit
+    python scripts/ingest_aviation.py --minutes 60       # run for an hour
 
 Ctrl+C flushes whatever is buffered and exits cleanly.
 
@@ -17,9 +18,25 @@ raw rather than translated means a bug in the field mapping can be fixed and
 re-run against the archive instead of re-fetched -- and you cannot re-fetch a
 moment that has passed.
 
-Quota: authenticated accounts get 4000+ credits per day. At 10 s intervals a
-continuous run is roughly 8600 polls per day, which is over. Use --interval 30
-for an unattended multi-day run, or accept gaps.
+TWO COLLECTORS, ONE SCRIPT
+
+--aoi selects a footprint from config.AOIS. Each carries its own box, archive
+directory, collector name and default interval, so the two runs never collide:
+separate lock files, separate heartbeat streams, separate Parquet trees.
+
+    air     DC-Baltimore     ~2 sq deg     30 s    1 credit/poll
+    conus   continental US ~1450 sq deg   600 s    4 credits/poll
+
+Run both. Depth where the detectors need to sample a turn rate, breadth where
+they only need to know where things were.
+
+QUOTA. OpenSky bills by box AREA in four coarse steps, not by aircraft
+returned, so the national box costs four credits against the metro box's one.
+A registered account gets 4,000/day refilling hourly. The pair above spends
+3,456. Before changing any interval, ask config.daily_credits() rather than
+guessing -- overspending does not raise, it just 429s every poll after the
+bucket empties, leaving a hole at the same time each day that looks exactly
+like a diurnal pattern.
 """
 
 from __future__ import annotations
@@ -37,8 +54,26 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from dotenv import load_dotenv
 
-from angels.adapters.aviation.opensky import TokenManager, fetch_states
-from angels.config import AOI_AIR, RAW, REGION_NAME
+# Re-runs this script under the interpreter that has ANGELS installed, if the
+# one invoking it does not. See scripts/_bootstrap.py.
+#
+# The name check matters. `import _bootstrap` only resolves when scripts/ is on
+# sys.path, which is true when this file is RUN and false when the test suite
+# IMPORTS it as scripts.<name>. Swallowing every ModuleNotFoundError here would
+# also swallow the one _bootstrap raises about 'angels' itself -- turning a
+# clear "wrong interpreter" message back into a confusing one.
+try:
+    import _bootstrap  # noqa: F401  (must precede the angels imports)
+except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
+    if _e.name != "_bootstrap":
+        raise
+
+from angels.adapters.aviation.opensky import (
+    TokenManager,
+    fetch_states,
+    write_snapshot,
+)
+from angels.config import AOIS, LIVE, RAW, daily_credits, opensky_credits
 from angels.core.uptime import AlreadyRunning, CollectorLock, HeartbeatLog
 
 log = logging.getLogger("ingest")
@@ -77,14 +112,21 @@ def rows_to_table(fetched_at: datetime, rows: list[list]) -> pa.Table:
     return pa.Table.from_pydict(cols, schema=SCHEMA)
 
 
-def write_partition(table: pa.Table, when: datetime, root: Path) -> Path:
+def write_partition(table: pa.Table, when: datetime, root: Path,
+                    dataset: str = "aviation") -> Path:
     """One file per flush, partitioned by hour.
 
     Hour partitioning is not decoration -- it is what lets DuckDB skip files it
     does not need when you query a time range later. A single growing file
     would mean scanning the whole archive for every query.
+
+    `dataset` keeps the two footprints in separate trees. Merging them would
+    be worse than untidy: the national feed samples twenty times slower, so
+    any rate computed over the union -- reports per hour, gap length, track
+    continuity -- would be a weighted average of two incomparable things and
+    would not look wrong while being wrong.
     """
-    part = root / "aviation" / f"hour={when:%Y%m%d%H}"
+    part = root / dataset / f"hour={when:%Y%m%d%H}"
     part.mkdir(parents=True, exist_ok=True)
     path = part / f"states_{when:%Y%m%dT%H%M%S}.parquet"
     pq.write_table(table, path, compression="snappy")
@@ -92,11 +134,19 @@ def write_partition(table: pa.Table, when: datetime, root: Path) -> Path:
 
 
 class Ingester:
-    def __init__(self, bbox, root: Path, interval: float, flush_every: int):
+    def __init__(self, bbox, root: Path, interval: float, flush_every: int,
+                 *, dataset: str = "aviation", collector: str = "aviation",
+                 label: str = "", snapshot: Path | None = None):
         self.bbox = bbox
         self.root = root
         self.interval = interval
         self.flush_every = flush_every
+        self.dataset = dataset
+        self.collector = collector
+        self.label = label or collector
+        # Where to publish each poll for the viewer. Optional so tests and
+        # one-off runs write nothing outside their own archive directory.
+        self.snapshot = snapshot
         self.tokens = TokenManager()
         self.buffer: list[pa.Table] = []
         self.polls = 0
@@ -107,10 +157,21 @@ class Ingester:
         # back. Without it, a missing hour is indistinguishable from an hour
         # in which every aircraft went dark -- and you cannot work out which
         # after the fact.
-        self.hb = HeartbeatLog(root, collector="aviation", interval_s=interval)
+        #
+        # Keyed by collector name, so the two footprints keep independent
+        # uptime histories. They will genuinely differ -- one can 429 while
+        # the other is fine -- and a shared log would make the national box's
+        # downtime look like the metro box's.
+        self.hb = HeartbeatLog(root, collector=collector, interval_s=interval)
 
     def poll_once(self) -> int:
         t, rows = fetch_states(self.bbox, self.tokens)
+        if self.snapshot is not None:
+            # Written for EVERY successful poll, including an empty one. An
+            # empty sky that was asked about is a result; a snapshot that
+            # stops updating is a collector that stopped asking, and the
+            # viewer tells those apart by the file's age.
+            write_snapshot(self.snapshot, t, rows, self.bbox)
         if rows:
             self.buffer.append(rows_to_table(t, rows))
             self.rows += len(rows)
@@ -121,7 +182,8 @@ class Ingester:
         if not self.buffer:
             return None
         table = pa.concat_tables(self.buffer)
-        path = write_partition(table, datetime.now(timezone.utc), self.root)
+        path = write_partition(table, datetime.now(timezone.utc), self.root,
+                               self.dataset)
         log.info("wrote %d rows -> %s", table.num_rows, path.name)
         self.buffer.clear()
         return path
@@ -134,10 +196,14 @@ class Ingester:
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
 
-        log.info("polling %s (air box) every %.0fs -> %s",
-                 REGION_NAME, self.interval, self.root / "aviation")
+        cost = opensky_credits(self.bbox)
+        log.info("polling %s every %.0fs -> %s",
+                 self.label, self.interval, self.root / self.dataset)
+        log.info("%d credit(s)/poll, ~%d credits/day",
+                 cost, daily_credits(self.bbox, self.interval))
         log.info("session %s", self.hb.session_id)
-        self.hb.start(bbox=list(self.bbox), region=REGION_NAME)
+        self.hb.start(bbox=list(self.bbox), region=self.label,
+                      dataset=self.dataset, credits_per_poll=cost)
 
         try:
             while self.running:
@@ -178,8 +244,13 @@ class Ingester:
 def main() -> int:
     load_dotenv()
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--interval", type=float, default=10.0,
-                    help="seconds between polls (default 10)")
+    ap.add_argument("--aoi", choices=sorted(AOIS), default="air",
+                    help="which footprint to collect (default air). Each "
+                         "brings its own box, archive directory, collector "
+                         "name and default interval.")
+    ap.add_argument("--interval", type=float, default=None,
+                    help="seconds between polls. Defaults to the AOI's own "
+                         "interval: 30 for air, 600 for conus.")
     ap.add_argument("--flush-every", type=int, default=30,
                     help="polls per parquet file (default 30)")
     ap.add_argument("--once", action="store_true", help="one poll, then exit")
@@ -193,6 +264,9 @@ def main() -> int:
                          "practice when running under Task Scheduler, which "
                          "gives the process no console to print to.")
     args = ap.parse_args()
+
+    aoi = AOIS[args.aoi]
+    interval = args.interval if args.interval is not None else aoi["interval_s"]
 
     handlers: list[logging.Handler] = [logging.StreamHandler()]
     if args.log_file:
@@ -212,19 +286,28 @@ def main() -> int:
 
     max_polls = 1 if args.once else None
     if args.minutes:
-        max_polls = max(1, int(args.minutes * 60 / args.interval))
+        max_polls = max(1, int(args.minutes * 60 / interval))
 
     try:
-        ing = Ingester(AOI_AIR, RAW, args.interval, 1 if args.once else args.flush_every)
+        ing = Ingester(aoi["box"], RAW, interval,
+                       1 if args.once else args.flush_every,
+                       dataset=aoi["dataset"], collector=aoi["collector"],
+                       label=aoi["label"],
+                       snapshot=LIVE / f"{aoi['dataset']}.json")
     except RuntimeError as exc:
         log.error("%s", exc)
         return 1
 
-    # Two collectors is not obviously broken -- both work, both write, and
-    # nothing errors. You just burn quota twice and duplicate every row, and
-    # you might not notice for a week. Worth making impossible rather than
-    # remembering not to do.
-    lock = CollectorLock(RAW, "aviation", session_id=ing.hb.session_id,
+    # Two collectors ON THE SAME FOOTPRINT is not obviously broken -- both
+    # work, both write, and nothing errors. You just burn quota twice and
+    # duplicate every row, and you might not notice for a week. Worth making
+    # impossible rather than remembering not to do.
+    #
+    # The lock is per collector name, so air and conus running side by side is
+    # allowed and two of either is not -- which is exactly the distinction
+    # that matters. A single global lock would have made the design this whole
+    # change exists to enable impossible.
+    lock = CollectorLock(RAW, aoi["collector"], session_id=ing.hb.session_id,
                          force=args.force)
     try:
         lock.acquire()

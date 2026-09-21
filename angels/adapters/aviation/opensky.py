@@ -18,10 +18,11 @@ from __future__ import annotations
 import logging
 import os
 import time
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 import httpx
 
@@ -123,6 +124,35 @@ class TokenManager:
 # fetch and translate
 # --------------------------------------------------------------------------
 
+class RateLimited(RuntimeError):
+    """OpenSky answered 429: today's credits are spent.
+
+    Its own exception because it is not an outage and must never be reported
+    as one. On 2026-09-19 the viewer said "OpenSky is not responding" for
+    hours while OpenSky was responding perfectly clearly -- with "you have no
+    credits left". The two call for opposite actions: an outage is waited out,
+    an exhausted budget is a spending problem on our side.
+    """
+
+    def __init__(self, retry_after_s: float | None, message: str) -> None:
+        super().__init__(message)
+        self.retry_after_s = retry_after_s
+
+
+# The most recent credit count OpenSky reported. It sends the remainder of the
+# day's budget on every successful response; keeping it lets a caller SEE the
+# budget draining instead of learning about it from a 429.
+LAST_BUDGET: dict[str, float | None] = {"remaining": None, "at": None}
+
+
+def _header_float(r, name: str) -> float | None:
+    try:
+        v = r.headers.get(name)
+        return float(v) if v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
 def fetch_states(bbox: tuple[float, float, float, float],
                  tokens: TokenManager,
                  *, client: httpx.Client | None = None,
@@ -146,10 +176,19 @@ def fetch_states(bbox: tuple[float, float, float, float],
 
     c = client or httpx.Client(timeout=30.0)
     r = c.get(f"{API_BASE}/states/all", params=params, headers=tokens.headers())
+    if r.status_code == 429:
+        wait = _header_float(r, "X-Rate-Limit-Retry-After-Seconds")
+        raise RateLimited(
+            wait,
+            "OpenSky daily credits are spent"
+            + (f"; they return in about {wait / 3600:.1f} h" if wait else ""))
     r.raise_for_status()
+    remaining = _header_float(r, "X-Rate-Limit-Remaining")
+    if remaining is not None:
+        LAST_BUDGET.update(remaining=remaining, at=time.time())
     payload = r.json()
 
-    t = datetime.fromtimestamp(payload["time"], tz=timezone.utc)
+    t = datetime.fromtimestamp(payload["time"], tz=UTC)
     return t, (payload.get("states") or [])
 
 
@@ -179,7 +218,7 @@ def row_to_report(row: Sequence[Any], *,
         position=Position(
             lat=float(lat),
             lon=float(lon),
-            t=datetime.fromtimestamp(ts, tz=timezone.utc),
+            t=datetime.fromtimestamp(ts, tz=UTC),
             uncertainty_m=uncertainty_m,
             speed_mps=row[VELOCITY],
             heading_deg=row[TRUE_TRACK],
@@ -277,7 +316,7 @@ def archive_row_to_report(d: Mapping[str, Any], *,
         position=Position(
             lat=float(lat),
             lon=float(lon),
-            t=datetime.fromtimestamp(int(ts), tz=timezone.utc),
+            t=datetime.fromtimestamp(int(ts), tz=UTC),
             uncertainty_m=uncertainty_m,
             speed_mps=d.get("velocity"),
             heading_deg=d.get("true_track"),
@@ -287,20 +326,56 @@ def archive_row_to_report(d: Mapping[str, Any], *,
     )
 
 
+# The columns archive_row_to_report actually reads, plus position_source for
+# provenance. Named explicitly rather than SELECT * for two reasons:
+#
+#   1. Parquet is columnar, so naming them lets DuckDB skip the rest entirely.
+#      On a 400-million-row archive that is the difference between a query and
+#      a wait.
+#   2. It excludes `fetched_at`, the one TIMESTAMP WITH TIME ZONE column.
+#      DuckDB needs pytz to hand a tz-aware timestamp back to Python, and
+#      nothing here uses it -- every time in a Report comes from the integer
+#      unix seconds in time_position or last_contact. Selecting it would drag
+#      in a dependency to carry a value we throw away.
+_REPORT_COLUMNS = (
+    "icao24", "callsign", "time_position", "last_contact",
+    "longitude", "latitude", "baro_altitude", "geo_altitude",
+    "velocity", "true_track", "position_source",
+)
+
+
+class ArchiveReadError(RuntimeError):
+    """The archive exists but could not be read.
+
+    Distinct from "there is no archive yet", which is a normal state and
+    returns an empty list. This one means something is actually wrong --
+    a missing dependency, a corrupt Parquet file, a permissions problem --
+    and must not be mistaken for an empty sky.
+    """
+
+
 def read_archive(root: Path, t_start: datetime, t_end: datetime,
                  bbox: tuple[float, float, float, float],
                  *, include_on_ground: bool = False,
-                 limit: int | None = None) -> list[Report]:
+                 limit: int | None = None,
+                 dataset: str = "aviation") -> list[Report]:
     """Reports from the Parquet the ingest script has been writing.
 
     The live endpoint only ever returns *now*, so any time window has to come
     from stored data. DuckDB reads the hour-partitioned files directly and
     pushes the filters down, so a narrow window never scans the whole archive
     -- which is the entire reason for partitioning by hour.
+
+    `dataset` selects which collector's archive to read: "aviation" for the
+    30-second DC-Baltimore box, "aviation-conus" for the ten-minute national
+    one. They are kept in separate directories rather than a single archive
+    with a region column because their sample rates differ by twentyfold, and
+    anything that computed a rate over the union of the two would be wrong
+    without ever looking wrong.
     """
     import duckdb  # adapter-local: core must stay stdlib-only
 
-    pattern = (root / "aviation" / "hour=*" / "*.parquet").as_posix()
+    pattern = (root / dataset / "hour=*" / "*.parquet").as_posix()
     lomin, lamin, lomax, lamax = bbox
 
     where = [
@@ -313,17 +388,44 @@ def read_archive(root: Path, t_start: datetime, t_end: datetime,
     if not include_on_ground:
         where.append("NOT on_ground")
 
-    sql = (f"SELECT * FROM read_parquet('{pattern}') "
+    cols_sql = ", ".join(_REPORT_COLUMNS)
+    sql = (f"SELECT {cols_sql} FROM read_parquet('{pattern}') "
            f"WHERE {' AND '.join(where)} ORDER BY icao24, last_contact")
     if limit:
         sql += f" LIMIT {int(limit)}"
 
-    try:
-        rows = duckdb.sql(sql).df().to_dict("records")
-    except Exception as exc:
-        # An empty archive is not an error -- the poller may not have run yet.
-        log.warning("archive read failed (%s); returning nothing", exc)
+    # An archive that does not exist yet is NOT an error -- the collector may
+    # simply not have run. Decide that by LOOKING, before running the query,
+    # rather than by catching whatever the query throws.
+    #
+    # WHY THAT DISTINCTION IS THE WHOLE POINT. This function used to wrap the
+    # query in `except Exception: return []`, on the reasoning that an empty
+    # archive is normal. It is -- but that handler also swallowed real
+    # failures. When pandas turned out to be missing from a fresh environment,
+    # every caller was told, calmly, that there were no aircraft. The map went
+    # blank, run_detectors.py printed "No tracks in the archive. Is the
+    # collector running?", and the collector was running perfectly.
+    #
+    # An error reported as an absence is the exact failure this project exists
+    # to detect, appearing inside the project itself for the fourth time. A
+    # real failure now raises.
+    if not list(Path(root / dataset).glob("hour=*/*.parquet")):
+        log.debug("no parquet under %s/%s yet", root, dataset)
         return []
+
+    try:
+        rel = duckdb.sql(sql)
+        cols = [d[0] for d in rel.description]
+        # fetchall() rather than .df(): DuckDB's DataFrame conversion requires
+        # pandas, and nothing here needs a DataFrame -- the rows are turned
+        # into dicts and then into Reports either way. Dropping it removes a
+        # heavyweight dependency from the install and a whole class of
+        # environment breakage with it.
+        rows = [dict(zip(cols, r)) for r in rel.fetchall()]
+    except Exception as exc:
+        raise ArchiveReadError(
+            f"could not read the {dataset} archive under {root}: {exc}"
+        ) from exc
 
     out = [archive_row_to_report(r) for r in rows]
     return [r for r in out if r is not None]
@@ -388,6 +490,7 @@ class AviationAdapter:
     plausibility: AviationPlausibility = field(default_factory=AviationPlausibility)
     tokens: TokenManager | None = None
     archive_root: Path = RAW
+    dataset: str = "aviation"
     max_gap_s: float = 900.0
     _client: httpx.Client | None = None
 
@@ -413,7 +516,8 @@ class AviationAdapter:
         once historical access is approved. The signature does not change,
         which is the point.
         """
-        reports = read_archive(self.archive_root, t_start, t_end, bbox)
+        reports = read_archive(self.archive_root, t_start, t_end, bbox,
+                               dataset=self.dataset)
         return split_into_tracks(reports, max_gap_s=self.max_gap_s,
                                  domain=self.domain)
 
@@ -431,3 +535,81 @@ class AviationAdapter:
         a crude version of this today.
         """
         raise NotImplementedError("Phase 2: requires OpenSky historical access.")
+
+
+# --------------------------------------------------------------------------
+# the live snapshot: one poll, shared
+# --------------------------------------------------------------------------
+#
+# THE VIEWER MUST NOT SPEND CREDITS THE ARCHIVE NEEDS.
+#
+# The collector already asks OpenSky about the DC-Baltimore box every thirty
+# seconds. The viewer used to ask again, separately, every eight -- from the
+# same 4,000-credit daily budget. On 2026-09-19 a tab left open overnight
+# spent roughly 2,600 credits, the budget ran out at 04:20 local time, and the
+# collector was refused on every poll until 13:08 -- 8 h 48 min and 979
+# refused polls of archive that cannot be backfilled, lost to a map nobody was
+# looking at. (Recovery came at 13:08 local, not at midnight UTC, so do not
+# assume a fixed daily reset: read X-Rate-Limit-Retry-After-Seconds.)
+#
+# So the collector writes what it just received to a small file, and the
+# viewer reads that file. One poll, two consumers, zero extra credits.
+
+def write_snapshot(path: Path, t: datetime, rows: list,
+                   bbox: tuple[float, float, float, float]) -> bool:
+    """Write the latest poll atomically. False if it could not be written.
+
+    Written to a temporary name and swapped in, so a reader never sees half a
+    file. On Windows the swap can fail if a reader has the file open at that
+    instant; that costs one snapshot out of thousands and the next poll
+    replaces it thirty seconds later, so the failure is swallowed rather than
+    allowed to interrupt the collector.
+    """
+    import json
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps({
+            "time": int(t.timestamp()),
+            "written": time.time(),
+            "bbox": list(bbox),
+            "credits_remaining": LAST_BUDGET["remaining"],
+            "states": rows,
+        }), encoding="utf-8")
+        os.replace(tmp, path)
+        return True
+    except OSError:
+        return False
+
+
+def read_snapshot(path: Path, *, max_age_s: float,
+                  bbox: tuple[float, float, float, float]) -> dict | None:
+    """The latest collector poll, or None if there is no usable one.
+
+    None covers every reason not to trust it -- missing, unreadable, too old,
+    or for a different box -- because in every one of those cases the right
+    move is the same: do not serve it. A snapshot older than max_age_s means
+    the collector has stopped or is being refused, and serving it would show
+    a sky frozen at the moment the archive broke.
+    """
+    import json
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    # Valid JSON of the wrong shape is as untrustworthy as a torn write, and
+    # must not reach the route as an exception -- that would turn a bad file
+    # on disk into a 500 on the live map.
+    if not isinstance(doc, dict):
+        return None
+    try:
+        if [round(float(v), 4) for v in doc.get("bbox", [])] != \
+                [round(v, 4) for v in bbox]:
+            return None
+        age = time.time() - float(doc.get("written", 0))
+    except (TypeError, ValueError):
+        return None
+    if age > max_age_s:
+        return None
+    doc["age_s"] = age
+    return doc

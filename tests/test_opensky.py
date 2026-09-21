@@ -1,3 +1,14 @@
+"""Tests for the OpenSky adapter.
+
+All offline. Real state vectors are captured as fixtures so this suite runs
+without credentials, without a network, and without burning daily quota --
+which matters because you will run it hundreds of times.
+
+The rows below are the shape OpenSky actually returned over the Baltimore /
+DC box, including five aircraft parked on the ground at Reagan National. That
+ground cluster is the interesting case: it is what a naive loiter detector
+would happily report as five high-confidence events.
+"""
 
 from __future__ import annotations
 
@@ -174,7 +185,12 @@ def test_tracks_are_usable_by_core() -> None:
 # -- auth ------------------------------------------------------------------
 
 class FakeResponse:
-    def __init__(self, payload): self._p = payload
+    # status_code and headers because fetch_states now reads both: a 429 is
+    # checked before raise_for_status so it can become RateLimited, and the
+    # remaining-credits header is recorded on every success.
+    status_code = 200
+
+    def __init__(self, payload): self._p = payload; self.headers = {}
     def raise_for_status(self): return self
     def json(self): return self._p
 

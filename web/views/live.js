@@ -13,47 +13,35 @@
 
 // Same origin when uvicorn serves this page (port 8000), absolute when
 // something else does -- so the old two-server setup keeps working.
+import { reckonFleet } from "./reckon.js";
+
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
-export const POLL_MS = 8000;       // upstream cache is 6s; see live.py on quota
-const R = 6371008.8;
+// Polling our own server is free now -- the server reads the collector's
+// latest poll, which changes every 30 s -- so ten seconds is ample.
+export const POLL_MS = 10000;
 
 let fleet = [];             // last known state per aircraft
 let lastPoll = 0;
 let running = false;
 let requests = 0;   // upstream cost is invisible otherwise
+let visible = true;
 
-// --- dead reckoning -------------------------------------------------------
+const reckon = (now) => reckonFleet(fleet, now, "air");
 
-function project(lat, lon, bearingDeg, distM) {
-  const d = distM / R;
-  const b = (bearingDeg * Math.PI) / 180;
-  const p1 = (lat * Math.PI) / 180;
-  const l1 = (lon * Math.PI) / 180;
-  const p2 = Math.asin(Math.sin(p1) * Math.cos(d) + Math.cos(p1) * Math.sin(d) * Math.cos(b));
-  const l2 = l1 + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(p1),
-                             Math.cos(d) - Math.sin(p1) * Math.sin(p2));
-  return [((l2 * 180) / Math.PI + 540) % 360 - 180, (p2 * 180) / Math.PI];
-}
-
-function reckon(now) {
-  return {
-    type: "FeatureCollection",
-    features: fleet.map((a) => {
-      let coords = a.coords;
-      // Only extrapolate when we actually know how it is moving, and stop
-      // after 120s -- past that the guess is worse than admitting we do not
-      // know, and a stale aircraft should not keep flying across the map.
-      const age = (now - a.t) / 1000;
-      if (a.speed_mps && a.heading != null && age > 0 && age < 120) {
-        coords = project(a.coords[1], a.coords[0], a.heading, a.speed_mps * age);
-      }
-      return {
-        type: "Feature",
-        geometry: { type: "Point", coordinates: coords },
-        properties: { ...a.props, stale: age > 120 },
-      };
-    }),
-  };
+// Hiding the layer STOPS THE POLL.
+//
+// This comment used to say the opposite -- that polling while hidden "costs
+// nothing extra" because the cache is server-side. It cost exactly as much as
+// polling while visible, from the same daily budget the archive depends on,
+// and a tab left open overnight with aircraft hidden while the sea warmed up
+// spent the day's credits and cut the collectors off for almost nine hours.
+export function setVisible(map, on) {
+  visible = on;
+  for (const id of ["live-halo", "live-plane", "live-label"]) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+    }
+  }
 }
 
 // --- the plane symbol -----------------------------------------------------
@@ -228,12 +216,26 @@ export function startLive(map, onUpdate, onError) {
   };
   requestAnimationFrame(tick);
 
+  let backoff = 0;
   const poll = async () => {
-    try { await pollLive(map, onUpdate); }
-    catch (e) { onError?.(e); }
-    setTimeout(poll, POLL_MS);
+    if (!visible || document.hidden) {
+      // Checked every second so switching Air back on, or returning to the
+      // browser tab, brings the aircraft back promptly.
+      setTimeout(poll, 1000);
+      return;
+    }
+    try {
+      await pollLive(map, onUpdate);
+      backoff = 0;
+    } catch (e) {
+      // After a 429 the server will not ask OpenSky again until the stated
+      // retry time, so hammering it gains nothing; slow right down.
+      backoff = e.status === 429 ? 60000 : Math.min(60000, (backoff || POLL_MS) * 2);
+      onError?.(e);
+    }
+    setTimeout(poll, Math.max(POLL_MS, backoff));
   };
   poll();
 }
 
-export const liveInfo = () => ({ n: fleet.length, lastPoll, requests });
+export const liveInfo = () => ({ n: fleet.length, lastPoll, requests, visible });
