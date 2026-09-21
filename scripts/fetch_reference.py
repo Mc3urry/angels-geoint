@@ -30,6 +30,20 @@ from pathlib import Path
 
 import httpx
 
+# Re-runs this script under the interpreter that has ANGELS installed, if the
+# one invoking it does not. See scripts/_bootstrap.py.
+#
+# The name check matters. `import _bootstrap` only resolves when scripts/ is on
+# sys.path, which is true when this file is RUN and false when the test suite
+# IMPORTS it as scripts.<name>. Swallowing every ModuleNotFoundError here would
+# also swallow the one _bootstrap raises about 'angels' itself -- turning a
+# clear "wrong interpreter" message back into a confusing one.
+try:
+    import _bootstrap  # noqa: F401  (must precede the angels imports)
+except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
+    if _e.name != "_bootstrap":
+        raise
+
 from angels.config import REFERENCE
 
 GITHUB_BF = ("https://raw.githubusercontent.com/BuzzFeedNews/"

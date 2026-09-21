@@ -1,11 +1,17 @@
 """Run the detectors over the archive and write events.
 
-    python scripts/run_detectors.py                 # last 24h
+    python scripts/run_detectors.py                 # DC box, last 24h
+    python scripts/run_detectors.py --aoi conus     # national archive
     python scripts/run_detectors.py --hours 6
     python scripts/run_detectors.py --dry-run       # report, write nothing
     python scripts/run_detectors.py -v              # show every event
 
-Output: data/events/aviation-YYYY-MM-DDTHH.jsonl
+Output: data/events/<aoi>-YYYY-MM-DDTHH.jsonl
+
+The two archives are swept separately and never merged. Their sample rates
+differ twentyfold, and the thresholds inside the detectors are all implicitly
+relative to the report interval -- a sweep over the union would be tuned for
+neither.
 
 WHAT RUNS TODAY, AND WHAT DOES NOT
 
@@ -35,8 +41,22 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# Re-runs this script under the interpreter that has ANGELS installed, if the
+# one invoking it does not. See scripts/_bootstrap.py.
+#
+# The name check matters. `import _bootstrap` only resolves when scripts/ is on
+# sys.path, which is true when this file is RUN and false when the test suite
+# IMPORTS it as scripts.<name>. Swallowing every ModuleNotFoundError here would
+# also swallow the one _bootstrap raises about 'angels' itself -- turning a
+# clear "wrong interpreter" message back into a confusing one.
+try:
+    import _bootstrap  # noqa: F401  (must precede the angels imports)
+except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
+    if _e.name != "_bootstrap":
+        raise
+
 from angels.adapters.aviation.opensky import AviationAdapter
-from angels.config import AOI_AIR, EVENTS, RAW
+from angels.config import AOIS, EVENTS, RAW
 from angels.core.detectors import identity, kinematics
 from angels.core.models import DiscrepancyEvent
 from angels.core.uptime import blind_intervals
@@ -64,22 +84,32 @@ def run(tracks, plausibility, domain: str) -> dict[str, list[DiscrepancyEvent]]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--hours", type=float, default=24.0)
+    ap.add_argument("--aoi", choices=sorted(AOIS), default="air",
+                    help="which archive to sweep (default air)")
     ap.add_argument("--domain", choices=["air"], default="air")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
+    aoi = AOIS[args.aoi]
+
     end = datetime.now(timezone.utc)
     start = end - timedelta(hours=args.hours)
 
-    adapter = AviationAdapter()
-    tracks = adapter.tracks(start, end, AOI_AIR)
+    # max_gap_s comes from the AOI, not the adapter default. A gap threshold
+    # is only meaningful relative to the sample rate: 900 s is thirty missed
+    # polls on the 30 s box and less than two on the 600 s one, so the default
+    # would cut the national archive into fragments on every dropped poll.
+    adapter = AviationAdapter(dataset=aoi["dataset"],
+                              max_gap_s=float(aoi["max_gap_s"]))
+    tracks = adapter.tracks(start, end, aoi["box"])
 
-    print(f"\n  {args.domain}  {start:%Y-%m-%d %H:%M} to {end:%H:%M} UTC")
+    print(f"\n  {args.aoi} ({aoi['label']})  "
+          f"{start:%Y-%m-%d %H:%M} to {end:%H:%M} UTC")
 
     if not tracks:
         print("\n  No tracks in the archive for that window.")
-        print("  Is the collector running?  .\\collector.ps1 status\n")
+        print(f"  Is the collector running?  .\\collector.ps1 status -Aoi {args.aoi}\n")
         return 1
 
     reports = sum(len(t) for t in tracks)
@@ -87,7 +117,7 @@ def main() -> int:
 
     # Say plainly how much of the window we were actually watching. A sweep
     # over a window we were mostly asleep for is not a sweep.
-    blind = blind_intervals(RAW, start, end, collector="aviation")
+    blind = blind_intervals(RAW, start, end, collector=aoi["collector"])
     if blind:
         lost = sum((b - a).total_seconds() for a, b in blind) / 3600
         pct = 100 * lost / args.hours
@@ -121,7 +151,7 @@ def main() -> int:
 
     if flat and not args.dry_run:
         EVENTS.mkdir(parents=True, exist_ok=True)
-        path = EVENTS / f"{args.domain}-{end:%Y-%m-%dT%H}.jsonl"
+        path = EVENTS / f"{args.aoi}-{end:%Y-%m-%dT%H}.jsonl"
         with path.open("w", encoding="utf-8") as fh:
             for e in flat:
                 fh.write(json.dumps(e.to_geojson()) + "\n")

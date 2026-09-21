@@ -21,6 +21,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+. (Join-Path $PSScriptRoot "_env.ps1")
+
 function Show-Help {
     Write-Host ""
     Write-Host "  ANGELS tasks" -ForegroundColor Magenta
@@ -42,9 +44,13 @@ function Show-Help {
     Write-Host "    .\tasks.ps1 web        " -NoNewline -ForegroundColor Cyan
     Write-Host "front end on :5173"
     Write-Host "    .\tasks.ps1 ingest     " -NoNewline -ForegroundColor Cyan
-    Write-Host "poll OpenSky into the archive"
+    Write-Host "poll the DC box (30 s) into the archive"
+    Write-Host "    .\tasks.ps1 ingest-conus " -NoNewline -ForegroundColor Cyan
+    Write-Host "poll the whole country (10 min)"
     Write-Host "    .\tasks.ps1 status     " -NoNewline -ForegroundColor Cyan
     Write-Host "how much archive exists"
+    Write-Host "    .\tasks.ps1 doctor     " -NoNewline -ForegroundColor Cyan
+    Write-Host "is everything running? (after a reboot)"
     Write-Host ""
     Write-Host "    .\tasks.ps1 clean      " -NoNewline -ForegroundColor Cyan
     Write-Host "remove caches"
@@ -53,23 +59,44 @@ function Show-Help {
     Write-Host ""
 }
 
+# Resolve the project interpreter ONCE, and use it explicitly everywhere
+# below. Bare `python` is never invoked: on this machine it may be ArcGIS
+# Pro's 3.14, which has never heard of this project.
+$Py = $null
+if ($Task.ToLower() -notin @("help", "clean")) {
+    if ($Task.ToLower() -in @("install", "dev", "analysis")) {
+        # Installing is how the project GETS into an interpreter, so it
+        # cannot require one that already has it.
+        $Py = Get-AngelsPython
+        if (-not $Py) { $Py = "$env:USERPROFILE\envs\angels\python.exe" }
+        if (-not (Test-Path $Py)) { $Py = (Get-Command python).Source }
+    } else {
+        $Py = Assert-AngelsPython
+    }
+    Write-Host "  python: $Py" -ForegroundColor DarkGray
+}
+
 switch ($Task.ToLower()) {
 
-    "install"  { pip install -e . }
-    "dev"      { pip install -e ".[dev]" }
-    "analysis" { pip install -e ".[analysis]" }
+    "install"  { & $Py -m pip install -e . }
+    "dev"      { & $Py -m pip install -e ".[dev]" }
+    "analysis" { & $Py -m pip install -e ".[analysis]" }
 
-    "test"     { pytest -q }
-    "lint"     { ruff check angels tests scripts }
+    "test"     { & $Py -m pytest -q }
+    "doctor"   { & $Py scripts\doctor.py }
+    "lint"     { & $Py -m ruff check angels tests scripts }
 
-    "serve"    { uvicorn angels.api.main:app --reload }
+    "serve"    { & $Py -m uvicorn angels.api.main:app --reload }
     "web"      {
         Write-Host "front end -> http://localhost:5173" -ForegroundColor Magenta
         Write-Host "the API must also be running (.\tasks.ps1 serve)" -ForegroundColor DarkGray
-        python -m http.server 5173 --directory web
+        & $Py -m http.server 5173 --directory web
     }
 
-    "ingest"   { python scripts\ingest_aviation.py --interval 30 }
+    # Foreground poll, for watching it work. The unattended one belongs in
+    # .\collector.ps1, which survives a closed terminal and a reboot.
+    "ingest"       { & $Py scripts\ingest_aviation.py --aoi air }
+    "ingest-conus" { & $Py scripts\ingest_aviation.py --aoi conus }
 
     "status"   {
         # How much archive do we actually have? The single most useful thing

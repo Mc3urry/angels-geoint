@@ -60,5 +60,61 @@ were looking.
 and exclude those windows before reporting anything. A gap inside our own
 downtime is not a finding.
 
+### 2026-09-13 — national collection footprint added, core unchanged
+**Change:** none to `angels/core/`. Recorded here precisely because nothing
+changed.
+
+Scaling collection from a 2-square-degree metro box to the whole continental
+United States — a ~600× increase in area, twenty times the aircraft per poll,
+and a second collector running at a twentyfold different cadence — touched
+`config.py`, one adapter function signature (`read_archive(..., dataset=)`),
+two scripts and a PowerShell wrapper. `models.py`, `plausibility.py` and every
+detector were untouched and every one of their tests passed unmodified.
+
+**Why the abstraction covered it:** the detectors take a `Track` and a
+`PlausibilityModel` and nothing else. Neither carries a region. Chicago
+traffic and Baltimore traffic are the same type, arriving through the same
+seam, and a detector has no way to tell — which is the property the design was
+built for and the first time it has been tested at a scale change rather than
+a domain change.
+
+**What did have to change, and why it is adapter work rather than core work:**
+
+- `read_archive` grew a `dataset` argument. The two footprints write separate
+  Parquet trees because their sample rates differ twentyfold, and any rate
+  computed over the union — reports per hour, gap length, track continuity —
+  would be a weighted average of two incomparable regimes. Wrong without
+  looking wrong. This is a storage-layout concern, which is where it lives.
+- `max_gap_s` moved from an adapter default to a per-footprint setting. A gap
+  threshold is only meaningful relative to the polling interval: 900 s is
+  thirty missed polls at 30 s and less than two at 600 s, so the inherited
+  default would have fragmented every national track on a single dropped poll,
+  and the detectors would have read the fragments as evidence. This is the one
+  genuinely subtle finding of the change, and worth stating in the write-up:
+  **a parameter that is correct is not therefore portable.**
+- `CollectorLock` and `HeartbeatLog` needed no change at all. Both were already
+  keyed by collector name, from the 2026-09-02 entry above, which turned out to
+  be exactly the right granularity a year before there was a second collector.
+  Two names may hold locks simultaneously; two of one name still cannot.
+
+**Alternative considered:** one archive with a `region` column, filtered at
+query time. Rejected. It is tidier on disk and worse everywhere else — every
+downstream aggregation would silently mix sample rates unless every query
+remembered to filter, and "unless every query remembers" is not a design.
+
+**Cost to state honestly in the thesis, not to discover in review:** over a
+2° box, receiver coverage is near enough uniform to ignore. Over CONUS it is
+not. OpenSky is dense along the Northeast corridor and thin over the Great
+Basin; traffic density varies the same way; both correlate with terrain and
+population. A naive national map of silences is a map of where nobody is
+listening. `core/coverage.py` therefore stops being a nice-to-have and becomes
+load-bearing, and it has to be spatially varying rather than a scalar.
+
+**What it buys:** the geographic claim moves from one boundary (the DC SFRA,
+a case study, and a committee is right to ask whether the effect belongs to
+boundaries or to Washington) to ~37 Class B airspaces plus the prohibited
+areas, the MOA network and the ADIZ — enough to test whether the effect is a
+property of boundary *type*, controlling for traffic density.
+
 ### Phase 3 — maritime adapter
 _(fill in as you go)_
