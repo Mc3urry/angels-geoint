@@ -432,6 +432,45 @@ def test_a_server_ignoring_range_restarts_instead_of_appending(
     assert out.read_bytes() == b"1234567890", "the partial was appended to"
 
 
+@pytest.mark.parametrize("status", [501, 416])
+def test_a_refused_range_restarts_from_zero(tmp_path, monkeypatch, _tokens,
+                                            status) -> None:
+    """2024-05-28: a connection dropped at 418 MB and every resume came back
+    501. Keeping the partial would spend all six attempts asking again. The
+    partial is dropped and the next attempt asks for the whole file."""
+    import angels.adapters.maritime.cdse as cdse
+    monkeypatch.setattr(cdse.time, "sleep", lambda s: None)
+    s = _scene(size=10)
+    (tmp_path / f"{s.name}.zip.part").write_bytes(b"12345")
+    asked = []
+
+    def server(c, u, h):
+        asked.append(h.get("Range"))
+        if "Range" in h:
+            return _StreamResp(b"", status=status, headers={})
+        return _StreamResp(b"1234567890", status=200)
+
+    monkeypatch.setattr(cdse, "follow_authed", server)
+    out = cdse.download(s, tmp_path, _tokens, progress=False)
+    assert asked == ["bytes=5-", None]
+    assert out.read_bytes() == b"1234567890"
+
+
+def test_an_ordinary_server_error_keeps_the_partial(tmp_path, monkeypatch,
+                                                    _tokens) -> None:
+    """A 503 is an outage, not a refusal of Range: keep the bytes and resume."""
+    import angels.adapters.maritime.cdse as cdse
+    monkeypatch.setattr(cdse.time, "sleep", lambda s: None)
+    s = _scene(size=10)
+    (tmp_path / f"{s.name}.zip.part").write_bytes(b"12345")
+    replies = iter([_StreamResp(b"", status=503, headers={}),
+                    _StreamResp(b"67890", status=206,
+                                headers={"content-length": "5"})])
+    monkeypatch.setattr(cdse, "follow_authed", lambda c, u, h: next(replies))
+    out = cdse.download(s, tmp_path, _tokens, progress=False)
+    assert out.read_bytes() == b"1234567890"
+
+
 # -- passes ----------------------------------------------------------------
 #
 # THE MODELLING ERROR THIS FIXES. Asking for a scene covering 40% of AOI_SEA

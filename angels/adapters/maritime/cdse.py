@@ -496,6 +496,12 @@ def follow_authed(client: httpx.Client, url: str, headers: dict,
 
     raise RuntimeError(f"too many redirects (>{max_hops})")
 
+# Statuses that refuse the Range request itself rather than the download.
+# A partial file cannot be resumed from a node that answers these, so it is
+# discarded and the next attempt starts from byte zero.
+RANGE_REFUSED = (416, 501)
+
+
 def download(scene: Scene, dest_dir: Path, tokens: TokenManager, *,
              chunk: int = 1 << 20, max_attempts: int = 6,
              progress: bool = True) -> Path:
@@ -557,6 +563,19 @@ def download(scene: Scene, dest_dir: Path, tokens: TokenManager, *,
                         log.warning("range ignored; restarting %s", scene.name)
                         part.unlink(missing_ok=True)
                         have = 0
+                    elif have and r.status_code in RANGE_REFUSED:
+                        # The node will not serve a byte range at all -- 501
+                        # "Not Implemented" and 416 "Range Not Satisfiable"
+                        # are refusals of the Range request itself, not
+                        # outages. Seen on 2024-05-28: after a connection
+                        # drop at 418 MB every resume came back 501, and
+                        # keeping the partial meant all six attempts asked
+                        # the same unanswerable question. Drop it and start
+                        # clean; the next attempt asks without Range.
+                        part.unlink(missing_ok=True)
+                        raise RuntimeError(
+                            f"HTTP {r.status_code} on a resume -- range "
+                            f"refused, restarting from zero")
                     elif have and r.status_code != 206:
                         raise RuntimeError(f"HTTP {r.status_code}")
                     elif not have and r.status_code != 200:
