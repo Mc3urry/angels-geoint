@@ -64,7 +64,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
 
 from angels.adapters.maritime.ais import AISReadError, tracks_at
 from angels.adapters.maritime.searched import SearchedArea
-from angels.config import AOI_SEA, EVENTS, RAW
+from angels.config import AIS_FRONTIER, AOI_SEA, EVENTS, RAW
 from angels.core.detectors import calibration, matching
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -96,6 +96,14 @@ class Outcome:
     @property
     def per_1000km2(self) -> float:
         return 1000 * self.unmatched / self.searched_km2 if self.searched_km2 else float("nan")
+
+
+def split_dates(spec: str | None, available: list[date]) -> list[date]:
+    """Dates named on the command line, kept to the ones actually on disk."""
+    if not spec:
+        return []
+    want = {date.fromisoformat(x.strip()) for x in spec.split(",") if x.strip()}
+    return [d for d in available if d in want]
 
 
 def load_scene(path: Path, window_s: float) -> Scene | None:
@@ -168,8 +176,11 @@ def fmt(o: Outcome) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--train", default="2024-09-25")
-    ap.add_argument("--test", default="2024-06-21")
+    ap.add_argument("--train", default=None,
+                    help="comma-separated dates. Default: alternate dates, "
+                         "so both halves span the year and the seasons")
+    ap.add_argument("--test", default=None,
+                    help="comma-separated dates; default: the other half")
     ap.add_argument("--min-rate-kept", type=float, default=0.9,
                     help="keep at least this share of the ungated detection "
                          "rate (default 0.9)")
@@ -177,25 +188,54 @@ def main() -> int:
     ap.add_argument("--window", type=float, default=1800.0)
     args = ap.parse_args()
 
-    train_day, test_day = (date.fromisoformat(args.train),
-                           date.fromisoformat(args.test))
     files = sorted(EVENTS.glob("sar-*.geojson"))
-    scenes = {train_day: [], test_day: []}
+    frontier = date.fromisoformat(AIS_FRONTIER)
+    available = sorted({d for f in files
+                        if (d := scene_date(f)) and d <= frontier})
+    if not available:
+        print(f"\n  No matchable detection files in {EVENTS}.\n")
+        return 1
+
+    if args.train or args.test:
+        train_days = split_dates(args.train, available)
+        test_days = (split_dates(args.test, available)
+                     or [d for d in available if d not in train_days])
+    else:
+        # ALTERNATE, do not cut the year in half. A split by calendar order
+        # puts every winter pass on one side, and then the "test" set is a
+        # different sea as well as different data.
+        train_days = available[0::2]
+        test_days = available[1::2]
+    overlap = set(train_days) & set(test_days)
+    if overlap:
+        print(f"\n  {len(overlap)} date(s) in BOTH halves: "
+              f"{', '.join(str(d) for d in sorted(overlap))}")
+        print("  A gate chosen on a pass and tested on the same pass is not "
+              "tested.\n")
+        return 2
+
+    scenes = {"train": [], "test": []}
     for f in files:
         d = scene_date(f)
-        if d not in scenes:
+        half = ("train" if d in train_days
+                else "test" if d in test_days else None)
+        if half is None:
             continue
-        s = load_scene(f, args.window)
-        if s is not None:
-            scenes[d].append(s)
-            print(f"  {d}  {s.name[:48]}  {len(s.obs)} detections, "
-                  f"{len(s.tracks)} searched AIS vessels")
+        sc = load_scene(f, args.window)
+        if sc is not None:
+            scenes[half].append(sc)
 
-    if not scenes[train_day] or not scenes[test_day]:
-        print(f"\n  Need scorable scenes on both days; have "
-              f"{len(scenes[train_day])} on {train_day} and "
-              f"{len(scenes[test_day])} on {test_day}.\n")
+    print(f"  TRAIN {len(train_days)} date(s): "
+          f"{', '.join(str(d) for d in train_days)}")
+    print(f"  TEST  {len(test_days)} date(s): "
+          f"{', '.join(str(d) for d in test_days)}")
+    print(f"  {len(scenes['train'])} + {len(scenes['test'])} scorable "
+          f"scene(s)\n")
+    if not scenes["train"] or not scenes["test"]:
+        print("  Need scorable scenes in both halves.\n")
         return 1
+    train_day, test_day = "TRAIN", "TEST"
+    scenes = {train_day: scenes["train"], test_day: scenes["test"]}
 
     train, test = {}, {}
     for snr in SNR_GATES:
@@ -206,8 +246,8 @@ def main() -> int:
     L = calibration.DETECTABLE_LENGTH_M
     print(f"\n  detection rate for vessels >= {L:.0f} m, and unmatched "
           f"detections per 1,000 km2 searched\n")
-    print(f"  {'gate':>14}   {'TRAIN ' + str(train_day):^30}   "
-          f"{'TEST ' + str(test_day):^30}")
+    print(f"  {'gate':>14}   {'TRAIN (' + str(len(train_days)) + ' dates)':^30}"
+          f"   {'TEST (' + str(len(test_days)) + ' dates)':^30}")
     print(f"  {'snr   px':>14}   {'found/scored  rate (95%)  unm/1k':^30}   "
           f"{'found/scored  rate (95%)  unm/1k':^30}")
     pick = choose(train, args.min_rate_kept)
@@ -224,6 +264,7 @@ def main() -> int:
     print(f"\n  chosen gate: SNR >= {pick[0]}, pixels >= {pick[1]}  "
           f"(rule: strictest gate keeping >= {100 * args.min_rate_kept:.0f}% "
           f"of the ungated TRAIN rate)")
+    print(f"    train  {len(train_days)} date(s); test {len(test_days)}")
     print(f"    train  unmatched/1k km2 {b_tr.per_1000km2:.1f} -> "
           f"{p_tr.per_1000km2:.1f}, rate {fmt(b_tr).split()[1]} -> "
           f"{fmt(p_tr).split()[1]}")

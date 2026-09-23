@@ -187,3 +187,40 @@ def test_a_fixed_density_fixes_who_is_scored() -> None:
                       density_per_km2=len(observations) / 5_000)
     assert free.n_unscorable == 0          # thin detections: everyone scores
     assert fixed.unscorable == {1}         # the ungated scene's rule holds
+
+
+# -- the detectability curve -------------------------------------------------
+
+def test_the_curve_bins_by_length_and_keeps_unknown_apart() -> None:
+    from angels.core.detectors.calibration import length_bin
+    assert length_bin(track("1", 37, -75, length=12)) == "0-15 m"
+    assert length_bin(track("1", 37, -75, length=15)) == "15-25 m"
+    assert length_bin(track("1", 37, -75, length=40)) == "25-50 m"
+    assert length_bin(track("1", 37, -75, length=300)) == ">100 m"
+    assert length_bin(track("1", 37, -75)) == "unknown"
+
+
+def test_the_curve_and_the_two_classes_count_the_same_vessels() -> None:
+    tracks = [track("a", 37.0, -75.0, length=120),
+              track("b", 37.2, -75.0, length=12),
+              track("c", 37.3, -75.0, length=30),
+              track("d", 37.4, -75.0)]
+    observations = [obs(37.0, -75.0), obs(37.3, -75.0)]
+    r = associate(observations, tracks, T)
+    c = calibrate(r, tracks, observations, T, searched_km2=10_000)
+    assert sum(v.scored for v in c.curve.values()) == c.strata["all scored"].scored
+    assert sum(v.found for v in c.curve.values()) == c.strata["all scored"].found
+    assert (c.curve[">100 m"].found, c.curve[">100 m"].scored) == (1, 1)
+    assert (c.curve["0-15 m"].found, c.curve["0-15 m"].scored) == (0, 1)
+
+
+def test_the_curve_pools_across_passes() -> None:
+    a, b = Calibration(), Calibration()
+    a.curve["25-50 m"] = Rate(2, 3)
+    b.curve["25-50 m"] = Rate(1, 4)
+    assert (a + b).curve["25-50 m"].scored == 7
+
+
+def test_the_curve_edges_are_stated_and_fixed() -> None:
+    assert cal_mod.CURVE_EDGES_M[:4] == (0.0, 15.0, 25.0, 50.0)
+    assert cal_mod.CURVE_NAMES[-1] == "unknown"

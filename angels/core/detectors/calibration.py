@@ -75,6 +75,26 @@ MAX_CHANCE_MATCH = 0.05
 
 STRATA = (">=25 m", "<25 m", "unknown length", "all scored")
 
+# The same evidence as a CURVE rather than a line in the sand. Two classes
+# answer "is the detector good enough to trust"; the curve answers "what can
+# this sensor see", which is the question a reviewer asks and the one a
+# later study reuses. Edges fixed here, before any result.
+CURVE_EDGES_M = (0.0, 15.0, 25.0, 50.0, 100.0, float("inf"))
+CURVE_NAMES = tuple(
+    f"{lo:g}-{hi:g} m" if hi != float("inf") else f">{lo:g} m"
+    for lo, hi in zip(CURVE_EDGES_M, CURVE_EDGES_M[1:])) + ("unknown",)
+
+
+def length_bin(track: Track) -> str:
+    length = reported_length(track)
+    if length is None:
+        return "unknown"
+    for lo, hi in zip(CURVE_EDGES_M, CURVE_EDGES_M[1:]):
+        if lo <= length < hi:
+            return (f"{lo:g}-{hi:g} m" if hi != float("inf")
+                    else f">{lo:g} m")
+    return CURVE_NAMES[-2]
+
 
 def reported_length(track: Track) -> float | None:
     """The first positive length any report carries; None if none does.
@@ -148,6 +168,9 @@ class Calibration:
 
     strata: dict[str, Rate] = field(
         default_factory=lambda: {s: Rate() for s in STRATA})
+    # The detectability curve: the same scored vessels, binned by length.
+    curve: dict[str, Rate] = field(
+        default_factory=lambda: {s: Rate() for s in CURVE_NAMES})
     # Located, but too loosely for a match to mean anything at this density.
     n_unscorable: int = 0
     n_unscorable_matched: int = 0
@@ -167,6 +190,7 @@ class Calibration:
         and have no pooled value."""
         return Calibration(
             strata={s: self.strata[s] + other.strata[s] for s in STRATA},
+            curve={s: self.curve[s] + other.curve[s] for s in CURVE_NAMES},
             n_unscorable=self.n_unscorable + other.n_unscorable,
             n_unscorable_matched=(self.n_unscorable_matched
                                   + other.n_unscorable_matched),
@@ -186,6 +210,8 @@ class Calibration:
             "n_unscorable_matched": self.n_unscorable_matched,
             "expected_chance_matches": round(self.expected_chance_matches, 2),
             "strata": {s: r.to_json() for s, r in self.strata.items()},
+            "curve_edges_m": [e for e in CURVE_EDGES_M if e != float("inf")],
+            "curve": {s: r.to_json() for s, r in self.curve.items()},
         }
 
 
@@ -246,12 +272,29 @@ def calibrate(result: Association, tracks: list[Track],
         for s in (length_class(tr), "all scored"):
             cal.strata[s].found += hit
             cal.strata[s].scored += 1
+        b = cal.curve[length_bin(tr)]
+        b.found += hit
+        b.scored += 1
         cal.expected_chance_matches += p
     return cal
 
 
 def pct(v: float) -> str:
     return "  n/a" if v != v else f"{100 * v:4.0f}%"
+
+
+def format_curve(cal: Calibration, indent: str = "  ") -> list[str]:
+    """The detectability curve, shortest first, unknown last."""
+    lines = [f"{indent}{'length':>10}{'found':>7} / {'scored':<7}{'rate':>6}"
+             f"   95% range"]
+    for s in CURVE_NAMES:
+        r = cal.curve.get(s, Rate())
+        if r.scored == 0:
+            continue
+        lo, hi = r.interval
+        lines.append(f"{indent}{s:>10}{r.found:>7} / {r.scored:<7}"
+                     f"{pct(r.rate):>6}   {pct(lo).strip()}-{pct(hi).strip()}")
+    return lines
 
 
 def format_table(cal: Calibration, indent: str = "  ") -> list[str]:

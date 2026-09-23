@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from angels import __version__
-from angels.api.routes import live, tracks
+from angels.api.routes import coverage, events, live, tracks
 from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME, ROOT
 
 app = FastAPI(
@@ -56,12 +56,13 @@ def health() -> dict:
 
 app.include_router(live.router)
 app.include_router(tracks.router)
+app.include_router(coverage.router)
+app.include_router(events.router)
 
 # MOUNTED LAST, and it must stay last. StaticFiles at "/" is a catch-all --
 # anything registered after it would be shadowed and silently 404.
 # html=True serves index.html for the bare path.
 app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")
 
-# PHASE 2: from angels.api.routes import events;    app.include_router(events.router)
 # PHASE 4: from angels.api.routes import analysis;  app.include_router(analysis.router)
 # PHASE 5: from angels.api.routes import forensics; app.include_router(forensics.router)

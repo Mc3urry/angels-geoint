@@ -26,11 +26,19 @@ Each clause removes a different mistake:
 
   MIN_DATES        two passes can put two different ships in the same
                    kilometre by chance; a dozen dates make that unlikely.
-  MIN_FRACTION     the denominator is the passes that SEARCHED the spot, not
-                   all passes. A site inside the coastal blind zone on half
-                   the passes must not be judged as though it were looked at
-                   and found empty. Same principle as the detection rate's
-                   searched-water denominator.
+  MIN_FRACTION     the denominator is the passes that SEARCHED the spot
+                   SINCE IT FIRST APPEARED, not all passes. Two reasons, and
+                   the second was found the hard way. A site inside the
+                   coastal blind zone on half the passes must not be judged
+                   as though it were looked at and found empty -- the same
+                   principle as the detection rate's searched-water
+                   denominator. And a structure that is BUILT during the
+                   study year is absent before it exists: counting those
+                   earlier passes against it kept a whole wind farm under
+                   construction in the candidate list, where it produced a
+                   4x "concentration" 1-5 nm outside the contiguous zone
+                   that was really 85 monopiles going in off Virginia Beach
+                   between September and December 2024.
   never matched    an anchorage is also "always occupied", but by DIFFERENT
                    vessels, and those report themselves. A site where AIS
                    ever explained a detection is traffic, not furniture --
@@ -88,13 +96,36 @@ class Site:
         return len(self.dates)
 
     @property
+    def first_seen(self) -> str | None:
+        return min(self.dates) if self.dates else None
+
+    @property
     def n_searched(self) -> int:
         # A date it was detected on was, by construction, searched -- even if
         # the searched grid disagrees at the cell edge.
         return len(self.searched_dates | self.dates)
 
     @property
+    def n_searched_since_first(self) -> int:
+        """Passes that searched here on or after it was first seen.
+
+        The denominator for a thing that may not have existed all year. See
+        MIN_FRACTION in the module docstring.
+        """
+        first = self.first_seen
+        if first is None:
+            return 0
+        return len({d for d in (self.searched_dates | self.dates) if d >= first})
+
+    @property
     def hit_fraction(self) -> float:
+        n = self.n_searched_since_first
+        return self.n_dates / n if n else float("nan")
+
+    @property
+    def hit_fraction_all_passes(self) -> float:
+        """The old, stricter reading. Kept because the gap between the two
+        is exactly the signature of something that was built mid-year."""
         return self.n_dates / self.n_searched if self.n_searched else float("nan")
 
     @property
@@ -111,6 +142,9 @@ class Site:
         if self.ever_matched:
             return "traffic (AIS explained it at least once)"
         if self.is_fixed(**kw):
+            if (self.n_searched_since_first < self.n_searched
+                    and self.hit_fraction_all_passes < 0.5):
+                return "fixed structure (appeared during the year)"
             return "fixed structure"
         if self.n_dates >= 2:
             return "repeat, not yet fixed"
@@ -126,6 +160,8 @@ class Site:
                 "n_dates_seen": self.n_dates,
                 "n_dates_searched": self.n_searched,
                 "hit_fraction": round(self.hit_fraction, 3),
+                "n_searched_since_first": self.n_searched_since_first,
+                "first_seen": self.first_seen,
                 "dates": sorted(self.dates),
                 "ever_matched": self.ever_matched,
                 "max_snr": round(self.max_snr, 1),

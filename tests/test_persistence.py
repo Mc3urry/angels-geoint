@@ -149,3 +149,53 @@ def test_the_thresholds_are_stated_constants() -> None:
 
 def test_an_empty_site_has_no_rate_rather_than_a_zero() -> None:
     assert math.isnan(Site(lon=0, lat=0).hit_fraction)
+
+
+# -- things that get built halfway through the year --------------------------
+
+def test_a_structure_built_mid_year_is_still_fixed() -> None:
+    """THE WIND FARM. 85 monopiles went in off Virginia Beach between
+    September and December 2024. Judged against all twelve passes they look
+    like a 4-of-12 site and stay in the candidate list, where they produced
+    a 'concentration' 1-5 nm outside the contiguous zone."""
+    ix = SiteIndex()
+    year = [f"2024-{m:02d}-15" for m in range(1, 13)]
+    for d in year[8:]:                      # first seen in September
+        ix.add(-75.44, 36.90, d, snr=90)
+    for d in year:
+        ix.mark_searched(d, lambda lon, lat: True)
+    s = ix.sites[0]
+    assert s.first_seen == year[8]
+    assert s.n_dates == 4 and s.n_searched == 12
+    assert s.n_searched_since_first == 4
+    assert s.hit_fraction == pytest.approx(1.0)
+    assert s.hit_fraction_all_passes == pytest.approx(4 / 12)
+    assert s.is_fixed()
+    assert "appeared during the year" in s.verdict()
+
+
+def test_a_site_seen_early_and_never_again_is_not_fixed() -> None:
+    """The mirror case: the denominator must not be shrunk to whatever
+    window happens to contain the sightings."""
+    ix = SiteIndex()
+    year = [f"2024-{m:02d}-15" for m in range(1, 13)]
+    for d in year[:3]:
+        ix.add(-75.44, 36.90, d)
+    for d in year:
+        ix.mark_searched(d, lambda lon, lat: True)
+    s = ix.sites[0]
+    assert s.n_searched_since_first == 12
+    assert s.hit_fraction == pytest.approx(0.25)
+    assert not s.is_fixed()
+
+
+def test_the_two_fractions_agree_for_something_there_all_along() -> None:
+    ix = SiteIndex()
+    year = [f"2024-{m:02d}-15" for m in range(1, 13)]
+    for d in year:
+        ix.add(-75.44, 36.90, d)
+    for d in year:
+        ix.mark_searched(d, lambda lon, lat: True)
+    s = ix.sites[0]
+    assert s.hit_fraction == s.hit_fraction_all_passes == 1.0
+    assert s.verdict() == "fixed structure"

@@ -138,8 +138,19 @@ class WaterMask:
                                # split failed and texture had to decide
     released: int = 0          # small isolated "land" blobs returned to water
                                # -- ships, mostly; see MAX_TARGET_CELLS
+    # Where the land/water split came from. A mask cut from a pooled shoreline
+    # has no threshold, no contrast and no released targets of its own -- it
+    # never looked at this scene's histogram -- and printing those fields as
+    # "contrast nanx, 0 bright offshore target(s) kept searchable" told the
+    # reader that the release step had run and found nothing, which is the
+    # opposite of what happened: it did not run at all.
+    source: str = "own histogram"
 
     def __str__(self) -> str:
+        if self.source != "own histogram":
+            return (f"{100 * self.water_fraction:.0f}% water, from the "
+                    f"{self.source} -- this scene's own histogram would not "
+                    f"split, so no contrast or target release of its own")
         if not self.bimodal:
             return ("no coast in this scene -- all water, by texture "
                     f"{self.texture:.2f} (land would exceed "

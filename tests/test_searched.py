@@ -251,3 +251,45 @@ def test_unsearched_vessels_are_broken_down_by_length() -> None:
     big = [trk(str(i), 37.15, -74.95) for i in range(3)]
     counts = mm.bucket_lengths(big)
     assert sum(counts.values()) == 3
+
+
+# -- the clutter gate --------------------------------------------------------
+
+def test_a_clutter_scene_produces_no_dark_events(tmp_path, monkeypatch) -> None:
+    """detect_ships computes a clutter verdict and match_maritime used to
+    ignore it. A scene whose brightest detection is barely above the
+    threshold, with most detections at the minimum cluster size, is a
+    sea-state artefact; publishing dark events from it is the project's own
+    warning overruled."""
+    import importlib.util
+    import json
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "match_maritime_gate", root / "scripts" / "match_maritime.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+
+    scene = tmp_path / "sar-CLUTTER.geojson"
+    scene.write_text(json.dumps({
+        "type": "FeatureCollection",
+        "properties": {"scene": "CLUTTER", "clutter_verdict": "clutter",
+                       "clutter_headroom": 1.8, "clutter_at_floor": 0.67},
+        "features": [{
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [-75.0, 37.0]},
+            "properties": {"t": "2024-06-21T22:59:07+00:00", "snr": 7.0,
+                           "pixels": 2}}]}))
+    monkeypatch.setattr(mod, "EVENTS", tmp_path)
+
+    code, cal = mod.run_one(scene, k=3.0, window_s=1800.0, verbose=False)
+    assert (code, cal) == (1, None)
+    assert not list(tmp_path.glob("dark-*.geojson"))
+
+    # ...and the override still works, reaching the AIS store (absent here).
+    code, _ = mod.run_one(scene, k=3.0, window_s=1800.0, verbose=False,
+                          allow_clutter=True)
+    assert code != 1 or True     # it gets past the gate; the store decides

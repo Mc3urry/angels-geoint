@@ -132,6 +132,65 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
   border-style: dashed;
 }
 
+/* --- the observed layer toggle ------------------------------------------ */
+/* Visually apart from #domains, and in the layer's own slate rather than the
+   ink of the live controls, so the button itself says "different evidence"
+   before anything is drawn. */
+
+#layers { display: flex; gap: 4px; margin-left: 10px; padding-left: 10px;
+          border-left: 1px solid var(--rule); }
+#layers button {
+  font: 11px var(--mono);
+  padding: 4px 11px;
+  border: 1px dashed #93a2ab;
+  background: #fff;
+  color: #2f4858;
+  border-radius: 2px;
+  cursor: pointer;
+}
+#layers button:hover { border-color: #2f4858; }
+#layers button.on { background: #2f4858; border-color: #2f4858; color: #fff; }
+
+/* --- the observed panel block ------------------------------------------- */
+
+.asof {
+  display: flex; align-items: center; gap: 7px;
+  font: 10px var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  color: #2f4858;
+  background: #eef2f4;
+  border-left: 2px solid #2f4858;
+  padding: 6px 9px; margin: 0 0 12px;
+}
+.asof .dot {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: #fff; border: 1.6px solid #2f4858;   /* hollow, like the map */
+}
+
+/* The sampling rate. A bar per length class, because a single headline rate
+   invites the reader to apply 84% to a 9 m skiff. */
+.curve { margin: 10px 0 12px; }
+.curve .row { display: grid; grid-template-columns: 58px 1fr 54px;
+              align-items: center; gap: 7px; margin: 0 0 3px; }
+.curve .lab { font: 9.5px var(--mono); color: var(--ink-3); text-align: right; }
+.curve .bar { height: 7px; background: var(--rule); border-radius: 1px;
+              overflow: hidden; }
+.curve .bar i { display: block; height: 100%; background: #2f4858; }
+.curve .bar.blind i { background: #b03a2e; }
+.curve .val { font: 9.5px var(--mono); color: var(--ink-2);
+              font-variant-numeric: tabular-nums; }
+
+/* The click-through answer. */
+.probe { margin: 14px 0 12px; padding: 10px 11px;
+         border: 1px solid var(--rule); background: #fff; }
+.probe .lt { display: block; font: 700 9.5px var(--mono); letter-spacing: .14em;
+             text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+.probe .big { font: 700 15px/1.25 system-ui, sans-serif; margin: 0 0 5px; }
+.probe .never { color: #b03a2e; }
+.probe p { margin: 0 0 5px; font: 10.5px/1.6 var(--mono); color: var(--ink-2); }
+.probe p:last-child { margin-bottom: 0; }
+.probe .hist { margin-top: 7px; border-top: 1px solid var(--rule); padding-top: 6px; }
+.probe .hist span { display: block; font: 9.5px/1.5 var(--mono); color: var(--ink-3); }
+
 /* --- the cold-start bar ------------------------------------------------- */
 
 .stat.warming .n { color: var(--ink-3); }
@@ -222,3 +281,16 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
 .vkey .dot.s { width: 5px; height: 5px; }
 .vkey .dot.l { width: 13px; height: 13px; }
 .vkey .dot.faded { opacity: .3; }
+/* Hollow on purpose, and the only hollow symbol in the interface. */
+.vkey .ring { width: 11px; height: 11px; border-radius: 50%;
+  border: 1.8px solid #2f4858; background: transparent;
+  display: flex; align-items: center; justify-content: center; }
+.vkey .ring::after { content: "+"; font: 700 8px var(--mono); color: #2f4858;
+  line-height: 1; }
+.vkey .ring.faint { border-color: #6f7c83; border-width: 1.2px; opacity: .8; }
+.vkey .ring.faint::after { content: ""; }
+
+.curve .lt { display: block; font: 10px var(--mono); letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 7px;
+  line-height: 1.5; }
+.curve .val small { font-size: 8.5px; color: var(--ink-3); }

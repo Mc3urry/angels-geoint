@@ -24,6 +24,9 @@ import { addLive, startLive, liveInfo, setVisible as setAirVisible, POLL_MS }
 import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
          setGroups, GROUPS, SUBTYPE_LABEL, HULL_PATH }
   from "./views/vessels.js";
+import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
+         setVisible as setObsVisible, coverageAt, coverageSummary }
+  from "./views/discrepancy.js";
 
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 const AOI_AIR = [-77.7, 38.3, -76.0, 39.6];
@@ -43,6 +46,10 @@ const el = (id) => document.getElementById(id);
 let trailHours = 2;
 const on = { air: true, sea: false };
 let groupFilter = null;             // null = every vessel group
+let observed = false;               // the SAR discrepancy layer
+let probe = null;                   // the last /coverage answer, or null
+let probeBusy = false;
+let covSummary = null;
 
 function relTime(ms) {
   if (ms === null) return null;
@@ -209,6 +216,195 @@ function vesselLegend(counts, showCounts) {
     </div>`;
 }
 
+// --- the observed block ---------------------------------------------------
+//
+// The rule for this block: NO NUMBER WITHOUT ITS SAMPLING RATE, and no
+// position without its date. A count of 1,150 candidates printed on its own
+// is read as a census of dark vessels. It is a sample of unexplained returns,
+// taken by a sensor that finds 93% of ships over 100 m and 4% of boats under
+// 15 m, on days spread twelve days apart. The curve and the as-of line are
+// therefore part of the count, not a footnote to it.
+
+const pct = (r) => (r == null ? "—" : `${Math.round(100 * r)}%`);
+
+function dayAge(iso) {
+  if (!iso) return null;
+  return (Date.now() - Date.parse(`${iso}T00:00:00Z`)) / 86400000;
+}
+
+// The detectability curve, drawn. Classes at or below the detectable length
+// are marked: those are the sizes where absence means nothing.
+function curveBlock(dr) {
+  if (!dr || !dr.curve) return "";
+  const order = ["0-15 m", "15-25 m", "25-50 m", "50-100 m", ">100 m"];
+  const rows = order.filter((k) => dr.curve[k] && dr.curve[k].scored)
+    .map((k) => {
+      const r = dr.curve[k];
+      const blind = r.rate != null && r.rate < 0.5;
+      return `<div class="row">
+          <span class="lab">${k}</span>
+          <span class="bar ${blind ? "blind" : ""}"><i style="width:${
+            Math.round(100 * (r.rate ?? 0))}%"></i></span>
+          <span class="val">${pct(r.rate)} <small>n=${r.scored}</small></span>
+        </div>`;
+    }).join("");
+  if (!rows) return "";
+  const un = dr.curve.unknown;
+  return `
+    <div class="curve">
+      <span class="lt">Sampling rate &middot; share of AIS-reporting vessels
+        this detector actually found</span>
+      ${rows}
+    </div>
+    <p class="meta">Measured on ${dr.n_passes} pass${dr.n_passes === 1 ? "" : "es"},
+      in the same searched water, against vessels that reported a length.
+      Red bars are sizes this sensor misses more often than it finds:
+      <strong>at those lengths, nothing detected is not evidence of nothing
+      there</strong>.${un && un.scored ? ` ${un.scored} vessels never declared
+      a length and are binned apart, not assumed.` : ""}</p>`;
+}
+
+function observedBlock() {
+  const info = discrepancyInfo();
+  if (info.error) {
+    const e = info.error;
+    return `
+      <div class="asof"><span class="dot"></span>Observed layer unavailable</div>
+      <p class="meta">${e.detail || e.message}</p>
+      <p class="empty">${e.status === 404
+        ? "This is a missing product, not an empty sea. The layer appears once the detection and scoring scripts have run."
+        : "The API answered, but not with candidates."}</p>`;
+  }
+  if (!info.loaded || !info.meta) {
+    return `<div class="asof"><span class="dot"></span>Observed &middot; loading</div>`;
+  }
+
+  const m = info.meta;
+  const age = dayAge(m.as_of);
+  const rc = m.reception_counts || {};
+  const withheld = ["intermittent", "thin", "unheard"]
+    .reduce((a, k) => a + (rc[k] || 0), 0);
+  const nSites = info.siteMeta?.n ?? null;
+
+  return `
+    <!-- Its OWN timestamp, not the map's. The live bar above says seconds;
+         this says months, and both are true at once. -->
+    <div class="asof">
+      <span class="dot"></span>
+      Observed &middot; as of ${m.as_of || "unknown"}${
+        age != null ? ` &middot; ${Math.round(age)} days old` : ""}
+    </div>
+
+    <div class="stat"><span class="n">${(m.n ?? 0).toLocaleString()}</span>
+      <span class="l">Unexplained returns${
+        m.reception_filter === "all" ? "" : " &middot; in water AIS reaches"}</span></div>
+
+    ${curveBlock(m.detection_rate)}
+
+    <p class="meta">
+      ${m.n_total != null && m.n_total !== m.n
+        ? `${m.n.toLocaleString()} of ${m.n_total.toLocaleString()} shown. ` : ""}
+      ${withheld ? `${withheld.toLocaleString()} more sit in water where AIS
+        reception is intermittent, thin or absent. They are excluded rather
+        than counted: there, "no report" may mean nobody was listening, which
+        is not the same claim as "somebody was not reporting".` : ""}
+      ${m.dates?.length ? `<br>${m.dates.length} pass date${
+        m.dates.length === 1 ? "" : "s"}, ${m.dates[0]} to ${
+        m.dates[m.dates.length - 1]}. Sentinel-1 revisits this water about
+        every ${m.revisit_days || 12} days, so between any two of them there
+        is no observation at all.` : ""}
+    </p>
+
+    ${nSites != null ? `<p class="meta">${nSites.toLocaleString()} fixed
+      structures drawn in grey &mdash; turbines, platforms, bridge islands.
+      They were <strong>removed</strong> from the count above; they are shown
+      so the removal can be checked rather than taken on trust.</p>` : ""}
+
+    ${m.detection_rate?.expected_chance_matches
+      ? `<p class="meta">About
+         ${m.detection_rate.expected_chance_matches.toFixed(1)} of the AIS
+         matches behind that rate could be coincidence at these densities.</p>`
+      : ""}
+
+    <div class="legend">
+      <span class="lt">Observed symbols</span>
+      <div class="vkey">
+        <span class="k"><i class="ring"></i></span>
+        <span>Unexplained return &mdash; hollow, because a ring is a
+        measurement, not a ship</span>
+        <span class="k"><i class="ring faint"></i></span>
+        <span>Fixed structure, already subtracted</span>
+      </div>
+    </div>
+
+    <p class="empty">Click any water to ask when the radar last looked
+      there.</p>
+
+    ${probeBlock()}`;
+}
+
+// --- the click-through answer --------------------------------------------
+//
+// "Nothing here" on a map has two completely different meanings -- searched
+// and empty, or never searched -- and they are drawn identically. This is the
+// only control in the interface that can tell them apart, which is why the
+// panel points at it in words rather than waiting to be discovered.
+
+function probeBlock() {
+  if (probeBusy) {
+    return `<div class="probe"><span class="lt">This point</span>
+      <p>asking&hellip;</p></div>`;
+  }
+  if (!probe) return "";
+  const p = probe.last;
+  const dm = `${probe.lat.toFixed(3)}, ${probe.lon.toFixed(3)}`;
+
+  if (!p) {
+    return `
+      <div class="probe">
+        <span class="lt">This point &middot; ${dm}</span>
+        <p class="big never">Never searched</p>
+        <p>${probe.note}</p>
+        <p>${probe.n_passes_on_disk} pass${
+          probe.n_passes_on_disk === 1 ? "" : "es"} on disk; none of them
+          covered this cell. Empty water here is an untested claim, not a
+          negative result.</p>
+      </div>`;
+  }
+
+  const hist = (probe.history || []).slice(1);
+  return `
+    <div class="probe">
+      <span class="lt">This point &middot; ${dm}</span>
+      <p class="big">Last searched ${p.acquired.replace("T", " ").slice(0, 16)} UTC</p>
+      <p>${Math.round(p.age_days)} days ago &middot; ${p.scene}<br>
+        ${p.status === "searched"
+          ? `this cell was examined in full (${pct(p.searched_fraction)} of it)`
+          : `only ${pct(p.searched_fraction)} of this cell was examined &mdash;
+             part-searched shoreline, reported but never counted`}${
+        p.mask_source === "fallback"
+          ? "<br>water mask from the pooled shoreline, not this scene's own contrast"
+          : ""}</p>
+      <p>Anything that arrived since is unobserved by construction.</p>
+      ${hist.length ? `<div class="hist">${hist.map((h) =>
+        `<span>${h.acquired.slice(0, 10)} &middot; ${Math.round(h.age_days)} d
+          &middot; ${h.status}</span>`).join("")}</div>` : ""}
+    </div>`;
+}
+
+async function askCoverage(lngLat) {
+  probeBusy = true;
+  renderStatus();
+  try {
+    probe = await coverageAt(lngLat.lng, lngLat.lat);
+  } catch (e) {
+    probe = null;
+  } finally {
+    probeBusy = false;
+    renderStatus();
+  }
+}
+
 // --- the sea block --------------------------------------------------------
 
 function seaBlock() {
@@ -284,7 +480,12 @@ const errors = { air: null, sea: null };
 function renderStatus() {
   const active = Object.keys(on).filter((d) => on[d]);
   const failing = active.filter((d) => errors[d]);
-  if (active.length && failing.length === active.length) {
+  // A dead live feed must not blank the observed layer. They are independent
+  // evidence from independent sources: OpenSky being out of credits says
+  // nothing about what Sentinel-1 saw in June, and a full-page "cannot reach
+  // the API" over a working archive would be the panel lying about what it
+  // knows.
+  if (active.length && failing.length === active.length && !observed) {
     el("panel").innerHTML = errorPanel(errors[failing[0]]);
     return;
   }
@@ -299,7 +500,9 @@ function renderStatus() {
   el("panel").innerHTML = `
     <div class="livebar ${fresh ? "on" : "off"}">
       <span class="dot"></span>
-      ${ageMs === null ? "Connecting…" : `Live &middot; ${relTime(ageMs)}`}
+      ${failing.length === active.length && active.length
+        ? "Live feeds down &mdash; the observed layer below is unaffected"
+        : ageMs === null ? "Connecting…" : `Live &middot; ${relTime(ageMs)}`}
     </div>
     ${failing.map((d) => `<p class="err">${d === "air" ? "Air" : "Sea"} feed
       failed: ${errors[d].detail || errors[d].message || "unreachable"}.
@@ -316,6 +519,8 @@ function renderStatus() {
       <span class="l">Aircraft airborne</span></div>` : ""}
 
     ${on.sea ? seaBlock() : ""}
+
+    ${observed ? observedBlock() : ""}
 
     ${on.air ? `<div class="stat"><span class="n">${trails?.properties.n_tracks ?? "—"}</span>
       <span class="l">Trails &middot; last ${trailHours}h</span></div>` : ""}
@@ -339,11 +544,28 @@ function renderStatus() {
          reality, and that confusion is the thing this project exists to
          take apart. -->
     <div class="evidence">
-      <span class="lt">Evidence class</span>
-      <p>Cooperative reporting only. Everything here chose to broadcast.</p>
-      <p>${on.sea
+      <span class="lt">Evidence class${observed ? "es \u00b7 two, mixed" : ""}</span>
+      <p>${observed ? "<strong>Cooperative</strong> \u2014 filled symbols. " : ""}Cooperative reporting${
+        observed ? ":" : " only."} everything ${observed ? "filled" : "here"} chose to
+        broadcast, current to seconds.</p>
+      ${observed ? `<p><strong>Observed</strong> &mdash; hollow rings.
+        Sentinel-1 radar returns no AIS report explained, from passes
+        <em>${covSummary?.newest_age_days != null
+          ? Math.round(covSummary.newest_age_days) + " to "
+            + Math.round(covSummary.oldest_age_days ?? covSummary.newest_age_days)
+            + " days old"
+          : "hours to days old"}</em>, about
+        ${covSummary?.revisit_days ?? 12} days apart. The two layers are on
+        one map and are <em>not</em> one picture: a ring beside no ship is a
+        discrepancy from a past moment, not a vessel that is there now.</p>
+      <p>A ring is a candidate, not a confirmed dark vessel. It carries the
+        detector's residual false-alarm rate and the sampling rate above.</p>`
+      : `<p>${on.sea
         ? "Independent observation of vessels exists (Sentinel-1 SAR) but is retrospective \u2014 hours to days late, twelve days between revisits. A vessel missing from this map is <em>not</em> a dark vessel."
-        : "No independent observation channel for aircraft is available to civilians; six sources were tested and none returned MLAT. Anomalies in this domain are found inside the cooperative record, not by subtracting an observation from it."}</p>
+        : "No independent observation channel for aircraft is available to civilians; six sources were tested and none returned MLAT. Anomalies in this domain are found inside the cooperative record, not by subtracting an observation from it."}</p>`}
+      ${observed ? "" : `<p>Switch on <em>Observed &middot; SAR</em> to see
+        what independent observation found, and to ask any point when it was
+        last looked at.</p>`}
     </div>
 
     ${on.air && trails && !trails.features.length ? `<p class="empty">
@@ -403,11 +625,34 @@ async function loadTrails() {
   renderStatus();
 }
 
+async function setObserved(want) {
+  observed = want;
+  setObsVisible(map, want);
+  if (!want) { probe = null; renderStatus(); return; }
+  map.fitBounds(AOI_SEA, { padding: 40, duration: 900 });
+  renderStatus();                       // show "loading" before the wait
+  if (!discrepancyInfo().loaded) {
+    covSummary = covSummary || await coverageSummary();
+    await loadDiscrepancy(map);
+  }
+  renderStatus();
+}
+
 map.on("load", async () => {
   addTracks(map, { type: "FeatureCollection", features: [] });
+  addDiscrepancy(map);   // under the live layers: a past return must never
+                         // draw over a vessel reporting now
   addLive(map);       // added after tracks so aircraft draw above the trails
   addVessels(map);
   setSeaVisible(map, false);
+
+  // The probe is armed only while the observed layer is on. Clicking water on
+  // a purely cooperative map and being told about radar coverage would be an
+  // answer to a question the view was not asking.
+  map.on("click", (e) => {
+    if (!observed) return;
+    askCoverage(e.lngLat);
+  });
 
   startLive(map,
     (data) => { errors.air = null; live = data; renderStatus(); },
@@ -430,6 +675,14 @@ map.on("load", async () => {
       if (!want && Object.values(on).filter(Boolean).length === 1) return;
       b.classList.toggle("on", want);
       setDomain(b.dataset.domain, want);
+    };
+  });
+
+  document.querySelectorAll("#layers button").forEach((b) => {
+    b.onclick = () => {
+      const want = !b.classList.contains("on");
+      b.classList.toggle("on", want);
+      setObserved(want);
     };
   });
 

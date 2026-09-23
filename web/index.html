@@ -22,6 +22,15 @@
               title="Transit and public-fleet GTFS-Realtime. Scoped, not yet built.">Land</button>
     </div>
 
+    <!-- The other evidence class, kept in its own control rather than
+         alongside Air/Sea. Air and Sea are DOMAINS of the same cooperative
+         feed; this is a different kind of knowing, and putting it in the same
+         row of buttons would say the opposite. -->
+    <div id="layers">
+      <button data-layer="observed"
+              title="Sentinel-1 radar returns no AIS report explained. Retrospective: hours to days old, twelve days between passes.">Observed &middot; SAR</button>
+    </div>
+
     <div id="range">
       <button data-hours="1">1h</button>
       <button data-hours="2" class="on">2h</button>

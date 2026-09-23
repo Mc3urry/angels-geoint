@@ -30,3 +30,7 @@ data/**
 # Models
 *.pkl
 *.joblib
+
+# Staging for deletion. The sandbox that writes into this repo cannot delete
+# files, so anything on its way out is moved here instead. Never commit it.
+_to_delete/

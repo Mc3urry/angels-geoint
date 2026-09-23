@@ -203,11 +203,29 @@ def _scene_date(path: Path) -> date | None:
         return None
 
 
+COASTLINE = RAW.parent / "reference" / "coastline" / "shoreline.json"
+
+
+def load_coastline():
+    """The pooled shoreline, or None when there is not one yet."""
+    from angels.adapters.maritime.coastline import LandGrid
+
+    if not COASTLINE.exists():
+        return None
+    try:
+        return LandGrid.from_json(json.loads(
+            COASTLINE.read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        return None
+
+
 def detect_scene(zpath: Path, *, k: float, max_tiles: int | None,
                  mask_land: bool, verbose: bool) -> tuple[list[Observation], dict]:
     import numpy as np
     import rasterio
     from rasterio.windows import Window
+
+    fallback_mask = False
 
     member = vv_member(zpath)
     t = acquired_at(zpath.name)
@@ -232,8 +250,25 @@ def detect_scene(zpath: Path, *, k: float, max_tiles: int | None,
         except water.MaskError as exc:
             # Refused, not crashed. The message says which of the two
             # ambiguous cases this might be and what to do about each.
+            #
+            # THEN TRY THE SHORELINE MEASURED ON OTHER PASSES. The refusals
+            # are not random: they happen when wind brightens the sea until
+            # Otsu cannot split it, so the coverage that disappears is the
+            # coverage on rough days. The orbit retraces the same ground
+            # every twelve days, so a mask measured where the split worked
+            # describes the same coastline. See adapters/maritime/coastline.
             print(f"\n  WATER MASK REFUSED\n  {exc}\n")
-            raise
+            grid = load_coastline()
+            if grid is None:
+                print("  No fallback shoreline. Build one with "
+                      "scripts/build_coastline.py once some scenes have "
+                      "worked.\n")
+                raise
+            mask = grid.mask_for(loc, src.width, src.height)
+            print(f"  water        FALLBACK shoreline: {grid}")
+            print(f"               {100 * mask.water_fraction:.0f}% of this "
+                  f"scene is searchable under it")
+            fallback_mask = True
         if mask is None:
             print("  water        NOT MASKED -- land produces detections by "
                   "the million")
@@ -447,6 +482,11 @@ def detect_scene(zpath: Path, *, k: float, max_tiles: int | None,
         "tiles_skipped": skipped,
         "k_sigma": k,
         "land_masked": mask_land,
+        # Which shoreline this scene was masked with. A pass that fell back
+        # is still searchable, but it is not the same measurement as one
+        # whose own histogram split, and a reader must be able to tell.
+        "mask_source": ("fallback shoreline" if fallback_mask
+                        else "own histogram" if mask_land else "none"),
         "water_fraction": round(mask.water_fraction, 3) if mask else 1.0,
         "land_sea_contrast": round(mask.contrast, 2) if mask else None,
         "coast_blind_m": cfar.BACKGROUND / 2 * 10.0 if mask else 0.0,
@@ -524,6 +564,10 @@ def main() -> int:
 
     EVENTS.mkdir(parents=True, exist_ok=True)
     total = 0
+    # Scenes that actually searched water, as opposed to scenes handed in.
+    # "N observations across 4 scenes" when one of the four was refused
+    # reports coverage that did not happen.
+    searched_scenes = 0
 
     for zpath in scenes:
         try:
@@ -604,8 +648,11 @@ def main() -> int:
             }, indent=1), encoding="utf-8")
             print(f"\n  wrote {out}")
         total += len(obs)
+        searched_scenes += 1
 
-    print(f"\n  {total} observations across {len(scenes)} scene(s).")
+    print(f"\n  {total} observations across {searched_scenes} of "
+          f"{len(scenes)} scene(s) -- the rest were refused and searched "
+          f"nothing.")
     print("  Next: matching.py -- pair these against AIS at the same instant.")
     print("  A detection with no AIS partner is a dark vessel.\n")
     return 0

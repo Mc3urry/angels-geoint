@@ -228,7 +228,8 @@ def bucket_lengths(tracks) -> dict:
 
 
 def run_one(path: Path, *, k: float, window_s: float, verbose: bool,
-            min_snr: float = 0.0, min_pixels: int = 0
+            min_snr: float = 0.0, min_pixels: int = 0,
+            allow_clutter: bool = False
             ) -> tuple[int, "calibration.Calibration | None"]:
     """Match one scene. Returns (exit code, the scene's calibration or None
     when the scene could not be scored).
@@ -239,6 +240,29 @@ def run_one(path: Path, *, k: float, window_s: float, verbose: bool,
     """
     obs, meta = read_detections(path)
     n_raw = len(obs)
+
+    # THE DETECTOR ALREADY SAID THESE ARE NOT SHIPS.
+    #
+    # detect_ships.py computes a clutter verdict per scene from the SNR
+    # distribution -- headroom and the share of detections at the minimum
+    # cluster size -- and a "clutter" verdict means the brightest thing in
+    # the scene is barely above the threshold and most detections are the
+    # smallest the detector will accept. That is a sea-state artefact, and
+    # every unmatched detection in such a scene is one too. Computing that
+    # verdict and then publishing dark events from the scene anyway is the
+    # project's own warning ignored.
+    if meta.get("clutter_verdict") == "clutter" and not allow_clutter:
+        print(f"\n  {meta.get('scene', path.stem)[:58]}")
+        print(f"  REFUSED: the detector's own clutter check failed on this "
+              f"scene")
+        print(f"  (brightest {meta.get('clutter_headroom', 0):.1f}x the "
+              f"threshold, {100 * meta.get('clutter_at_floor', 0):.0f}% at "
+              f"the minimum cluster size).")
+        print("  No dark events from a scene whose detections are a clutter "
+              "tail.")
+        print("  Override with --allow-clutter if you are inspecting it "
+              "deliberately.\n")
+        return 1, None
     if min_snr or min_pixels:
         obs = [o for o in obs if o.attributes.get("snr", 0) >= min_snr
                and o.attributes.get("pixels", 0) >= min_pixels]
@@ -456,6 +480,13 @@ def print_calibration(cal, *, pooled: bool = False) -> None:
         else:
             print(f"                 ({cal.n_unscorable_matched} of them "
                   f"'matched')")
+    curve = calibration.format_curve(cal, indent="    ")
+    if len(curve) > 1:
+        print()
+        print("  what this sensor can see, by reported length"
+              + (" (pooled)" if pooled else ""))
+        for line in curve:
+            print(line)
     if cal.expected_chance_matches >= 0.05:
         print(f"    about {cal.expected_chance_matches:.1f} of the scored "
               f"matches could be chance coincidences")
@@ -496,6 +527,9 @@ def main() -> int:
                          "(choose with tune_detector.py)")
     ap.add_argument("--min-pixels", type=int, default=0,
                     help="drop detections smaller than this many pixels")
+    ap.add_argument("--allow-clutter", action="store_true",
+                    help="match scenes the detector called clutter (they are "
+                         "refused by default)")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -546,7 +580,8 @@ def main() -> int:
     for f in files:
         code, cal = run_one(f, k=args.k, window_s=args.window,
                             verbose=args.verbose, min_snr=args.min_snr,
-                            min_pixels=args.min_pixels)
+                            min_pixels=args.min_pixels,
+                            allow_clutter=args.allow_clutter)
         worst = max(worst, code)
         if cal is not None:
             cals.append(cal)
