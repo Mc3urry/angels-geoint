@@ -102,3 +102,62 @@ def test_the_guard_permits_loopback_end_to_end() -> None:
             client.close()
     finally:
         server.close()
+
+
+# -- the data guard --------------------------------------------------------
+#
+# Same shape as the network guard above: the fixture decides what every other
+# test in the suite is allowed to see, so it is checked directly rather than
+# trusted. On 2026-09-24 seven tests were reading the running collectors'
+# output and reporting live vessel counts as assertion failures.
+
+def test_generated_data_paths_are_moved_out_of_the_repository() -> None:
+    import angels.config as cfg
+
+    assert not str(cfg.RAW).startswith(str(cfg.ROOT))
+    assert not str(cfg.INTERIM).startswith(str(cfg.ROOT))
+    assert not str(cfg.LIVE).startswith(str(cfg.ROOT))
+    assert not str(cfg.EVENTS).startswith(str(cfg.ROOT))
+
+
+def test_checked_in_reference_data_is_left_alone() -> None:
+    """The line is between data a PROCESS writes and data the REPOSITORY
+    ships. Reference files are identical on every machine; reading them is
+    reading a fixture, not eavesdropping on production, and moving them
+    would break honest tests to punish a sin they did not commit."""
+    import angels.config as cfg
+
+    assert str(cfg.REFERENCE).startswith(str(cfg.ROOT))
+
+
+def test_the_guard_reaches_modules_that_copied_the_path() -> None:
+    """`from angels.config import RAW` copies the value at import time.
+
+    Patching angels.config alone would leave every route still pointing at
+    the real tree, which is the failure mode this half of the fixture
+    exists for.
+    """
+    import angels.config as cfg
+    from angels.api.routes import live, tracks
+
+    assert not str(tracks.RAW).startswith(str(cfg.ROOT))
+    assert not str(live.LIVE).startswith(str(cfg.ROOT))
+
+
+def test_a_running_collectors_snapshot_is_invisible() -> None:
+    """The precise regression. /live prefers the collector's published table
+    when it is fresh, so a visible snapshot makes the sea tests assert
+    against whatever is floating off Maryland right now."""
+    from angels.api.routes import live
+
+    assert not (live.LIVE / "maritime-live.json").exists()
+    assert not (live.LIVE / "maritime-live-conus.json").exists()
+
+
+def test_the_repository_itself_is_still_reachable() -> None:
+    """The guard must not move ROOT. The API serves web/ from there, and a
+    test that cannot find index.html would be a puzzle, not a guard."""
+    import angels.config as cfg
+
+    assert (cfg.ROOT / "web").exists()
+

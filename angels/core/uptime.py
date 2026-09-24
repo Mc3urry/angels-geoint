@@ -273,18 +273,54 @@ def _process_alive(pid: int) -> bool:
     os.kill ignores the signal and calls TerminateProcess, so the liveness
     check would kill the very process it is asking about. Windows gets
     OpenProcess + GetExitCodeProcess instead.
+
+    "COULD NOT OPEN IT" IS NOT "IT IS NOT THERE".
+
+    OpenProcess returns NULL for two unrelated reasons, and only GetLastError
+    separates them: ERROR_INVALID_PARAMETER means no such process, and
+    ERROR_ACCESS_DENIED means the process is running and we are not allowed
+    to touch it. Until 2026-09-23 both returned False.
+
+    That is not a cosmetic bug. CollectorLock.acquire() calls this to decide
+    whether a held lock is a corpse it may take over. Once the collectors ran
+    as SYSTEM -- which is the whole point of installing them as scheduled
+    tasks -- a collector started from an ordinary shell would look at the live
+    SYSTEM collector's lock, be told the process was gone, take the lock, and
+    run a SECOND collector on the same feed. Two maritime collectors write
+    every position twice, per-process dedup cannot see across them, and the
+    reception grid then reads the median inter-report gap as half what it is.
+    That is the one measurement this project cannot afford to get wrong, and
+    it licenses every dark-vessel claim downstream.
+
+    The POSIX branch below already draws this distinction -- PermissionError
+    means "exists, just not ours". Windows simply never got the same care.
     """
     if pid <= 0:
         return False
 
     if sys.platform == "win32":
         import ctypes
+
         PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
         STILL_ACTIVE = 259
-        k32 = ctypes.windll.kernel32
+        ERROR_ACCESS_DENIED = 5
+
+        # use_last_error so ctypes captures GetLastError before any of its own
+        # calls can overwrite it; restypes set because a HANDLE is pointer-
+        # sized and the default c_int would truncate it on 64-bit.
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.restype = ctypes.c_void_p
+        k32.OpenProcess.argtypes = (ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32)
+        k32.CloseHandle.argtypes = (ctypes.c_void_p,)
+        k32.GetExitCodeProcess.argtypes = (ctypes.c_void_p,
+                                           ctypes.POINTER(ctypes.c_ulong))
+
         handle = k32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
         if not handle:
-            return False
+            # Denied means it is running and out of reach. Treat it as alive:
+            # refusing to start beside a process we cannot see is the safe
+            # error, and stealing its lock is the unsafe one.
+            return ctypes.get_last_error() == ERROR_ACCESS_DENIED
         try:
             code = ctypes.c_ulong()
             ok = k32.GetExitCodeProcess(handle, ctypes.byref(code))

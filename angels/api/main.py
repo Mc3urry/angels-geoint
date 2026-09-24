@@ -1,7 +1,7 @@
 """FastAPI service. Serves the API and the front end from one process.
 
     uvicorn angels.api.main:app --reload
-    -> http://localhost:8000
+    -> http://127.0.0.1:8000
 
 One server rather than two, deliberately. The front end is a handful of static
 files, and mounting them here removes a second process to start, a second port
@@ -59,10 +59,40 @@ app.include_router(tracks.router)
 app.include_router(coverage.router)
 app.include_router(events.router)
 
+class RevalidatingStatic(StaticFiles):
+    """Static files that the browser must check before reusing.
+
+    WHY THIS EXISTS.
+
+    The front end is ES modules: index.html imports app.js, which imports
+    views/live.js and the rest. A browser will happily revalidate the page
+    and one module while serving another from its memory cache -- and then
+    app.js is the new version, live.js is yesterday's, and the page dies on
+
+        SyntaxError: the requested module './views/live.js' does not
+        provide an export named 'NATIONAL_POLL_MS'
+
+    which says a code error and means a cache error. Telling someone to press
+    Ctrl+Shift+R is a workaround that has to be remembered every time.
+
+    `no-cache` does NOT mean "do not store". It means "do not reuse without
+    asking", so the browser still keeps the file and StaticFiles still answers
+    with 304 Not Modified from the ETag it already sends. Over localhost that
+    costs a round trip of a few hundred microseconds and buys never debugging
+    a stale module again.
+    """
+
+    def file_response(self, *args, **kwargs):          # type: ignore[override]
+        resp = super().file_response(*args, **kwargs)
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
 # MOUNTED LAST, and it must stay last. StaticFiles at "/" is a catch-all --
 # anything registered after it would be shadowed and silently 404.
 # html=True serves index.html for the bare path.
-app.mount("/", StaticFiles(directory=ROOT / "web", html=True), name="web")
+app.mount("/", RevalidatingStatic(directory=ROOT / "web", html=True),
+          name="web")
 
 # PHASE 4: from angels.api.routes import analysis;  app.include_router(analysis.router)
 # PHASE 5: from angels.api.routes import forensics; app.include_router(forensics.router)

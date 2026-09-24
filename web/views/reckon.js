@@ -33,8 +33,24 @@ export function project(lat, lon, bearingDeg, distM) {
 // costs nothing and stops the harbour flickering.
 export const HORIZON_S = { air: 120, sea: 300 };
 
-export function reckonFleet(fleet, now, domain = "air") {
-  const horizon = HORIZON_S[domain] ?? 120;
+// WHEN PROJECTING IS THE WRONG ANSWER
+//
+// Dead reckoning is only honest while the guess is better than admitting we
+// do not know, and that depends entirely on how old the fix can be. The
+// DC-Baltimore box is polled every 30 s, so an aircraft has moved about 2 km
+// and the projection is close. The national box is polled every TEN MINUTES:
+// the same aircraft has moved 150 km, and a projected symbol would be a
+// confident drawing of a place it demonstrably is not -- looking exactly as
+// certain as the 30 s one.
+//
+// So the caller can turn projection off with `{ project: false }`, and each
+// feature then carries `uncertainty_m`: how far the thing could have gone
+// since it was last heard. The map draws THAT instead of a false position.
+// The server decides which mode applies (`dead_reckon` in the /live payload)
+// rather than the client inferring it from the cadence.
+export function reckonFleet(fleet, now, domain = "air", opts = {}) {
+  const horizon = opts.horizon ?? HORIZON_S[domain] ?? 120;
+  const projecting = opts.project !== false;
   return {
     type: "FeatureCollection",
     features: fleet.map((a) => {
@@ -43,13 +59,23 @@ export function reckonFleet(fleet, now, domain = "air") {
       // A vessel stopped at a berth has speed 0 and no meaningful heading.
       // Projecting it anywhere would be inventing motion, so the speed test
       // is a real test and not a null guard.
-      if (a.speed_mps > 0.5 && a.heading != null && age > 0 && age < horizon) {
+      if (projecting && a.speed_mps > 0.5 && a.heading != null
+          && age > 0 && age < horizon) {
         coords = project(a.coords[1], a.coords[0], a.heading, a.speed_mps * age);
       }
       return {
         type: "Feature",
         geometry: { type: "Point", coordinates: coords },
-        properties: { ...a.props, stale: age > horizon },
+        properties: {
+          ...a.props,
+          stale: age > horizon,
+          age_s: Math.max(0, Math.round(age)),
+          // Zero while projecting: the symbol is already the best estimate.
+          // Otherwise the radius of what we genuinely do not know.
+          uncertainty_m: projecting
+            ? 0
+            : Math.max(0, (a.speed_mps || 0) * Math.min(age, horizon)),
+        },
       };
     }),
   };

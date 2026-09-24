@@ -318,3 +318,54 @@ def test_release_does_not_remove_another_process_lock(tmp_path) -> None:
     }))
     CollectorLock(tmp_path, "aviation").release()
     assert (d / "aviation.lock").exists()
+
+
+def test_process_alive_never_calls_a_denied_process_dead() -> None:
+    """A process we may not open is RUNNING, not gone.
+
+    This is the distinction CollectorLock.acquire() rests on: it asks whether
+    the PID in a held lock is still alive, and takes the lock over when the
+    answer is no. Once the collectors run as SYSTEM -- which is the entire
+    point of installing them as scheduled tasks -- an ordinary shell cannot
+    open those processes. Answering "dead" there lets a second collector
+    start on the same feed, and two maritime collectors write every position
+    twice, at a zero-second interval, which the reception grid reads as a
+    feed twice as attentive as it is.
+
+    PID 4 on Windows is the System process: always running, and not openable
+    by an unprivileged caller. Whichever way this test runs -- elevated or
+    not -- the answer must be True, and before 2026-09-23 it was False in the
+    unelevated case.
+    """
+    import sys
+
+    from angels.core.uptime import _process_alive
+
+    if sys.platform != "win32":
+        # The POSIX branch has always drawn the distinction; assert it stays.
+        import os
+
+        import angels.core.uptime as uptime
+
+        def denied(pid, sig):
+            raise PermissionError(1, "Operation not permitted")
+
+        real = os.kill
+        uptime.os.kill = denied
+        try:
+            assert _process_alive(99_999) is True
+        finally:
+            uptime.os.kill = real
+        return
+
+    assert _process_alive(4) is True
+
+
+def test_process_alive_says_no_to_a_pid_that_is_really_gone() -> None:
+    """The other half. A conservative check that never says "dead" would be
+    just as useless, because every stale lock would then be permanent."""
+    from angels.core.uptime import _process_alive
+
+    assert _process_alive(0) is False
+    assert _process_alive(-1) is False
+

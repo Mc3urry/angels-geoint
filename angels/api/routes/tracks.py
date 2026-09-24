@@ -17,12 +17,61 @@ from typing import Any, Literal
 from fastapi import APIRouter, HTTPException, Query
 
 from angels.adapters.aviation.opensky import AviationAdapter
-from angels.config import AOI_AIR, AOI_SEA
+from angels.config import AOI_SEA, AOI_SEA_CONUS, AOIS, RAW
 from angels.core.models import Track
 
 router = APIRouter(tags=["tracks"])
 
-_ADAPTERS = {"air": AviationAdapter()}
+# One adapter per aviation collection footprint, because they read DIFFERENT
+# archives: the DC box polls every 30 s into "aviation", the country every
+# 10 min into "aviation-conus". The gap that splits one track from the next
+# has to follow the cadence -- 900 s is three missed polls on one and a tenth
+# of a poll on the other, and leaving it at 900 for the national archive would
+# split a transcontinental flight on every dropped poll and hand every
+# detector downstream a continent full of short broken tracks.
+_AIR_ADAPTERS = {
+    name: AviationAdapter(dataset=AOIS[name]["dataset"],
+                          max_gap_s=float(AOIS[name]["max_gap_s"]))
+    for name in ("air", "conus")
+}
+class MaritimeArchive:
+    """Tracks from the live-AIS archive the maritime collector writes.
+
+    Nothing here is new machinery: the collector writes ais.COLUMNS, one row
+    per report, so `ais.load` and `ais.to_tracks` -- the same two functions
+    the retrospective analysis runs on the MarineCadastre bulk files -- read
+    it unchanged. That was the whole point of choosing that schema.
+    """
+
+    domain = "sea"
+
+    def __init__(self, dataset: str) -> None:
+        self.dataset = dataset
+
+    def tracks(self, t_start, t_end, bbox):
+        from angels.adapters.maritime import ais
+
+        root = RAW / self.dataset
+        files = sorted(root.rglob("*.parquet"))
+        if not files:
+            # An empty archive is not an empty sea, and the difference has to
+            # survive as far as the caller. Raising here lets the route say
+            # which collector is not running instead of serving a cheerful
+            # zero tracks.
+            raise ais.AISReadError(
+                f"No live-AIS archive under {root}. The maritime collector "
+                f"writes it: python scripts/ingest_maritime.py --aoi "
+                f"{'conus' if 'conus' in self.dataset else 'sea'}")
+        return ais.to_tracks(ais.load(files, t0=t_start, t1=t_end, bbox=bbox))
+
+
+_SEA_ADAPTERS = {
+    "air": MaritimeArchive("maritime-live"),
+    "conus": MaritimeArchive("maritime-live-conus"),
+}
+_SEA_BOXES = {"air": AOI_SEA, "conus": AOI_SEA_CONUS}
+
+_ADAPTERS = {"air": _AIR_ADAPTERS["air"]}
 
 # A one-second ADS-B feed produces far more vertices than a map can show. The
 # renderer cannot tell the difference and the payload triples, so thin long
@@ -67,10 +116,11 @@ def get_tracks(
     start: datetime | None = Query(None, description="UTC ISO8601; default 2h ago"),
     end: datetime | None = Query(None, description="UTC ISO8601; default now"),
     domain: Literal["air", "sea"] = "air",
+    aoi: Literal["air", "conus"] = "air",
     min_points: int = Query(2, ge=2, description="drop tracks shorter than this"),
     limit: int = Query(500, ge=1, le=5000, description="max tracks returned"),
 ) -> dict[str, Any]:
-    adapter = _ADAPTERS.get(domain)
+    adapter = _AIR_ADAPTERS[aoi] if domain == "air" else _SEA_ADAPTERS[aoi]
     if adapter is None:
         raise HTTPException(501, f"no adapter for domain '{domain}' yet")
 
@@ -87,8 +137,15 @@ def get_tracks(
     if end <= start:
         raise HTTPException(400, "end must be after start")
 
-    bbox = AOI_AIR if domain == "air" else AOI_SEA
-    tracks = [t for t in adapter.tracks(start, end, bbox) if len(t) >= min_points]
+    bbox = tuple(AOIS[aoi]["box"]) if domain == "air" else _SEA_BOXES[aoi]
+    try:
+        found = adapter.tracks(start, end, bbox)
+    except Exception as exc:                                   # noqa: BLE001
+        # 404, not 200-with-nothing. "The collector for this water is not
+        # running" and "this water is empty" are opposite claims, and only
+        # one of them is ever true here.
+        raise HTTPException(404, str(exc)) from exc
+    tracks = [t for t in found if len(t) >= min_points]
     tracks.sort(key=lambda t: len(t), reverse=True)
     shown = tracks[:limit]
 
@@ -97,7 +154,16 @@ def get_tracks(
         "features": [track_to_feature(t) for t in shown],
         "properties": {
             "domain": domain,
-            "bbox": bbox,
+            "aoi": aoi if domain == "air" else None,
+            "label": (AOIS[aoi]["label"] if domain == "air"
+                      else ("US waters" if aoi == "conus"
+                            else "Chesapeake-Delaware")),
+            # Live-collected, not the bulk archive. Both are the same schema
+            # and the same readers; they are months apart in latency, and a
+            # reader must not mistake one for the other.
+            "archive": ("opensky-collector" if domain == "air"
+                        else "aisstream-collector"),
+            "bbox": list(bbox),
             "start": start.isoformat(),
             "end": end.isoformat(),
             "n_tracks": len(shown),

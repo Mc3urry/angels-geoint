@@ -103,6 +103,15 @@ AOI = AOI_AIR
 AOI_CONUS = (-125.0, 24.0, -66.5, 49.5)
 """The continental United States. ~1,450 square degrees -> 4 credits/request."""
 
+# The same box for the sea. aisstream has NO quota, so the national AIS view
+# costs nothing to request -- but it is not free either, and the cost is
+# paid in a different currency: the socket delivers every message in the box,
+# so widening it multiplies the message rate and RESETS the table. A vessel
+# at anchor reports every three minutes, so after a widen the map is honestly
+# incomplete for at least that long, which is why the stream widens ONCE, on
+# demand, and never narrows again. See angels/api/routes/live.py.
+AOI_SEA_CONUS = AOI_CONUS
+
 
 # Every collection footprint, in one registry. A collector is defined by a
 # box, the archive directory it writes to, and the name its heartbeats and

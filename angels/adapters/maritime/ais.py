@@ -243,6 +243,37 @@ def row_to_report(row: dict) -> AISReport | None:
 # reading
 # --------------------------------------------------------------------------
 
+# The two live-AIS datasets OVERLAP, and that is by design.
+#
+# maritime-live covers the Chesapeake-Delaware study box; maritime-live-conus
+# covers all US waters and therefore contains the study box as well. Both are
+# collected, because each view wants a warm table of its own and re-deriving
+# the small box from the large one at read time would be slower and would
+# couple two collectors that should be able to fail independently.
+#
+# The cost is a trap: a single read spanning both counts every Chesapeake
+# vessel twice. Nothing would error. The reception grid measures coverage by
+# the MEDIAN GAP BETWEEN ONE VESSEL'S REPORTS, and duplicate positions at
+# zero-second intervals would halve it -- a feed reported as twice as
+# attentive as it is, in the one measurement that licenses every dark-vessel
+# claim. It is the same failure the per-flush dedup bug would have caused,
+# arriving by a different road.
+#
+# So it is refused here rather than written down as a rule to remember. This
+# is the function every maritime reader resolves its paths through -- the
+# clipper, the reception grid, the matcher, the tracks route -- so one guard
+# covers all of them.
+OVERLAPPING_STORES = ("maritime-live", "maritime-live-conus")
+
+
+def _store_of(path: Path) -> str | None:
+    """Which overlapping dataset a file belongs to, if any."""
+    for part in path.parts:
+        if part in OVERLAPPING_STORES:
+            return part
+    return None
+
+
 def _parquet_files(paths) -> list[Path]:
     """Every ais.parquet under the given files, globs or directories."""
     if isinstance(paths, (str, Path)):
@@ -256,6 +287,17 @@ def _parquet_files(paths) -> list[Path]:
             out.extend(sorted(Path().glob(str(p))))
         elif p.suffix == ".parquet":
             out.append(p)
+
+    stores = {s for s in (_store_of(f) for f in out) if s}
+    if len(stores) > 1:
+        raise AISReadError(
+            "This read spans " + " and ".join(sorted(stores)) + ", which "
+            "overlap: maritime-live-conus contains the whole of "
+            "maritime-live's box. Every vessel in the study area would be "
+            "counted twice, at a zero-second interval, and the reception "
+            "grid would read the median reporting gap as half what it is. "
+            "Read one store or the other -- maritime-live-conus already "
+            "covers the study box.")
     return out
 
 

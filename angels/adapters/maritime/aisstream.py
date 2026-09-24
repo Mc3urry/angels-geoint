@@ -407,7 +407,17 @@ class Stream:
         while True:
             try:
                 async with websockets.connect(
-                        ENDPOINT, ping_interval=20, max_size=2 ** 20) as ws:
+                        ENDPOINT, ping_interval=20, max_size=2 ** 20,
+                        # EXPLICIT, not left to the library default. From
+                        # September 2026 aisstream applies per-user bandwidth
+                        # limits to UNCOMPRESSED connections and DROPS the
+                        # messages that exceed them -- and a dropped position
+                        # is indistinguishable, downstream, from a vessel
+                        # that stopped transmitting. That is the one artefact
+                        # this project must never manufacture, and it would
+                        # arrive silently, so the negotiation is stated here
+                        # rather than inherited.
+                        compression="deflate") as ws:
                     await asyncio.wait_for(ws.send(self._subscription()),
                                            timeout=SUBSCRIBE_DEADLINE_S)
                     self._connected = True

@@ -7,15 +7,21 @@
 
 // Same origin when uvicorn serves this page (port 8000), absolute when
 // something else does -- so the old two-server setup keeps working.
+import { attachHover, card, crowd, pinHint } from "./popup.js";
+
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 
-export async function fetchTracks({ hours = 2, domain = "air", limit = 500 } = {}) {
+export async function fetchTracks({ hours = 2, domain = "air", aoi = "air",
+                                    limit = 500 } = {}) {
   const end = new Date();
   const start = new Date(end.getTime() - hours * 3600 * 1000);
   const qs = new URLSearchParams({
     start: start.toISOString(),
     end: end.toISOString(),
     domain,
+    // Which archive. The two air collectors write separate ones at
+    // completely different cadences; see the route.
+    aoi,
     limit: String(limit),
   });
   const r = await fetch(`${API}/tracks?${qs}`);
@@ -73,26 +79,11 @@ export function addTracks(map, data) {
     paint: { "line-width": 12, "line-opacity": 0 },
   });
 
-  const popup = new maplibregl.Popup({
-    closeButton: false, closeOnClick: false, className: "track-popup",
-  });
-
-  map.on("mousemove", "tracks-hit", (e) => {
-    map.getCanvas().style.cursor = "crosshair";
-    const p = e.features[0].properties;
-    const mins = Math.round(p.duration_s / 60);
-    const straightness = p.path_km > 0 ? (p.net_km / p.path_km) : 1;
-    popup.setLngLat(e.lngLat).setHTML(`
-      <strong>${p.platform_id}</strong><br>
-      ${p.n_reports} reports over ${mins} min<br>
-      ${p.path_km} km flown, ${p.net_km} km net<br>
-      straightness ${straightness.toFixed(2)}
-    `).addTo(map);
-  });
-
-  map.on("mouseleave", "tracks-hit", () => {
-    map.getCanvas().style.cursor = "";
-    popup.remove();
+  attachHover(map, {
+    layers: ["tracks-hit"],
+    key: (p) => p.platform_id ?? null,
+    cursor: "crosshair",
+    html: trackCard,
   });
 }
 
@@ -101,3 +92,47 @@ export function addTracks(map, data) {
 // that went a long way without getting anywhere. That second case is what
 // core/detectors/orbits.py will look for in Phase 2, so eyeballing it now
 // tells you whether the signal is even present in your box.
+
+// --- the archive track card -----------------------------------------------
+//
+// Not a position: a whole recorded path, which is a different kind of object
+// and should not be hovered in the same words as a live contact. The card
+// says so in its subline rather than leaving the reader to notice that this
+// one has no age on it.
+
+// STRAIGHTNESS IS THE ONE NUMBER HERE THAT IS AN INFERENCE, so it is the one
+// that gets translated. Net displacement over path length: near 1.0 is a
+// transit, near 0 is something that went a long way without getting
+// anywhere. The second case is what core/detectors/orbits.py will look for,
+// and reading it off a hover card tells you whether the signal is even
+// present in your box before a line of that detector is written.
+function shape(r) {
+  if (r >= 0.9) return "a straight transit";
+  if (r >= 0.6) return "a transit with manoeuvring";
+  if (r >= 0.3) return "wandering \u2014 went far, got nowhere";
+  return "orbiting or loitering";
+}
+
+export function trackCard(p, { others = 0, pinnable = false } = {}) {
+  const mins = p.duration_s != null ? Math.round(p.duration_s / 60) : null;
+  const r = p.path_km > 0 ? p.net_km / p.path_km : 1;
+
+  return card({
+    title: p.platform_id ?? "track",
+    sub: "Recorded path \u2014 archive, not a live position",
+    foot: [crowd(others)],
+    rows: [
+      ["Duration", mins != null
+        ? `${mins}&nbsp;min <span class="dim">(${p.n_reports} reports)</span>` : null],
+      ["Distance", p.path_km != null
+        ? `${p.path_km}&nbsp;km flown <span class="dim">(${p.net_km}&nbsp;km net)</span>`
+        : null],
+      ["Straightness", p.path_km > 0
+        ? `${r.toFixed(2)} <span class="dim">&middot; ${shape(r)}</span>` : null],
+    ],
+    evidence: `<b>Cooperative.</b> Every fix in this path was broadcast by
+      the platform itself, and the gaps between them are gaps in what it
+      chose to send \u2014 not in where it went.`,
+    hint: pinHint(pinnable),
+  });
+}

@@ -26,6 +26,8 @@
 // take on trust; a wind farm visible as furniture is a removal the reader can
 // check.
 
+import { attachHover, card, crowd, esc, pinHint } from "./popup.js";
+
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 
 const CAND = "#2f4858";          // slate. Not a vessel group, not the ramp.
@@ -137,39 +139,15 @@ export function addDiscrepancy(map) {
     paint: { "icon-opacity": 0.85 },
   });
 
-  const popup = new maplibregl.Popup({
-    closeButton: false, closeOnClick: false, className: "track-popup",
-  });
-
-  map.on("mousemove", "cand-ring", (e) => {
-    map.getCanvas().style.cursor = "help";
-    const p = e.features[0].properties;
-    const age = p.age_days != null ? `${Math.round(p.age_days)} days ago` : "";
-    popup.setLngLat(e.lngLat).setHTML(`
-      <strong>Unexplained return</strong><br>
-      ${p.date || "date unknown"}${age ? ` &middot; ${age}` : ""}<br>
-      SNR ${Number(p.snr ?? 0).toFixed(0)} &middot; ${p.pixels ?? "?"} px<br>
-      AIS here: ${p.reception || "not measured"}<br>
-      <em>observed, retrospective &mdash; not a confirmed vessel</em>
-    `).addTo(map);
-  });
-  map.on("mouseleave", "cand-ring", () => {
-    map.getCanvas().style.cursor = "";
-    popup.remove();
-  });
-
-  map.on("mousemove", "sites-dot", (e) => {
-    map.getCanvas().style.cursor = "help";
-    const p = e.features[0].properties;
-    popup.setLngLat(e.lngLat).setHTML(`
-      <strong>Fixed structure</strong><br>
-      seen on ${p.n_dates ?? "?"} pass dates, never AIS-matched<br>
-      <em>removed from the candidate list</em>
-    `).addTo(map);
-  });
-  map.on("mouseleave", "sites-dot", () => {
-    map.getCanvas().style.cursor = "";
-    popup.remove();
+  // One interaction for the whole map: bigger-than-the-symbol hit targets,
+  // the card follows the contact under the cursor rather than the first one
+  // entered, and click keeps it open. See attachHover in popup.js.
+  attachHover(map, {
+    layers: ["cand-ring", "cand-cross", "sites-dot"],
+    key: (p) => p.id ?? `${p.date ?? ""}:${p.lon ?? ""}:${p.lat ?? ""}`,
+    cursor: "help",
+    html: (p, ctx) =>
+      (ctx.layer === "sites-dot" ? siteCard : candidateCard)(p, ctx),
   });
 
   setVisible(map, false);
@@ -235,4 +213,94 @@ export async function coverageSummary() {
   } catch {
     return null;
   }
+}
+
+// --- hover cards ----------------------------------------------------------
+//
+// THE ONLY TWO CARDS ON THIS MAP THAT ARE NOT COOPERATIVE REPORTS, and the
+// reason a hover card is worth building at all.
+//
+// Every live card ends with "Cooperative -- the contact broadcast all of
+// this". These two end with the opposite, because Sentinel-1 recorded them
+// without anybody's participation or consent. That inversion is the whole
+// argument of the project, and it was being carried by one italic clause at
+// the end of a run of <br> tags, in a popup that looked like a debug print,
+// while the cooperative cards it is meant to be contrasted against got the
+// designed treatment. A reader comparing the two was shown the argument in
+// the wrong direction.
+
+// How strong the return was, in the terms the detector works in: SNR is what
+// decides whether it survived thresholding, pixels is roughly how big it is.
+function strength(p) {
+  const snr = p.snr != null ? `SNR ${Number(p.snr).toFixed(0)}` : null;
+  const px = p.pixels != null ? `${p.pixels}&nbsp;px` : null;
+  return [snr, px].filter(Boolean).join(" &middot; ") || null;
+}
+
+// THE LOAD-BEARING QUALIFIER, and the one most likely to be skipped.
+//
+// A radar return with no AIS beside it means nothing in water where AIS is
+// not received: the silence there is ours, not the vessel's. Only "heard"
+// water supports a dark-vessel reading, and the card now says which kind
+// this is in words rather than printing a class name and leaving the reader
+// to assume the favourable one.
+const RECEPTION = {
+  heard: ["AIS is received here", false],
+  intermittent: ["patchy here \u2014 a weaker claim", true],
+  thin: ["thin here \u2014 not a dark-vessel claim", true],
+  unheard: ["none received here \u2014 the silence is OURS", true],
+};
+
+export function candidateCard(p, { others = 0, pinnable = false } = {}) {
+  const rec = RECEPTION[String(p.reception || "").toLowerCase()];
+
+  return card({
+    title: "UNEXPLAINED RETURN",
+    chip: CAND,
+    // The age in days, with no freshness band. A pill reading "stale" would
+    // be nonsense on a source that is retrospective by design -- Sentinel-1
+    // passes when it passes, and days old is the normal condition here, not
+    // a fault to flag.
+    age: p.age_days != null ? `${Math.round(p.age_days)}d` : null,
+    sub: p.date ? `Sentinel-1 pass &middot; ${esc(p.date)}` : "Sentinel-1 pass",
+    rows: [
+      ["Strength", strength(p)],
+      ["AIS here", rec ? rec[0] : (p.reception ? esc(p.reception) : "not measured"),
+        { warn: rec ? rec[1] : true }],
+    ],
+    foot: [
+      crowd(others),
+      !rec
+        ? `<b>Reception here was not measured.</b> Without it, this is a
+           return with no AIS beside it \u2014 not a vessel that went dark.`
+        : null,
+    ],
+    evidence: `<b>Observed, not reported.</b> Sentinel-1 recorded this
+      without the object's participation or consent \u2014 the inverse of
+      every other contact on this map. Retrospective by days, and
+      <b>not a confirmed vessel</b>: a radar return that nothing
+      cooperative accounts for.`,
+    hint: pinHint(pinnable),
+  });
+}
+
+export function siteCard(p, { pinnable = false } = {}) {
+  const n = p.n_dates ?? null;
+  return card({
+    title: "FIXED STRUCTURE",
+    chip: SITE,
+    sub: "Excluded from the candidate list",
+    rows: [
+      ["Seen on", n != null ? `${esc(n)} separate passes` : "repeated passes"],
+      ["AIS", "never matched, on any pass"],
+    ],
+    foot: [
+      `Something returning radar from the same coordinates across months
+       that never transmits is a platform, a wreck, a buoy or a turbine
+       \u2014 not a vessel going dark.`,
+    ],
+    evidence: `<b>Excluded on purpose, and drawn anyway.</b> An exclusion
+      you cannot see is one you have to take on trust.`,
+    hint: pinHint(pinnable),
+  });
 }

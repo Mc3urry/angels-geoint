@@ -49,7 +49,7 @@ function Start-App {
             "Set-Location '$Repo'; Write-Host 'ANGELS API' -ForegroundColor Magenta; " +
             "uvicorn angels.api.main:app --reload --port $ApiPort"
         ) -WindowStyle Minimized
-        Write-Host "  Serving  -> http://localhost:$ApiPort" -ForegroundColor Green
+        Write-Host "  Serving  -> http://127.0.0.1:$ApiPort" -ForegroundColor Green
     }
 
     # Wait for the API to actually answer rather than sleeping a fixed amount
@@ -69,7 +69,20 @@ function Start-App {
         return
     }
 
-    if (-not $NoBrowser) { Start-Process "http://localhost:$ApiPort" }
+    # THE LITERAL ADDRESS, NOT "localhost". Two reasons, both real:
+    #
+    #   1. uvicorn binds 127.0.0.1 by default, and on Windows "localhost" can
+    #      resolve to ::1 first -- which is a different address, nothing is
+    #      listening on it, and the browser says "connection refused" about a
+    #      server that is plainly running.
+    #   2. A browser keys its HTTP cache by the hostname STRING, so
+    #      localhost:8000 and 127.0.0.1:8000 are separate cache keyspaces.
+    #      On 2026-09-23 the localhost one was holding an ES module from
+    #      before the no-cache header existed, and the page died on a
+    #      SyntaxError about a missing export -- a cache fault wearing a code
+    #      fault's clothes. Pinning the launcher to one spelling means the
+    #      viewer always opens where its cache is governed by that header.
+    if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$ApiPort" }
 
     Write-Host ""
     Write-Host "  One window, minimised. Closing it stops the viewer." -ForegroundColor DarkGray

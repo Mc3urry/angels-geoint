@@ -45,7 +45,8 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
   border-radius: 2px;
   cursor: pointer;
 }
-#range button:hover { border-color: var(--ink-3); }
+#range button:hover:not(:disabled) { border-color: var(--ink-3); }
+#range button:disabled { opacity: .35; cursor: not-allowed; }
 #range button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 #map { grid-area: map; }
@@ -65,11 +66,133 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
 
 .track-popup .maplibregl-popup-content {
   font: 11px/1.6 var(--mono);
-  padding: 8px 11px;
+  padding: 0;
   border-radius: 3px;
-  box-shadow: 0 2px 12px rgba(14,26,36,.18);
+  box-shadow: 0 4px 18px rgba(14,26,36,.22);
+  overflow: hidden;
 }
 .track-popup .maplibregl-popup-tip { display: none; }
+
+/* --- the hover card ------------------------------------------------------
+   It follows the cursor and covers the map, so every millimetre of height
+   is paid for on every contact. Three decisions carry it:
+
+   1. TWO TYPEFACES. Mono is what the contact broadcast -- identifiers,
+      codes, numbers with units. Sans is what we say about it. The card was
+      mono throughout, which dressed three paragraphs of our own commentary
+      as though the vessel had transmitted them.
+   2. AGE IN THE HEADER. It decides what every other field is worth, and it
+      was row six of seven.
+   3. TWO ALERT LEVELS. A squawk of 7700 and a vessel contradicting its own
+      status are not the same news and must not look alike. */
+
+.pcard {
+  width: 300px; --chip: transparent;
+  /* Down the WHOLE card, not just the header. The SAR candidate's slate
+     (#2f4858) is invisible against the near-black header but reads clearly
+     against the light rows below it -- and the colour belongs to the
+     contact, not to one band of its card. */
+  border-left: 3px solid var(--chip);
+}
+
+.ph {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px 8px;
+  background: var(--ink); color: #fff;
+}
+.ph strong {
+  font: 700 12.5px/1.25 var(--mono); letter-spacing: .04em;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* The freshness pill. Colour, because "3 min" and "40 min" are the same
+   shape and opposite meanings, and a hover card is read in about a second. */
+.page {
+  margin-left: auto; flex: none;
+  font: 9.5px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 6px; border-radius: 2px;
+  background: rgba(255,255,255,.13); color: #cfdbe3;
+}
+.page.fresh { background: #10635f; color: #e8f5f3; }
+.page.aging { background: #7c5412; color: #ffeccd; }
+.page.stale { background: #8c2b1c; color: #ffe1db; }
+
+/* Provenance of the identity, on one line, under the name it chose. */
+.psub {
+  padding: 5px 12px 6px;
+  background: #16232e; color: #8fa3b1;
+  font: 9.5px/1.45 var(--mono); letter-spacing: .03em;
+}
+
+.pr { display: grid; grid-template-columns: 76px 1fr; gap: 10px;
+      padding: 4px 12px; align-items: baseline; }
+.pr:first-of-type { padding-top: 8px; }
+.pr:last-of-type { padding-bottom: 8px; }
+.pl { font: 9px/1.6 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+      color: var(--ink-3); }
+.pv { font: 11.5px/1.45 var(--mono); color: var(--ink);
+      overflow-wrap: break-word; }
+.pv.strong { font-weight: 700; }
+.pv .dim { color: var(--ink-3); }
+
+/* A vessel contradicting its own report: notable, not urgent. */
+.pr.warn { background: #fdecea; }
+.pr.warn .pl { color: #b05a4c; }
+.pr.warn .pv { color: #9b2c1f; }
+
+/* An emergency squawk. The only thing on this map that means someone is in
+   trouble right now, and it was a pale pink table stripe. */
+.pr.alarm { background: #9b2c1f; padding: 7px 12px; }
+.pr.alarm .pl { color: #f3c4bc; }
+.pr.alarm .pv { color: #fff; font-weight: 700; letter-spacing: .02em; }
+
+/* Ours, not theirs -- hence the sans. */
+.pn { padding: 8px 12px; background: #fafbfc; border-top: 1px solid var(--rule); }
+.pn p { margin: 0 0 6px; font: 11px/1.42 system-ui, sans-serif; color: var(--ink-2); }
+.pn p:last-child { margin-bottom: 0; }
+.pn b { color: #9b2c1f; }
+
+/* Printed on EVERY card, both domains. A hover card with a callsign, a
+   heading and a squawk looks exactly like a radar readout, and a radar
+   readout implies something independent saw it. Nothing here did. */
+.pe { margin: 0; padding: 8px 12px; background: #eef2f5;
+      border-top: 1px solid var(--rule);
+      font: 10.5px/1.45 system-ui, sans-serif; color: var(--ink-2); }
+.pe b { color: var(--ink); }
+
+/* The affordance, on the hover card only. A card you can keep open is no
+   use if nothing says so, and saying it on the PINNED card would be telling
+   you to do the thing you just did. */
+.pk { margin: 0; padding: 5px 12px; background: var(--ink);
+      font: 9px/1.5 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+      color: #8fa3b1; text-align: center; }
+
+/* --- a pinned card -------------------------------------------------------
+   Hover is for glancing; pinning is for reading. These cards now carry four
+   hundred pixels of real prose, and hover-only meant the notes could be
+   reached but not read -- move toward them and the card is gone. A pinned
+   card holds still, takes a scrollbar when it needs one (the cursor can be
+   over it, so scrolling actually works here), and closes on Escape. */
+.track-popup.pinned .maplibregl-popup-content {
+  position: relative;
+  max-height: 70vh; overflow-y: auto;
+  box-shadow: 0 6px 26px rgba(14,26,36,.34);
+}
+.track-popup.pinned .pcard { border-left-width: 4px; }
+
+/* MapLibre appends the close button as the LAST child of the content box.
+   `float: right` therefore floats it into the last line of the card -- it
+   came out at the bottom-right corner, under the evidence paragraph, which
+   is neither where anyone looks for it nor recognisable as a close. Taken
+   out of flow and pinned to the header instead. */
+.track-popup.pinned .ph { padding-right: 30px; }
+.track-popup.pinned .maplibregl-popup-close-button {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; padding: 0;
+  font: 16px/22px var(--mono); color: #93a5b2;
+  background: transparent; border: 0; cursor: pointer; z-index: 2;
+}
+.track-popup.pinned .maplibregl-popup-close-button:hover { color: #fff; }
 
 @media (max-width: 720px) {
   body { grid-template-columns: 1fr; grid-template-areas: "head" "map" "panel"; }
@@ -131,6 +254,55 @@ h1 { margin: 0; font: 700 15px/1 var(--mono); letter-spacing: .2em; }
   cursor: not-allowed;
   border-style: dashed;
 }
+
+/* --- which sky ---------------------------------------------------------- */
+
+#boxes { display: flex; gap: 0; margin-left: 10px; }
+#boxes button {
+  font: 11px var(--mono);
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+#boxes button:first-child { border-radius: 2px 0 0 2px; }
+#boxes button:last-child { border-radius: 0 2px 2px 0; border-left: none; }
+#boxes button:hover { border-color: var(--ink-3); }
+#boxes button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* The fix-age block. Its own colour because it is a warning about what the
+   map is allowed to claim, not a statistic about the feed. */
+.fixage {
+  margin: 0 0 12px; padding: 8px 10px;
+  border: 1px solid #e4d7bd; border-left: 2px solid #9a5b12;
+  background: #fdf8ef;
+}
+.fixage .lt {
+  display: block; font: 700 9.5px var(--mono); letter-spacing: .14em;
+  text-transform: uppercase; color: #9a5b12; margin-bottom: 5px;
+}
+.fixage p { margin: 0 0 5px; font: 10.5px/1.6 var(--mono); color: var(--ink-2); }
+.fixage p:last-child { margin-bottom: 0; }
+.fixage b { font-variant-numeric: tabular-nums; }
+/* The ring, at map scale, inflating with the worst case. The sampling-rate
+   indicator proper: legible at national zoom where the per-aircraft rings
+   overlap into a wash. */
+.ringkey { display: flex; align-items: center; gap: 9px; margin: 7px 0 2px; }
+.ringkey .disc {
+  width: 46px; height: 46px; flex: none; position: relative;
+  border: 1px dashed var(--rule); border-radius: 50%;
+}
+.ringkey .disc i {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  border: 1.5px solid #9a5b12; border-radius: 50%;
+  transition: width .9s linear, height .9s linear;
+}
+.ringkey .disc b {
+  position: absolute; left: 50%; top: 50%; width: 4px; height: 4px;
+  margin: -2px 0 0 -2px; background: var(--ink); border-radius: 50%;
+}
+.ringkey span { font: 9.5px/1.45 var(--mono); color: var(--ink-3); }
 
 /* --- the observed layer toggle ------------------------------------------ */
 /* Visually apart from #domains, and in the layer's own slate rather than the

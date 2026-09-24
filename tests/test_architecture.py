@@ -126,3 +126,41 @@ def test_scripts_import() -> None:
             pass  # not an import problem; not this test's business
 
     assert not broken, "scripts that fail to import:\n  " + "\n  ".join(broken)
+
+
+def test_every_collector_writes_a_heartbeat() -> None:
+    """A collector that does not record being alive cannot be trusted later.
+
+    core/uptime.py exists because a gap in an archive is ambiguous: an hour
+    with nothing in it is either a quiet sky, a quiet sea, or a collector
+    that was not running. Only a heartbeat written AT THE TIME can tell them
+    apart, and the maritime reception grid makes exactly the same call the
+    aviation one does.
+
+    The aviation collector had this from the start; the maritime one shipped
+    on 2026-09-23 without it, and nobody noticed, because the missing thing
+    is invisible by construction -- its absence looks like an empty sea. A
+    test is the only place that omission is visible before it matters.
+
+    Structural on purpose. Whether the heartbeats are CORRECT is the
+    collector's own tests' business; whether one exists at all is an
+    invariant of being a collector.
+    """
+    offenders: list[str] = []
+    for path in sorted((ROOT / "scripts").glob("ingest_*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        built = any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "HeartbeatLog"
+            for node in ast.walk(tree)
+        )
+        if not built:
+            offenders.append(f"scripts/{path.name}")
+
+    assert not offenders, (
+        "every ingest script must construct a HeartbeatLog, so that an empty "
+        "hour can be told from an hour nobody collected:\n  "
+        + "\n  ".join(offenders)
+    )
+

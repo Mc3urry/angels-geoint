@@ -58,7 +58,6 @@ question: if something had broadcast here, would this dataset show it?
 
 from __future__ import annotations
 
-import math
 import statistics
 from dataclasses import dataclass, field
 
@@ -80,17 +79,12 @@ MIN_VESSELS = 3
 # vessel visits on two different dates look like the edge of coverage.
 MAX_GAP_S = 3600.0
 
-HEARD, INTERMITTENT, THIN, UNHEARD = "heard", "intermittent", "thin", "unheard"
-
-
-def _index(v: float, cell: float) -> int:
-    """Floor to a cell index, rounding first.
-
-    Same guard as searched.py: floor() of a value that binary floating point
-    puts a hair below a cell boundary lands one cell too low, and the cell it
-    lands in is the neighbour of the one meant.
-    """
-    return math.floor(round(v / cell, 9))
+# The class vocabulary and the empty-cell rule are SHARED with the aviation
+# grid, deliberately: a cross-domain claim reads "heard" as the same word in
+# both domains, and two private copies of it would drift. See core.coverage.
+from angels.core.coverage import (  # noqa: E402
+    HEARD, INTERMITTENT, THIN, UNHEARD, cell_area_km2, cell_index as _index,
+    neighbour_class)
 
 
 @dataclass
@@ -221,16 +215,10 @@ class ReceptionGrid:
         if not neighbours:
             return UNHEARD
         col, row = self.key(lon, lat)
-        classes = [self.cells[(col + dc, row + dr)].reception(**kw)
-                   for dc in (-1, 0, 1) for dr in (-1, 0, 1)
-                   if (col + dc, row + dr) in self.cells]
-        if not classes:
-            return UNHEARD
-        if classes.count(HEARD) * 2 >= len(classes):
-            return HEARD
-        if HEARD in classes or INTERMITTENT in classes:
-            return INTERMITTENT
-        return THIN
+        return neighbour_class(
+            [self.cells[(col + dc, row + dr)].reception(**kw)
+             for dc in (-1, 0, 1) for dr in (-1, 0, 1)
+             if (col + dc, row + dr) in self.cells])
 
     def summary(self, **kw) -> dict[str, int]:
         out = {HEARD: 0, INTERMITTENT: 0, THIN: 0}
@@ -244,9 +232,7 @@ class ReceptionGrid:
         for (col, row), c in self.cells.items():
             if c.reception(**kw) != klass:
                 continue
-            lat = (row + 0.5) * self.cell_deg
-            total += (self.cell_deg * 111.32 * math.cos(math.radians(lat))
-                      * self.cell_deg * 110.57)
+            total += cell_area_km2(row, self.cell_deg)
         return total
 
     # -- storage -----------------------------------------------------------

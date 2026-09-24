@@ -72,8 +72,11 @@ def archive(tmp_path, monkeypatch):
     part.mkdir(parents=True)
     pq.write_table(pa.Table.from_pydict(cols, schema=SCHEMA), part / "s.parquet")
 
-    monkeypatch.setitem(routes.tracks._ADAPTERS, "air",
-                        AviationAdapter(archive_root=tmp_path))
+    # Both maps, because the route now picks the adapter by `aoi` for the air
+    # domain and by `domain` for everything else.
+    stub = AviationAdapter(archive_root=tmp_path)
+    monkeypatch.setitem(routes.tracks._ADAPTERS, "air", stub)
+    monkeypatch.setitem(routes.tracks._AIR_ADAPTERS, "air", stub)
     return tmp_path
 
 
@@ -167,8 +170,14 @@ def test_min_points_drops_short_tracks(client, archive) -> None:
     assert g["features"] == []
 
 
-def test_unknown_domain_is_not_implemented(client, archive) -> None:
-    assert client.get("/tracks", params={**window(), "domain": "sea"}).status_code == 501
+def test_sea_with_no_archive_is_404_naming_the_collector(client, archive) -> None:
+    """The sea domain is implemented now -- it reads the live-AIS archive the
+    maritime collector writes. With no archive the answer must be 404 with
+    the command that fixes it, NOT 200 with an empty list: "the collector is
+    not running" and "this water is empty" are opposite claims."""
+    r = client.get("/tracks", params={**window(), "domain": "sea"})
+    assert r.status_code == 404
+    assert "ingest_maritime.py" in r.json()["detail"]
 
 
 # -- decimation ------------------------------------------------------------
@@ -233,3 +242,31 @@ def test_both_parsers_fall_back_to_baro_altitude() -> None:
            "geo_altitude": None, "velocity": 180.0, "true_track": 270.0}
     assert row_to_report(arr).position.alt_m == 8000.0
     assert archive_row_to_report(dct).position.alt_m == 8000.0
+
+
+def test_the_two_air_archives_are_separate_adapters() -> None:
+    """The DC box polls every 30 s into "aviation"; the country every 10 min
+    into "aviation-conus". One adapter for both would read the wrong archive,
+    and -- worse -- carry the DC box's 900 s gap threshold onto national
+    tracks, splitting a transcontinental flight on every dropped poll."""
+    from angels.api.routes.tracks import _AIR_ADAPTERS
+
+    air, conus = _AIR_ADAPTERS["air"], _AIR_ADAPTERS["conus"]
+    assert air.dataset == "aviation"
+    assert conus.dataset == "aviation-conus"
+    assert conus.max_gap_s > air.max_gap_s
+    assert conus.max_gap_s == 1800.0
+
+
+def test_the_national_box_reports_its_own_bbox(archive) -> None:
+    """A national request answered with the DC bbox would tell the front end
+    it had the whole country when it had two degrees of it."""
+    from angels.config import AOI_CONUS
+
+    client = TestClient(app)
+    r = client.get("/tracks?domain=air&aoi=conus")
+    assert r.status_code == 200
+    props = r.json()["properties"]
+    assert props["aoi"] == "conus"
+    assert props["bbox"] == list(AOI_CONUS)
+    assert props["label"] == "continental US"

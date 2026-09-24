@@ -29,13 +29,30 @@
     <div id="layers">
       <button data-layer="observed"
               title="Sentinel-1 radar returns no AIS report explained. Retrospective: hours to days old, twelve days between passes.">Observed &middot; SAR</button>
+      <!-- OFF BY DEFAULT. Trails read the archive rather than the live feed,
+           and on the national box that is a lot of geometry for a layer most
+           sessions do not want. Nothing is fetched at all until it is on. -->
+      <button data-layer="trails"
+              title="Historical tracks from the archive for the selected box. Off by default; reads the archive, not the live feed.">Trails</button>
     </div>
 
+    <!-- WHICH SKY. Not a zoom control: the two boxes are polled at
+         completely different rates, and the map says different things about
+         what it knows in each. See the panel's fix-age block. -->
+    <div id="boxes">
+      <button data-aoi="air" class="on"
+              title="DC-Baltimore, polled every 30 s. Positions projected between polls.">DC</button>
+      <button data-aoi="conus"
+              title="Continental US, polled every 10 minutes. Positions shown where last heard, with an uncertainty ring.">CONUS</button>
+    </div>
+
+    <!-- Disabled until Trails is on: a time range for a layer that is not
+         drawn is a control that does nothing, which is worse than absent. -->
     <div id="range">
-      <button data-hours="1">1h</button>
-      <button data-hours="2" class="on">2h</button>
-      <button data-hours="6">6h</button>
-      <button data-hours="24">24h</button>
+      <button data-hours="1" disabled>1h</button>
+      <button data-hours="2" class="on" disabled>2h</button>
+      <button data-hours="6" disabled>6h</button>
+      <button data-hours="24" disabled>24h</button>
     </div>
   </header>
 

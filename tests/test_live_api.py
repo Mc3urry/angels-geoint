@@ -21,6 +21,13 @@ from angels.api.main import app
 from angels.api.routes import live as live_route
 
 
+async def _ready(stream):
+    """sea_stream is a coroutine now -- it may have to widen the
+    subscription and stop the old socket first. The stubs stay plain objects;
+    only the awaiting changes."""
+    return stream
+
+
 @pytest.fixture
 def client():
     return TestClient(app)
@@ -41,7 +48,8 @@ def warm(monkeypatch):
     s._connected = True
     s._peak_rate = 120.0
     s._discovered = []
-    monkeypatch.setattr(live_route, "sea_stream", lambda: s)
+    monkeypatch.setattr(live_route, "sea_stream",
+                        lambda box=None: _ready(s))
 
     async def _noop() -> None:
         return None
@@ -100,7 +108,8 @@ def test_a_warming_stream_says_so(client, monkeypatch) -> None:
     s = aisstream.Stream((-77.2, 36.0, -71.0, 39.6), api_key="test")
     s._started_at = time.time() - 4.0
     s._connected = True
-    monkeypatch.setattr(live_route, "sea_stream", lambda: s)
+    monkeypatch.setattr(live_route, "sea_stream",
+                        lambda box=None: _ready(s))
 
     async def _noop() -> None:
         return None
@@ -191,7 +200,8 @@ def test_a_missing_key_is_503_not_an_empty_collection(client, monkeypatch) -> No
     credential, and the client has to be told that rather than shown a map."""
     s = aisstream.Stream((-77.2, 36.0, -71.0, 39.6), api_key="")
     s._key = ""
-    monkeypatch.setattr(live_route, "sea_stream", lambda: s)
+    monkeypatch.setattr(live_route, "sea_stream",
+                        lambda box=None: _ready(s))
     r = client.get("/live?domain=sea")
     assert r.status_code == 503
     assert "AISSTREAM_API_KEY" in r.json()["detail"]
@@ -202,3 +212,105 @@ def test_importing_the_app_opens_no_socket() -> None:
     socket would make the test suite itself reach the network, which the
     conftest guard forbids outright."""
     assert live_route._sea is None or live_route._sea._task is None
+
+
+def test_the_front_end_is_served_with_no_cache() -> None:
+    """A stale ES module reports itself as a SyntaxError about a missing
+    export, which reads as a code bug and is a cache bug. `no-cache` keeps
+    the file but forces a revalidation, so app.js and views/live.js can never
+    be different vintages of each other."""
+    from fastapi.testclient import TestClient
+
+    from angels.api.main import app as the_app
+
+    client = TestClient(the_app)
+    for path in ("/index.html", "/app.js", "/views/live.js"):
+        r = client.get(path)
+        assert r.status_code == 200, path
+        assert r.headers.get("cache-control") == "no-cache", path
+        # The ETag is what makes revalidation cheap; without it the header
+        # above would turn every reload into a full re-download.
+        assert r.headers.get("etag"), path
+
+
+# -- the sea's national box -------------------------------------------------
+#
+# aisstream has no quota, so asking for the country costs nothing in money.
+# It costs the TABLE: changing the subscription throws away everything heard
+# for the old box, and an anchored vessel reports only every three minutes.
+# These tests are about paying that once rather than on every click.
+
+def test_the_sea_subscription_widens_but_never_narrows(monkeypatch) -> None:
+    from angels.api.routes.live import SEA_BOXES, _contains
+
+    made, stopped = [], []
+
+    class FakeStream:
+        def __init__(self, bbox):
+            self.bbox = bbox
+            made.append(bbox)
+
+        async def stop(self):
+            stopped.append(self.bbox)
+
+    monkeypatch.setattr(live_route.aisstream, "Stream", FakeStream)
+    monkeypatch.setattr(live_route, "_sea", None)
+
+    import asyncio
+
+    async def run():
+        a = await live_route.sea_stream(SEA_BOXES["air"])
+        b = await live_route.sea_stream(SEA_BOXES["conus"])   # widens
+        c = await live_route.sea_stream(SEA_BOXES["air"])     # must NOT narrow
+        return a, b, c
+
+    a, b, c = asyncio.run(run())
+    assert a.bbox == SEA_BOXES["air"]
+    assert b.bbox == SEA_BOXES["conus"]
+    assert c is b, "asking for the small box again must reuse the wide socket"
+    assert stopped == [SEA_BOXES["air"]], "exactly one resubscription"
+    assert _contains(SEA_BOXES["conus"], SEA_BOXES["air"])
+
+
+def test_the_small_box_is_a_filter_over_the_wide_table(monkeypatch) -> None:
+    """Once the socket is national, the Chesapeake view must be a filter --
+    not a resubscription, and not the whole country mislabelled."""
+    from angels.config import AOI_SEA, AOI_SEA_CONUS
+
+    def at(lon, lat, mmsi):
+        return {"type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "properties": {"mmsi": mmsi, "subtype": "cargo"}}
+
+    inside = at(-76.0, 37.5, "111")            # Chesapeake mouth
+    outside = at(-122.4, 37.8, "222")          # San Francisco
+
+    class Wide:
+        bbox = AOI_SEA_CONUS
+
+        async def start(self):
+            return None
+
+        def snapshot(self, wanted=None):
+            return aisstream.Snapshot(
+                features=[inside, outside], listening_s=600.0, connected=True,
+                warming=False, n_messages=10, last_message_age_s=1.0,
+                error=None, bbox=AOI_SEA_CONUS, by_subtype={"cargo": 2},
+                discovery_per_min=0.0, peak_discovery_per_min=100.0,
+                n_typed=2, n_heard_static=2, static_parts={})
+
+    monkeypatch.setattr(live_route, "sea_stream", lambda box=None: _ready(Wide()))
+    client = TestClient(app)
+
+    nat = client.get("/live?domain=sea&aoi=conus").json()
+    assert nat["properties"]["n"] == 2
+    assert nat["properties"]["bbox"] == list(AOI_SEA_CONUS)
+
+    loc = client.get("/live?domain=sea").json()
+    assert loc["properties"]["n"] == 1
+    assert loc["properties"]["bbox"] == list(AOI_SEA)
+    # The count in the subscription travels too, so the panel can say that
+    # the rest of the country is heard but not drawn.
+    assert loc["properties"]["n_in_subscription"] == 2
+    assert loc["properties"]["subscribed_bbox"] == list(AOI_SEA_CONUS)
+    assert loc["features"][0]["geometry"]["coordinates"][0] == -76.0

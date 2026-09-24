@@ -16,7 +16,18 @@
 
 param(
     [Parameter(Position = 0)]
-    [string]$Task = "help"
+    [string]$Task = "help",
+
+    # `run` only: which script, and everything to hand it.
+    [Parameter(Position = 1)]
+    [string]$Script,
+
+    # Collects the rest verbatim, including tokens beginning with a dash, so
+    # `--aoi conus --at=-117.0,40.0` reaches Python unchanged. Not named
+    # $Args: that is an automatic variable and shadowing it here would bite
+    # somewhere else in this file.
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Rest
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,6 +62,11 @@ function Show-Help {
     Write-Host "how much archive exists"
     Write-Host "    .\tasks.ps1 doctor     " -NoNewline -ForegroundColor Cyan
     Write-Host "is everything running? (after a reboot)"
+    Write-Host ""
+    Write-Host "    .\tasks.ps1 run <script> [args...]" -ForegroundColor Cyan
+    Write-Host "        any script in scripts\, with the right interpreter." -ForegroundColor DarkGray
+    Write-Host "        .\tasks.ps1 run adsb_coverage --aoi conus" -ForegroundColor DarkGray
+    Write-Host "        .\tasks.ps1 run             lists them" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "    .\tasks.ps1 clean      " -NoNewline -ForegroundColor Cyan
     Write-Host "remove caches"
@@ -88,7 +104,7 @@ switch ($Task.ToLower()) {
 
     "serve"    { & $Py -m uvicorn angels.api.main:app --reload }
     "web"      {
-        Write-Host "front end -> http://localhost:5173" -ForegroundColor Magenta
+        Write-Host "front end -> http://127.0.0.1:5173" -ForegroundColor Magenta
         Write-Host "the API must also be running (.\tasks.ps1 serve)" -ForegroundColor DarkGray
         & $Py -m http.server 5173 --directory web
     }
@@ -97,6 +113,48 @@ switch ($Task.ToLower()) {
     # .\collector.ps1, which survives a closed terminal and a reboot.
     "ingest"       { & $Py scripts\ingest_aviation.py --aoi air }
     "ingest-conus" { & $Py scripts\ingest_aviation.py --aoi conus }
+
+    # WHY THIS EXISTS. Every script in scripts\ needs the project's
+    # interpreter, and typing `python scripts\x.py` gets ArcGIS Pro's 3.14,
+    # which has never heard of this project. _env.ps1 already knows how to
+    # find the right one; this just puts it one word away for EVERY script
+    # rather than only the handful with their own task above.
+    "run"      {
+        $dir = Join-Path $PSScriptRoot "scripts"
+        if (-not $Script) {
+            Write-Host ""
+            Write-Host "  scripts in $dir" -ForegroundColor Magenta
+            Get-ChildItem -Path $dir -Filter *.py |
+                Where-Object { $_.Name -ne "_bootstrap.py" } |
+                Sort-Object Name |
+                ForEach-Object { Write-Host "    $($_.BaseName)" }
+            Write-Host ""
+            Write-Host "  .\tasks.ps1 run <name> [args...]" -ForegroundColor DarkGray
+            Write-Host ""
+            break
+        }
+
+        # Accept adsb_coverage, adsb_coverage.py, or scripts\adsb_coverage.py
+        # -- all three are things you will type, and none of them is wrong.
+        $name = [IO.Path]::GetFileNameWithoutExtension($Script)
+        $path = Join-Path $dir "$name.py"
+        if (-not (Test-Path $path)) {
+            Write-Host ""
+            Write-Host "  No scripts\$name.py" -ForegroundColor Red
+            $near = Get-ChildItem -Path $dir -Filter *.py |
+                    Where-Object { $_.BaseName -like "*$name*" }
+            if ($near) {
+                Write-Host "  did you mean:" -ForegroundColor Yellow
+                $near | ForEach-Object { Write-Host "    $($_.BaseName)" }
+            } else {
+                Write-Host "  .\tasks.ps1 run    lists them all" -ForegroundColor DarkGray
+            }
+            Write-Host ""
+            exit 1
+        }
+
+        if ($Rest) { & $Py $path @Rest } else { & $Py $path }
+    }
 
     "status"   {
         # How much archive do we actually have? The single most useful thing

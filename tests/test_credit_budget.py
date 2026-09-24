@@ -33,7 +33,7 @@ from fastapi.testclient import TestClient
 from angels.adapters.aviation import opensky
 from angels.api.main import app
 from angels.api.routes import live as live_route
-from angels.config import AOI_AIR
+from angels.config import AOI_AIR, AOI_CONUS
 
 ROOT = Path(__file__).resolve().parents[1]
 T = datetime(2026, 9, 19, 12, 0, tzinfo=UTC)
@@ -244,3 +244,121 @@ def test_a_stale_collector_does_not_freeze_the_sky(api, monkeypatch) -> None:
     p.write_text(json.dumps(doc))
     monkeypatch.setattr(opensky, "fetch_states", lambda bbox, tokens: (T, []))
     assert client.get("/live?domain=air").json()["properties"]["source"] == "direct"
+
+
+# -- the national box: four credits a request, so it is never bought --------
+#
+# The DC box costs one credit and may be fetched directly when the collector
+# is down. The country costs FOUR, from the same 4,000 a day, which would
+# reproduce the 2026-09-19 incident four times faster. These tests are the
+# guard on that, and on the second half of the same problem: a ten-minute-old
+# fix drawn as though it were a current one.
+
+CONUS_ROW = ["def456", "UAL1 ", "United States", 1, 1, -100.0, 40.0, 10000.0,
+             False, 250.0, 90.0, 0.0, None, 10050.0, "1200", False, 0]
+
+
+def test_the_national_box_reads_its_own_snapshot(api, monkeypatch) -> None:
+    client, live_dir = api
+    opensky.write_snapshot(live_dir / "aviation-conus.json", T, [CONUS_ROW],
+                           AOI_CONUS)
+
+    def forbidden(*a, **k):
+        raise AssertionError("the viewer asked OpenSky for the whole country")
+
+    monkeypatch.setattr(opensky, "fetch_states", forbidden)
+    r = client.get("/live?domain=air&aoi=conus")
+    assert r.status_code == 200
+    props = r.json()["properties"]
+    assert props["source"] == "collector"
+    assert props["aoi"] == "conus"
+    assert props["bbox"] == list(AOI_CONUS)
+    assert r.json()["features"][0]["properties"]["icao24"] == "def456"
+
+
+def test_a_stale_national_snapshot_is_never_bought_directly(api, monkeypatch) -> None:
+    """THE GUARD. With no snapshot the DC box falls back to a 1-credit fetch.
+    The country must refuse instead: at 4 credits a request it would empty
+    the budget the archive lives on four times faster than the incident that
+    made this route read a file at all."""
+    client, _ = api
+
+    def forbidden(*a, **k):
+        raise AssertionError("the viewer bought a national fetch")
+
+    monkeypatch.setattr(opensky, "fetch_states", forbidden)
+    r = client.get("/live?domain=air&aoi=conus")
+    assert r.status_code == 503
+    detail = r.json()["detail"]
+    assert "four credits" in detail
+    assert "collector.ps1 start -Aoi conus" in detail
+
+
+def test_the_national_snapshot_is_not_called_stale_at_the_dc_threshold(api) -> None:
+    """90 s is three missed polls on a 30 s box and a sixth of one on a
+    10 min box. A fixed threshold would call every national snapshot stale
+    on arrival, and the route would then refuse a working feed."""
+    client, live_dir = api
+    path = live_dir / "aviation-conus.json"
+    opensky.write_snapshot(path, T, [CONUS_ROW], AOI_CONUS)
+    # Age is measured from `written`, so backdate that rather than the poll
+    # time: 400 s is stale for the DC box and fresh for the country.
+    doc = json.loads(path.read_text())
+    doc["written"] = time.time() - 400
+    path.write_text(json.dumps(doc))
+
+    r = client.get("/live?domain=air&aoi=conus")
+    assert r.status_code == 200
+    assert r.json()["properties"]["snapshot_age_s"] > live_route.SNAPSHOT_MAX_AGE_S
+
+    # The same file, at the DC box's threshold, would be refused.
+    assert opensky.read_snapshot(
+        path, max_age_s=live_route.SNAPSHOT_MAX_AGE_S, bbox=AOI_CONUS) is None
+
+
+def test_the_two_boxes_do_not_share_a_cache_entry(api, monkeypatch) -> None:
+    """Different boxes, different answers. One cache key for both would serve
+    the DC box's hundred aircraft as the nation's seven thousand."""
+    client, live_dir = api
+    opensky.write_snapshot(live_dir / "aviation.json", T, [ROW], AOI_AIR)
+    opensky.write_snapshot(live_dir / "aviation-conus.json", T, [CONUS_ROW],
+                           AOI_CONUS)
+    a = client.get("/live?domain=air").json()
+    c = client.get("/live?domain=air&aoi=conus").json()
+    assert a["features"][0]["properties"]["icao24"] == "abc123"
+    assert c["features"][0]["properties"]["icao24"] == "def456"
+
+
+# -- what the client is allowed to draw ------------------------------------
+
+def test_the_dc_box_may_be_dead_reckoned_and_the_country_may_not(api) -> None:
+    """THE SECOND HALF OF GOING NATIONAL. At 30 s an airliner moves 2 km and
+    projecting it forward is fair. At 10 min it moves 150 km, and the same
+    projection is a confident drawing of a place the aircraft is not. The
+    SERVER states the policy so the client cannot infer it wrongly."""
+    client, live_dir = api
+    opensky.write_snapshot(live_dir / "aviation.json", T, [ROW], AOI_AIR)
+    opensky.write_snapshot(live_dir / "aviation-conus.json", T, [CONUS_ROW],
+                           AOI_CONUS)
+
+    air = client.get("/live?domain=air").json()["properties"]
+    conus = client.get("/live?domain=air&aoi=conus").json()["properties"]
+
+    assert air["dead_reckon"] is True
+    assert air["poll_interval_s"] == 30.0
+    assert conus["dead_reckon"] is False
+    assert conus["poll_interval_s"] == 600.0
+    assert "last HEARD" in conus["fix_age_note"]
+
+
+def test_every_aircraft_carries_what_the_halo_needs(api) -> None:
+    """Radius = speed x (server_time - last_contact). Both must be in the
+    payload, or the client has to invent one of them."""
+    client, live_dir = api
+    opensky.write_snapshot(live_dir / "aviation-conus.json", T, [CONUS_ROW],
+                           AOI_CONUS)
+    body = client.get("/live?domain=air&aoi=conus").json()
+    p = body["features"][0]["properties"]
+    assert p["speed_mps"] == 250.0
+    assert p["t"] == CONUS_ROW[4]                      # last_contact
+    assert body["properties"]["server_time_unix"] == int(T.timestamp())

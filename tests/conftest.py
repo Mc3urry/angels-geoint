@@ -1,4 +1,5 @@
-"""Shared test fixtures, and one hard rule: tests do not touch the network.
+"""Shared test fixtures, and two hard rules: tests reach neither the
+network nor this machine's own data.
 
 WHY THIS FILE EXISTS
 
@@ -29,12 +30,19 @@ real service is not testing the code, it is testing the internet.
 
 Tests that genuinely need a transport should inject a fake client; see
 tests/test_opensky.py for the pattern.
+
+The second rule, added 2026-09-24, is the same principle applied to the
+filesystem: a suite whose result depends on what the collectors happened to
+have written this minute is not measuring the code. See
+_no_production_data below.
 """
 
 from __future__ import annotations
 
 import ipaddress
 import socket
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -128,6 +136,106 @@ def _no_network(monkeypatch, request):
     monkeypatch.setattr(socket.socket, "connect", blocked)
 
 
+# --------------------------------------------------------------------------
+# the second thing tests must not touch: this machine's real data
+# --------------------------------------------------------------------------
+
+class ProductionDataVisible(RuntimeError):
+    """A test could see data/ on the machine it is running on."""
+
+
+@pytest.fixture(autouse=True)
+def _no_production_data(monkeypatch, tmp_path, request):
+    """Point every data path at an empty temp directory.
+
+    WHY THIS EXISTS -- and it is the network guard's story told again.
+
+    On 2026-09-24 seven tests failed on a machine where nothing had changed
+    in the code they test. `/live?domain=sea` returned 439 vessels to a test
+    that had injected exactly one; a stream stubbed to have been listening
+    four seconds reported 401.9; `/tracks` returned 200 where the test
+    demanded a 404 for a missing archive. The numbers were real. The suite
+    was reading the live collectors' snapshots out of data/interim/live and
+    their Parquet out of data/raw, because the route prefers the collector's
+    table over its own socket -- which is the correct behaviour in
+    production and ruinous in a test.
+
+    The failure is not that seven tests broke. It is that the suite's
+    result had silently become a function of WHETHER THE COLLECTORS WERE
+    RUNNING. It went green earlier the same evening only because they were
+    down. Making them permanent -- the whole goal of the scheduled-task work
+    -- is what turned the suite red, so the reward for fixing the
+    infrastructure was a test suite that no longer meant anything.
+
+    A test that reads production data is the filesystem version of a test
+    that reaches the network, and it deserves the same answer: not a
+    workaround in the seven tests that noticed, but a rule that makes the
+    class impossible. Every Path under DATA is rebound to an empty temp
+    tree, so a route that goes looking for a collector's table finds
+    nothing and falls back exactly as it would on a cold machine.
+
+    Opt out, with an argument, via:
+
+        @pytest.mark.realdata
+        def test_something_against_the_archive(): ...
+    """
+    if request.node.get_closest_marker("realdata"):
+        return
+
+    import angels.config as cfg
+
+    # WHAT IS REDIRECTED, AND WHERE THE LINE IS.
+    #
+    # Only the trees a RUNNING PROCESS writes: raw archives, interim
+    # snapshots, derived events. Those are the ones whose contents depend on
+    # what the collectors did this minute, and reading them is what makes a
+    # test result a fact about the machine rather than about the code.
+    #
+    # data/reference/ is deliberately left real. It is checked in, it is
+    # identical on every machine, and a test that reads the shoreline or the
+    # territorial-limit table is reading a fixture that happens to live on
+    # disk -- not eavesdropping on production. Redirecting it would break
+    # honest tests to punish a sin they did not commit.
+    #
+    # ROOT is left alone for the same reason: the API serves web/ from there,
+    # and a test that cannot find index.html would be a puzzle, not a guard.
+    generated = [p.resolve() for p in (cfg.RAW, cfg.INTERIM, cfg.EVENTS)]
+    sandbox = tmp_path / "data"
+    sandbox.mkdir(parents=True, exist_ok=True)
+
+    def redirected(value):
+        """The same path, under the sandbox -- or None if it is not ours."""
+        try:
+            here = Path(value).resolve()
+        except (OSError, RuntimeError):
+            return None
+        for root in generated:
+            try:
+                rel = here.relative_to(root)
+            except ValueError:
+                continue
+            return sandbox / root.name / rel
+        return None
+
+    # angels.config FIRST, so a module imported later in the run -- a script
+    # pulled in by a test halfway down the file -- gets the sandbox too.
+    # `from angels.config import RAW` copies the value at import time, which
+    # is exactly why the rebinding below has to happen per module as well.
+    modules = [cfg] + [m for name, m in list(sys.modules.items())
+                       if m is not None and m is not cfg
+                       and (name == "angels" or name.startswith("angels."))]
+
+    for mod in modules:
+        for attr, value in list(vars(mod).items()):
+            if not isinstance(value, Path):
+                continue
+            moved = redirected(value)
+            if moved is not None:
+                monkeypatch.setattr(mod, attr, moved, raising=False)
+
+
 def pytest_configure(config) -> None:
     config.addinivalue_line(
         "markers", "network: test genuinely requires internet access")
+    config.addinivalue_line(
+        "markers", "realdata: test genuinely reads this machine's data/ tree")

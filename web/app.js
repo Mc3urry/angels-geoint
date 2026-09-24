@@ -19,10 +19,12 @@
 // of self-reported positions looks exactly like a display of reality.
 
 import { fetchTracks, addTracks } from "./views/map.js";
-import { addLive, startLive, liveInfo, setVisible as setAirVisible, POLL_MS }
+import { addLive, startLive, liveInfo, liveMeta, liveAoi, setAoi,
+         setVisible as setAirVisible, POLL_MS, NATIONAL_POLL_MS }
   from "./views/live.js";
 import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
-         setGroups, GROUPS, SUBTYPE_LABEL, HULL_PATH }
+         setGroups, setSeaAoi, setWake, wakeStats, GROUPS, SUBTYPE_LABEL,
+         HULL_PATH }
   from "./views/vessels.js";
 import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
          setVisible as setObsVisible, coverageAt, coverageSummary }
@@ -31,6 +33,7 @@ import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 const AOI_AIR = [-77.7, 38.3, -76.0, 39.6];
 const AOI_SEA = [-77.2, 36.0, -71.0, 39.6];
+const AOI_CONUS = [-125.0, 24.0, -66.5, 49.5];
 const TRAIL_REFRESH_MS = 45000;
 
 const map = new maplibregl.Map({
@@ -47,6 +50,13 @@ let trailHours = 2;
 const on = { air: true, sea: false };
 let groupFilter = null;             // null = every vessel group
 let observed = false;               // the SAR discrepancy layer
+// OFF BY DEFAULT, and nothing is fetched while it is off. Trails read the
+// archive rather than the live feed, and on the national box that is a great
+// deal of geometry for a layer most sessions never want. It used to load on
+// boot and refresh every 45 s whether or not anyone had asked for it.
+let trails_on = false;
+let trailTimer = null;
+let wakeSince = 0;
 let probe = null;                   // the last /coverage answer, or null
 let probeBusy = false;
 let covSummary = null;
@@ -94,6 +104,28 @@ uvicorn angels.api.main:app --reload</pre>
       <code>.env</code> and restart uvicorn. <code>.env</code> is read at
       startup, not per request.</p>
       <p class="empty">This is a missing key, not an empty sea.</p>`;
+  }
+
+  // A 503 on the air domain used to mean exactly one thing -- no credentials
+  // -- so it was rendered as that unconditionally. The national box added a
+  // second one, and telling someone to put OPENSKY_CLIENT_ID in .env when
+  // their credentials are fine and the CONUS collector is simply not running
+  // is the same wrong-diagnosis failure this project keeps having to undo.
+  // Matched on the fix the server names, which is what makes it distinct.
+  if (err.status === 503 && !sea && /collector\.ps1/.test(err.detail || "")) {
+    return `
+      <div class="livebar off"><span class="dot"></span>No national snapshot</div>
+      <h2 class="errh">The CONUS collector is not running</h2>
+      <p class="meta">Your credentials are fine. The national box is served
+      from the collector's own poll and nothing recent enough is on disk.</p>
+      <pre class="cmd">.\collector.ps1 start -Aoi conus
+.\collector.ps1 status</pre>
+      <p class="meta">${err.detail || ""}</p>
+      <p class="empty">This box is deliberately <strong>never</strong> fetched
+      directly. The whole country costs four credits a request against the
+      same 4,000 a day the archive lives on &mdash; a tab left open would
+      empty it four times faster than the night that cost 8 h 48 min of
+      aircraft archive. Switch back to <strong>DC</strong> meanwhile.</p>`;
   }
 
   if (err.status === 503) {
@@ -213,6 +245,92 @@ function vesselLegend(counts, showCounts) {
         <span class="k"><i class="dot faded"></i></span>
         <span>Faded &mdash; not heard for 6&nbsp;min or more</span>
       </div>
+    </div>`;
+}
+
+// --- the session wake -----------------------------------------------------
+//
+// The sea's answer to the air's archive trail, and NOT the same thing. The
+// distinction is the point, so the block leads with how long the browser has
+// been watching: an archive trail is as long as the archive, a wake is never
+// longer than you have been looking at it.
+
+function wakeBlock() {
+  const w = wakeStats();
+  const secs = wakeSince ? Math.round((Date.now() - wakeSince) / 1000) : 0;
+  const span = secs < 90 ? `${secs}s`
+             : secs < 5400 ? `${Math.round(secs / 60)} min`
+             : `${Math.floor(secs / 3600)}h ${Math.round((secs % 3600) / 60)}m`;
+
+  return `
+    <div class="stat"><span class="n">${w.drawn.toLocaleString()}</span>
+      <span class="l">Session wakes &middot; ${span} of watching</span></div>
+    <p class="meta">
+      ${w.points.toLocaleString()} remembered positions across
+      ${w.platforms.toLocaleString()} vessels.
+      ${w.dropped ? `${w.dropped.toLocaleString()} dropped at the
+        ${w.cap.toLocaleString()}-vessel cap &mdash; a national subscription
+        holds more than a browser should keep history for.` : ""}
+    </p>
+    <p class="meta"><strong>This is not an archive.</strong> There is no
+      stored AIS to draw from: aisstream's terms on keeping received
+      positions are unsettled, and this project does not persist someone
+      else's data on an assumption. These lines are what this tab has seen
+      since you switched them on, held in memory, erased by a reload. The
+      air trails beside them are a different thing &mdash; a collector's
+      archive that existed before you arrived.</p>`;
+}
+
+// --- what the map is allowed to claim about a position --------------------
+
+//
+// THE HALF OF GOING NATIONAL THAT IS NOT ABOUT CREDITS.
+//
+// The DC box is polled every 30 s: an airliner moves about 2 km between
+// polls, so projecting it forward from heading and speed is fair and the
+// icons glide. The national box is polled every TEN MINUTES, in which the
+// same aircraft covers 150 km. A projected national map would look exactly
+// as confident as the local one and be wrong by the width of a state.
+//
+// So on the national box nothing is projected, every aircraft is drawn where
+// it was last HEARD, and the ring around it is how far it could have gone
+// since. This block is the ring at map scale -- the sampling-rate indicator
+// proper, legible at a zoom where seven thousand individual rings overlap
+// into a wash. It inflates as the fix ages and snaps back on each poll,
+// which is the feedback a number alone cannot give.
+
+const FAST_JET_MPS = 250;      // ~490 kt, a long-haul cruise
+
+function fixAgeBlock() {
+  const m = liveMeta();
+  if (!m || m.dead_reckon !== false) return "";
+
+  // The age must TICK, not sit still between polls. snapshot_age_s is how
+  // old the fix was when the server answered; the seconds since then are
+  // ours to add. Without this the ring inflates while the number beside it
+  // stays frozen, which reads as a bug and undermines the one message the
+  // block exists to deliver.
+  const since = liveInfo().lastPoll ? (Date.now() - liveInfo().lastPoll) / 1000 : 0;
+  const worst = m.max_fix_age_s ?? 1800;
+  const fix = Math.min(worst, (m.snapshot_age_s ?? 0) + since);
+  // Radius in the 46px key disc, scaled against the worst case the server
+  // will serve at all, so a full disc means "as stale as this ever gets".
+  const px = Math.max(4, Math.min(44, 44 * (fix / worst)));
+  const km = Math.round(FAST_JET_MPS * fix / 1000);
+
+  return `
+    <div class="fixage">
+      <span class="lt">Fix age &middot; what this map does not know</span>
+      <p>Polled every <b>${Math.round(m.poll_interval_s / 60)} min</b>.
+        Newest fix <b>${Math.round(fix)} s</b> old.</p>
+      <div class="ringkey">
+        <span class="disc"><b></b><i style="width:${px}px;height:${px}px"></i></span>
+        <span>At ${FAST_JET_MPS} m/s that is up to<br>
+          <b>${km.toLocaleString()} km</b> of travel since the fix.<br>
+          The ring inflates until the next poll.</span>
+      </div>
+      <p>Nothing here is projected forward. Each aircraft is drawn where it
+        was last <em>heard</em>, not where it probably is.</p>
     </div>`;
 }
 
@@ -453,9 +571,21 @@ function seaBlock() {
   const counts = m.by_subtype || {};
   const filtered = groupFilter && info.shown !== info.n;
   const untyped = info.n - (m.n_typed ?? 0);
+  // Heard by the socket but outside the box being drawn. Only ever non-zero
+  // after someone has looked at CONUS: the subscription widens and never
+  // narrows, so the Chesapeake view afterwards is a window onto a national
+  // table. Saying so stops "412 vessels" and "61 vessels" looking like a
+  // feed that lost most of its traffic.
+  const elsewhere = Math.max(0, (m.n_in_subscription ?? info.n) - info.n);
   return `
-    <div class="stat"><span class="n">${info.n}</span>
-      <span class="l">Vessels reporting</span></div>
+    <div class="stat"><span class="n">${info.n.toLocaleString()}</span>
+      <span class="l">Vessels reporting${
+        m.aoi === "conus" ? " &middot; continental US" : ""}</span></div>
+    ${elsewhere ? `<p class="meta">${elsewhere.toLocaleString()} more are
+      being heard elsewhere in US waters and are not drawn: the AIS
+      subscription widened when you looked at CONUS and does not narrow
+      again, because re-subscribing would throw the table away and an
+      anchored vessel reports only every three minutes.</p>` : ""}
     ${filtered ? `<p class="meta">Showing ${info.shown} of ${info.n}.
       The counts below are everything heard, not everything drawn &mdash; a
       filter narrows the view, it does not remove traffic.</p>` : ""}
@@ -515,22 +645,32 @@ function renderStatus() {
       live.properties.credits_remaining != null
         ? ` &middot; ${Math.round(live.properties.credits_remaining).toLocaleString()} credits left today`
         : ""}</p>` : ""}
-    ${on.air ? `<div class="stat"><span class="n">${live?.properties.n ?? "—"}</span>
-      <span class="l">Aircraft airborne</span></div>` : ""}
+    ${on.air ? `<div class="stat"><span class="n">${
+      live ? live.properties.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l">Aircraft airborne${
+        liveAoi() === "conus" ? " &middot; continental US" : ""}</span></div>` : ""}
+    ${on.air ? fixAgeBlock() : ""}
 
     ${on.sea ? seaBlock() : ""}
 
     ${observed ? observedBlock() : ""}
 
-    ${on.air ? `<div class="stat"><span class="n">${trails?.properties.n_tracks ?? "—"}</span>
-      <span class="l">Trails &middot; last ${trailHours}h</span></div>` : ""}
+    ${on.air && trails_on ? `<div class="stat"><span class="n">${
+      trails?.properties.n_tracks ?? "&hellip;"}</span>
+      <span class="l">Archive trails &middot; last ${trailHours}h &middot; ${
+        liveAoi() === "conus" ? "continental US" : "DC-Baltimore"}</span></div>` : ""}
+    ${on.sea && trails_on ? wakeBlock() : ""}
 
     <p class="meta">
-      ${on.air && verts ? verts.toLocaleString() + " track vertices<br>" : ""}
-      ${[on.air ? `air every ${Math.round(POLL_MS / 1000)}s` : "",
+      ${on.air && trails_on && verts ? verts.toLocaleString() + " track vertices<br>" : ""}
+      ${[on.air ? `air every ${Math.round(
+           (liveMeta()?.dead_reckon === false ? NATIONAL_POLL_MS : POLL_MS)
+           / 1000)}s` : "",
          on.sea ? "sea every 10s" : ""].filter(Boolean).join(" &middot; ")}<br>
       ${air.requests + sea.requests} request${air.requests + sea.requests === 1 ? "" : "s"} this session &middot;
-      positions dead-reckoned between polls
+      ${liveMeta()?.dead_reckon === false
+        ? "positions where last heard"
+        : "positions dead-reckoned between polls"}
     </p>
 
     ${on.air ? `<div class="legend">
@@ -568,9 +708,11 @@ function renderStatus() {
         last looked at.</p>`}
     </div>
 
-    ${on.air && trails && !trails.features.length ? `<p class="empty">
-      No trails yet. That layer reads the archive<br>
-      that <code>ingest_aviation.py</code> writes.</p>` : ""}
+    ${on.air && trails_on && trails && !trails.features.length ? `<p class="empty">
+      No trails in this window. That layer reads the
+      ${liveAoi() === "conus" ? "national" : "DC"} archive
+      that <code>ingest_aviation.py</code> writes &mdash; try a longer
+      range, or check the collector for that box is running.</p>` : ""}
 
     <p class="empty">Hover a contact for detail.<br>Zoom in for labels.</p>`;
 
@@ -604,11 +746,7 @@ function setDomain(name, want) {
     if (want) map.fitBounds(AOI_SEA, { padding: 40, duration: 900 });
     else if (on.air) map.fitBounds(AOI_AIR, { padding: 40, duration: 900 });
   }
-  for (const id of ["tracks-casing", "tracks-line"]) {
-    if (map.getLayer(id)) {
-      map.setLayoutProperty(id, "visibility", on.air ? "visible" : "none");
-    }
-  }
+  setTrailsVisible(trails_on && on.air);
   renderStatus();
 }
 
@@ -616,13 +754,58 @@ function setDomain(name, want) {
 
 let live = null, trails = null;
 
+function setTrailsVisible(want) {
+  for (const id of ["tracks-casing", "tracks-line", "tracks-hit"]) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, "visibility", want ? "visible" : "none");
+    }
+  }
+}
+
 async function loadTrails() {
-  if (!on.air) return;
+  // Both guards matter. Without the first, switching Trails off left a
+  // refresh in flight that repopulated the source a moment later; without
+  // the second, the archive was being read for a domain not on the map.
+  if (!trails_on || !on.air) return;
   try {
-    trails = await fetchTracks({ hours: trailHours });
+    trails = await fetchTracks({ hours: trailHours, aoi: liveAoi() });
     addTracks(map, trails);
+    setTrailsVisible(true);
   } catch { /* trails are optional context; live is the point */ }
   renderStatus();
+}
+
+// ONE BUTTON, TWO DIFFERENT KINDS OF HISTORY, and the panel says which.
+//
+//   air   an ARCHIVE TRAIL. A collector has been writing state vectors for
+//         weeks, so the line exists before you arrive and survives a reload.
+//   sea   a SESSION WAKE. There is no AIS archive, because aisstream's terms
+//         on storing received positions are unsettled and this project does
+//         not persist third-party data on an assumption. The browser draws
+//         what it has seen since the tab opened, in RAM, and a reload erases
+//         it.
+//
+// Putting them on one control is right -- both answer "where has this been"
+// -- but letting them LOOK the same would not be, so the panel labels them
+// and the sea one says how long it has been watching.
+function setTrails(want) {
+  trails_on = want;
+  clearInterval(trailTimer);
+  trailTimer = null;
+  document.querySelectorAll("#range button")
+          .forEach((b) => { b.disabled = !want; });
+
+  setWake(map, want);
+  if (want) wakeSince = Date.now();
+
+  if (!want) {
+    setTrailsVisible(false);
+    trails = null;                    // so the panel stops quoting a count
+    renderStatus();
+    return;
+  }
+  loadTrails();
+  trailTimer = setInterval(loadTrails, TRAIL_REFRESH_MS);
 }
 
 async function setObserved(want) {
@@ -662,8 +845,7 @@ map.on("load", async () => {
     () => { errors.sea = null; renderStatus(); },
     (err)  => { errors.sea = err; renderStatus(); });
 
-  loadTrails();
-  setInterval(() => loadTrails(), TRAIL_REFRESH_MS);
+  setTrailsVisible(false);          // the layers exist; they start hidden
   setInterval(() => renderStatus(), 1000);
 
   document.querySelectorAll("#domains button").forEach((b) => {
@@ -678,16 +860,55 @@ map.on("load", async () => {
     };
   });
 
+  document.querySelectorAll("#boxes button").forEach((b) => {
+    b.onclick = () => {
+      if (b.classList.contains("on")) return;
+      document.querySelectorAll("#boxes button")
+              .forEach((x) => x.classList.remove("on"));
+      b.classList.add("on");
+      const want = b.dataset.aoi;
+      // The box is not an air control. Both live domains have a national
+      // and a local view, and a header button that silently moved only one
+      // of them would leave the map showing two different study areas at
+      // once -- which is the single thing the cross-domain comparison
+      // cannot survive.
+      setSeaAoi(map, want);
+      // The wake was just cleared with the box, so the clock that says how
+      // long it represents restarts with it. Left alone it would claim
+      // minutes of watching over a line thirty seconds old.
+      if (trails_on) wakeSince = Date.now();
+      // DROP THE OLD COUNT. `live` still held the previous box's payload, so
+      // for the second or two before the new one landed the panel showed
+      // "67 aircraft airborne - continental US" and, coming back, "6,652
+      // aircraft airborne" over Baltimore. A number under the wrong label is
+      // the one mistake this whole project is about.
+      live = null;
+      setAoi(map, want);
+      map.fitBounds(want === "conus" ? AOI_CONUS : (on.sea ? AOI_SEA : AOI_AIR),
+                    { padding: 40, duration: 900 });
+      // Each box has its OWN archive -- "aviation" at 30 s, "aviation-conus"
+      // at 10 min -- so the trails have to be re-fetched, not just re-shown.
+      // Drawing the DC archive over the country would be a two-degree
+      // scribble in one corner, implying the rest of the map had no history.
+      trails = null;
+      setTrailsVisible(false);
+      if (trails_on) loadTrails();
+      renderStatus();
+    };
+  });
+
   document.querySelectorAll("#layers button").forEach((b) => {
     b.onclick = () => {
       const want = !b.classList.contains("on");
       b.classList.toggle("on", want);
-      setObserved(want);
+      if (b.dataset.layer === "observed") setObserved(want);
+      if (b.dataset.layer === "trails") setTrails(want);
     };
   });
 
   document.querySelectorAll("#range button").forEach((b) => {
     b.onclick = () => {
+      if (b.disabled) return;
       document.querySelectorAll("#range button").forEach((x) => x.classList.remove("on"));
       b.classList.add("on");
       trailHours = Number(b.dataset.hours);
