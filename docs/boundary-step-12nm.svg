@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="574" viewBox="0 0 900 574" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<rect width="900" height="574" fill="#ffffff"/>
+<text x="96" y="32" font-size="17.5" font-weight="700" fill="#0e1a24">No step at the territorial sea line</text>
+<text x="96" y="53" font-size="12.5" fill="#3c4c59">Unexplained radar returns per km&#178; of searched water, as a ratio to what the searched water predicts.</text>
+<text x="96" y="71" font-size="12.5" fill="#3c4c59">12&#8239;nm limit, &#177;10&#8239;nm strip, 12 Sentinel-1 passes. Marker area &#8733; number of detections.</text>
+<line x1="104" y1="313.2" x2="846" y2="313.2" stroke="#d7dfe5" stroke-width="1"/>
+<text x="92" y="317.2" font-size="10.5" fill="#6b7c89" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">0.5</text>
+<line x1="104" y1="155.6" x2="846" y2="155.6" stroke="#d7dfe5" stroke-width="1"/>
+<text x="92" y="159.6" font-size="10.5" fill="#6b7c89" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">1.5</text>
+<line x1="104" y1="234.4" x2="846" y2="234.4" stroke="#6b7c89" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="92" y="238.4" font-size="10.5" fill="#3c4c59" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">1.0</text>
+<line x1="475.0" y1="110" x2="475.0" y2="392" stroke="#0e1a24" stroke-width="1.5"/>
+<text x="475.0" y="104" font-size="11" font-weight="600" fill="#0e1a24" text-anchor="middle">12&#8239;nm line</text>
+<line x1="104" y1="392" x2="846" y2="392" stroke="#d7dfe5" stroke-width="1"/>
+<text x="150.4" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">-10 to -5</text>
+<text x="243.1" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">-5 to -2</text>
+<text x="335.9" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">-2 to -1</text>
+<text x="428.6" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">-1 to 0</text>
+<text x="521.4" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">0 to 1</text>
+<text x="614.1" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">1 to 2</text>
+<text x="706.9" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">2 to 5</text>
+<text x="799.6" y="410" font-size="10.5" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">5 to 10</text>
+<text x="465.0" y="428" font-size="10.5" fill="#6b7c89" text-anchor="end">&#8592; landward</text>
+<text x="485.0" y="428" font-size="10.5" fill="#6b7c89">seaward &#8594;</text>
+<text x="92" y="450" font-size="10" fill="#a8175c" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">returns n</text>
+<text x="150.4" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">54</text>
+<text x="243.1" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">21</text>
+<text x="335.9" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">8</text>
+<text x="428.6" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">2</text>
+<text x="521.4" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">5</text>
+<text x="614.1" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">4</text>
+<text x="706.9" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">18</text>
+<text x="799.6" y="450" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">35</text>
+<text x="92" y="467" font-size="10" fill="#2a78d6" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">control n</text>
+<text x="150.4" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">37</text>
+<text x="243.1" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">25</text>
+<text x="335.9" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">8</text>
+<text x="428.6" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">11</text>
+<text x="521.4" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">3</text>
+<text x="614.1" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">1</text>
+<text x="706.9" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">18</text>
+<text x="799.6" y="467" font-size="10" fill="#3c4c59" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">35</text>
+<text x="475.0" y="492" font-size="11" fill="#6b7c89" text-anchor="middle">distance from the line, nautical miles</text>
+<polyline points="154.4,221.8 247.1,198.2 339.9,212.4 432.6,154.1 525.4,321.1 618.1,369.9 710.9,259.6 803.6,231.3" fill="none" stroke="#2a78d6" stroke-width="1.5" opacity="0.35" stroke-linejoin="round"/>
+<circle cx="154.4" cy="221.8" r="10.6" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="247.1" cy="198.2" r="8.8" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="339.9" cy="212.4" r="4.9" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="432.6" cy="154.1" r="5.8" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="525.4" cy="321.1" r="3.0" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="618.1" cy="369.9" r="3.0" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="710.9" cy="259.6" r="7.4" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="803.6" cy="231.3" r="10.4" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<polyline points="146.4,161.9 239.1,240.7 331.9,221.8 424.6,351.0 517.4,280.1 610.1,305.3 702.9,265.9 795.6,239.2" fill="none" stroke="#a8175c" stroke-width="1.5" opacity="0.35" stroke-linejoin="round"/>
+<circle cx="146.4" cy="161.9" r="12.9" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="239.1" cy="240.7" r="8.0" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="331.9" cy="221.8" r="4.9" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="424.6" cy="351.0" r="3.0" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="517.4" cy="280.1" r="3.9" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="610.1" cy="305.3" r="3.5" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="702.9" cy="265.9" r="7.4" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<circle cx="795.6" cy="239.2" r="10.4" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<g transform="translate(96,530)">
+<circle cx="6" cy="-4" r="6" fill="#a8175c" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<text x="19" y="0" font-size="11.5" fill="#3c4c59">Unexplained returns (n&#8239;=&#8239;147)</text>
+<circle cx="250" cy="-4" r="6" fill="#2a78d6" fill-opacity="0.85" stroke="#ffffff" stroke-width="2"/>
+<text x="263" y="0" font-size="11.5" fill="#3c4c59">AIS-reporting control (n&#8239;=&#8239;138)</text>
+</g>
+<text x="96" y="560" font-size="10.5" fill="#6b7c89">Against a shift null, which preserves the clustering these returns have: p&#8239;=&#8239;0.18 for the returns, 0.38 for the control. Neither rejects.</text>
+</svg>
