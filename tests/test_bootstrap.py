@@ -189,3 +189,61 @@ def test_no_third_party_import_runs_before_the_bootstrap(script: Path) -> None:
     early = _third_party_imports_before_bootstrap(script)
     assert not early, (f"{script.name} imports {early} before the bootstrap; "
                        f"move them below the `import _bootstrap` block")
+
+
+def _has_bootstrap_block(path: Path) -> bool:
+    import ast
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return any(
+        isinstance(node, ast.Try) and any(
+            isinstance(n, ast.Import)
+            and any(a.name == "_bootstrap" for a in n.names)
+            for n in node.body)
+        for node in tree.body
+    )
+
+
+def _imports_project_code(path: Path) -> bool:
+    import ast
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (node.module or "").split(
+                ".")[0] in ("angels", "scripts"):
+            return True
+        if isinstance(node, ast.Import) and any(
+                a.name.split(".")[0] in ("angels", "scripts")
+                for a in node.names):
+            return True
+    return False
+
+
+@pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)
+def test_a_script_that_imports_the_package_has_a_bootstrap(script: Path) -> None:
+    """THE HOLE THIS CLOSES.
+
+    `_third_party_imports_before_bootstrap` returns an empty list for a script
+    with no bootstrap block at all, on the reasoning that such a file is a
+    stub. The test above therefore PASSES such a script vacuously, and the
+    comment says "checked elsewhere if ever needed". It was not checked
+    elsewhere.
+
+    `classify_candidates.py` shipped on 2026-09-25 with `sys.path.insert` in
+    place of the bootstrap. Both guards were green: it imports `angels`
+    successfully under a bare interpreter because the path hack puts the repo
+    root on sys.path -- and then fails on the first real dependency, under
+    whatever Python the user typed, which is exactly the failure mode the
+    bootstrap exists to prevent. A path hack silences the symptom the
+    bootstrap is watching for.
+
+    So: a script that reaches into the package must switch interpreter first.
+    A script that does not touch the package needs nothing and is exempt.
+    """
+    if not _imports_project_code(script):
+        return
+    assert _has_bootstrap_block(script), (
+        f"{script.name} imports project code but has no `try: import "
+        f"_bootstrap` block, so running it under a bare interpreter will fail "
+        f"on the first dependency instead of re-executing under the project "
+        f"environment. Do not substitute sys.path.insert -- that hides the "
+        f"very failure the bootstrap detects."
+    )

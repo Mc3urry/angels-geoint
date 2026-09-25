@@ -1,4 +1,10 @@
 """Confirm OpenSky credentials work. Prints aircraft currently in the AOI."""
+try:
+    import _bootstrap  # noqa: F401
+except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
+    if _e.name != "_bootstrap":
+        raise
+
 import httpx
 from dotenv import load_dotenv
 from angels.config import (AOI, OPENSKY_API_BASE, OPENSKY_TOKEN_URL,
