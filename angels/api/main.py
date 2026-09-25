@@ -19,7 +19,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from angels import __version__
-from angels.api.routes import coverage, events, live, tracks
+from angels.api.routes import (coverage, dossier, events, labels, live,
+                                tracks)
 from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME, ROOT
 
 app = FastAPI(
@@ -58,6 +59,8 @@ app.include_router(live.router)
 app.include_router(tracks.router)
 app.include_router(coverage.router)
 app.include_router(events.router)
+app.include_router(labels.router)
+app.include_router(dossier.router)
 
 class RevalidatingStatic(StaticFiles):
     """Static files that the browser must check before reusing.
