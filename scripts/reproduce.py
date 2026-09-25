@@ -49,8 +49,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
@@ -121,8 +123,7 @@ STAGES = [
                   (REFERENCE / "limits", "fetch"),
                   ("events/sar-*.geojson", "raw"),
                   ("events/dark-*.geojson", "raw")],
-        "cmd": ["scripts/boundary_analysis.py", "--out",
-                str(OUT / "boundary-bands.json")],
+        "cmd": None,            # built from the committed settings; see below
         "slow": True,
         "verify": "boundary",
     },
@@ -141,6 +142,13 @@ STAGES = [
                      (INTERIM / "candidates", "raw")],
     },
 ]
+
+
+def _dur(secs: float) -> str:
+    if secs < 90:
+        return f"{secs:.1f} s"
+    m, sec = divmod(int(secs), 60)
+    return f"{m}m {sec:02d}s"
 
 
 def _importable(module: str) -> bool:
@@ -173,6 +181,50 @@ def label(item) -> str:
     return item.replace("events/", "data/events/")
 
 
+def boundary_cmd() -> list[str]:
+    """Re-run the boundary analysis the way the committed file was made.
+
+    Hardcoding the defaults was wrong, and the first real run showed it: the
+    published result was produced with `--near-nm 10`, which adds the two
+    local step-test entries -- the test FINDINGS.md leans on hardest. Without
+    the flag those keys were simply absent from the rebuild, and the verifier
+    could only say "present in only one". Six limits matched to the digit and
+    the one that mattered most was not checked at all.
+
+    So the command is derived from the artefact instead of assumed. Newer
+    files record `near_nm` outright; for the one committed on 2026-09-25 it is
+    read back out of the limit names, which embed it as "(within 10 nm)".
+    """
+    cmd = ["scripts/boundary_analysis.py", "--out",
+           str(OUT / "boundary-bands.json")]
+    ref = EVENTS / "boundary-bands.json"
+    if not ref.exists():
+        return cmd
+    try:
+        doc = json.loads(ref.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return cmd
+    near = doc.get("near_nm")
+    if near is None:
+        found = {m.group(1) for k in doc.get("limits", {})
+                 if (m := re.search(r"\(within ([\d.]+) nm\)", k))}
+        near = float(found.pop()) if len(found) == 1 else None
+    if near is not None:
+        cmd += ["--near-nm", f"{near:g}"]
+    for flag, key in (("--trials", "trials"), ("--stride", "stride"),
+                      ("--shift-trials", "shift_trials")):
+        if doc.get(key) is not None:
+            cmd += [flag, str(doc[key])]
+    gate = doc.get("gate") or {}
+    if gate.get("min_snr") is not None:
+        cmd += ["--min-snr", str(gate["min_snr"])]
+    if gate.get("min_pixels") is not None:
+        cmd += ["--min-pixels", str(gate["min_pixels"])]
+    if doc.get("reception_kept"):
+        cmd += ["--reception", ",".join(doc["reception_kept"])]
+    return cmd
+
+
 def verify_boundary(made: Path) -> list[str]:
     """Regenerated band numbers against the committed ones, exactly.
 
@@ -183,16 +235,49 @@ def verify_boundary(made: Path) -> list[str]:
     ref = EVENTS / "boundary-bands.json"
     if not ref.exists() or not made.exists():
         return ["one side missing; nothing to compare"]
-    a = json.loads(ref.read_text(encoding="utf-8"))["limits"]
-    b = json.loads(made.read_text(encoding="utf-8"))["limits"]
+    ra = json.loads(ref.read_text(encoding="utf-8"))
+    rb = json.loads(made.read_text(encoding="utf-8"))
+
+    # A run at different settings is not drift, and reporting it as drift
+    # would punish the obvious thing to do first -- a short run to see how
+    # long a long one takes. The nulls are Monte Carlo: fewer trials means
+    # different p-values by construction.
+    keys = ("trials", "shift_trials", "stride", "near_nm", "gate",
+            "reception_kept", "candidate_file")
+    # A field the COMMITTED file never recorded is not a disagreement. The
+    # 2026-09-25 artefact predates `near_nm` and `shift_trials`, and treating
+    # their absence as a mismatch would flag every faithful re-run from now
+    # on -- the same false alarm as comparing a short run's p-values, in the
+    # other direction.
+    unrecorded = [k for k in keys if k not in ra and k in rb]
+    settings = {k: (ra[k], rb.get(k)) for k in keys if k in ra}
+    differ = {k: v for k, v in settings.items() if v[0] != v[1]}
+    note = ([f"(the committed file predates {', '.join(unrecorded)}; "
+             f"not compared)"] if unrecorded else [])
+    if differ:
+        out = ["NOT COMPARABLE -- the two runs used different settings:"]
+        out += [f"  {k}: committed {x!r} vs rebuilt {y!r}"
+                for k, (x, y) in differ.items()]
+        out.append("  Band counts below are still meaningful; p-values are "
+                   "not. Re-run at the committed settings to verify.")
+        if any(k in differ for k in ("trials", "stride", "shift_trials")):
+            return out + note + _band_diffs(ra["limits"], rb["limits"],
+                                            deterministic_only=True)
+        return out + note
+    return _band_diffs(ra["limits"], rb["limits"]) + note
+
+
+def _band_diffs(a: dict, b: dict, *, deterministic_only: bool = False) -> list[str]:
+    fields = ("candidates_by_band", "expected_by_band", "ais_seen_by_band")
+    if not deterministic_only:
+        fields += ("chi2", "p_scattered", "p_shift", "chi2_control",
+                   "p_control_shift")
     out = []
     for name in sorted(set(a) | set(b)):
         if name not in a or name not in b:
             out.append(f"{name}: present in only one")
             continue
-        for field in ("candidates_by_band", "expected_by_band",
-                      "ais_seen_by_band", "chi2", "p_scattered", "p_shift",
-                      "chi2_control", "p_control_shift"):
+        for field in fields:
             x, y = a[name].get(field), b[name].get(field)
             if x != y:
                 out.append(f"{name} / {field}: committed {x!r} -> rebuilt {y!r}")
@@ -223,6 +308,8 @@ def main() -> int:
         for i, src in st.get("optional", []):
             if not present(i):
                 print(f"      degraded {label(i):42} {SOURCES[src]}")
+        if st.get("verify") == "boundary" and st.get("cmd") is None:
+            st["cmd"] = boundary_cmd()
         soft = [m for m in st.get("soft", []) if not _importable(m)]
         for m in soft:
             print(f"      needs     {m:42} {SOURCES['ml']}")
@@ -250,6 +337,7 @@ def main() -> int:
 
     print("\n  RUN\n")
     ran, failed, skipped = [], [], []
+    timings: list[tuple[str, float]] = []
     for st in runnable:
         if st.get("slow") and not args.all:
             print(f"    {st['name']:20} skipped   (slow; pass --all)")
@@ -257,10 +345,12 @@ def main() -> int:
             continue
         cmd = [sys.executable, *st["cmd"]]
         print(f"    {st['name']:20} running   {' '.join(st['cmd'][:1])}")
+        t0 = time.monotonic()
         r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        timings.append((st["name"], time.monotonic() - t0))
         if r.returncode == 0:
             ran.append(st)
-            print(f"    {'':20} ok")
+            print(f"    {'':20} ok        {_dur(timings[-1][1])}")
         else:
             tail = (r.stderr or r.stdout).strip().splitlines()[-3:] or \
                 ["(no output)"]
@@ -295,7 +385,10 @@ def main() -> int:
 
     print("\n  SUMMARY\n")
     print(f"    ran {len(ran)}, skipped {len(skipped)}, failed {len(failed)}, "
-          f"blocked {len(blocked)}")
+          f"blocked {len(blocked)}"
+          + (f", in {_dur(sum(x for _, x in timings))}" if timings else ""))
+    for name, secs in timings:
+        print(f"      {name:22}{_dur(secs):>10}")
     for name, err in failed:
         for line in err:
             print(f"      {name}: {line[:110]}")

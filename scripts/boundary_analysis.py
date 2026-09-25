@@ -693,6 +693,12 @@ def main() -> int:
         "candidate_file": cand_path.name,
         "gate": {"min_snr": args.min_snr, "min_pixels": args.min_pixels},
         "trials": args.trials, "stride": args.stride,
+        # Recorded so a re-run can be told what this run actually did. Its
+        # absence cost a reproduction: `reproduce.py` re-ran without
+        # --near-nm, the two step-test entries simply did not appear, and
+        # nothing in the file said they should have.
+        "near_nm": args.near_nm,
+        "shift_trials": args.shift_trials,
         "note": ("The 3 nm state seaward line is not in NOAA's Maritime "
                  "Limits product; these are the 12, 24 and 200 nm lines."),
         "limits": results,
