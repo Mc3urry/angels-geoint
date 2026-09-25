@@ -44,7 +44,7 @@ param(
                  "logs", "clear-locks", "windows", "install-all")]
     [string]$Action = "status",
 
-    [ValidateSet("air", "conus", "sea", "sea-conus")]
+    [ValidateSet("air", "conus", "sea", "sea-conus", "air-indep")]
     [string]$Aoi = "air",
 
     # 0 means "use the AOI's own default" -- 30 s for air, 600 s for conus.
@@ -125,7 +125,39 @@ $Footprints = @{
                Label = "US waters";              Credits = 0;  Flush = 0
                FlushSeconds = 120;
                Script = "scripts\ingest_maritime.py";        SeaAoi = "conus" }
+
+    # THE INDEPENDENT AVIATION CHANNEL, and the reason it is a fifth collector
+    # rather than a change to the first.
+    #
+    # The two aviation boxes above poll OpenSky, which returns
+    # position_source = 0 -- ADS-B, self-reported -- on every row it has ever
+    # given us: 152,040 of them across 224 hours. That is one side of a
+    # two-sided question. adsb.fi labels each aircraft's position source, so
+    # MLAT and TIS-B targets arrive alongside the cooperative ones FROM THE
+    # SAME RECEIVER NETWORK. Mixing feeds instead would make every coverage
+    # difference between two networks look like a behavioural one, which is
+    # the mistake the searched-water denominator exists to prevent on the
+    # maritime side.
+    #
+    # Credits = 0: adsb.fi has no quota. What it asks for instead is
+    # courtesy -- one request a second, non-commercial use, attribution. We
+    # poll every 30 s, and ingest_adsbfi.py refuses an interval under 5 s.
+    'air-indep' = @{
+               Task = "ANGELS Collector AIR INDEP";
+               Dataset = "aviation-adsbfi";
+               Log  = "collector-air-indep.log"; Interval = 30;
+               Label = "DC-Baltimore, independent";
+               Credits = 0;  Flush = 10;
+               Script = "scripts\ingest_adsbfi.py" }
 }
+
+# ONE ordered list of footprints, used by status, process detection,
+# install-all and windows. Four of those five places used to carry their own
+# copy of @("air","conus","sea","sea-conus"); adding the fifth collector on
+# 2026-09-25 would have had to find every one of them, and missing the
+# process-detection copy would have made the new collector invisible to
+# `status` and killable by `install-all` without ever appearing in a list.
+$Order = @("air", "conus", "sea", "sea-conus", "air-indep")
 
 $AoiWasGiven = $PSBoundParameters.ContainsKey("Aoi")
 
@@ -476,7 +508,7 @@ function Show-Status {
     if ($AoiWasGiven) {
         Show-One $Aoi
     } else {
-        foreach ($k in @("air", "conus", "sea", "sea-conus")) { Show-One $k }
+        foreach ($k in $Order) { Show-One $k }
 
         # The table above reads the Task Scheduler, which cannot see a
         # collector someone started in a terminal -- so a footprint can show
@@ -668,12 +700,18 @@ function Find-CollectorProcesses {
     $script:LastProcScan.Visible = @($all | Where-Object { $_.CommandLine }).Count
     $script:LastProcScan.Blind   = $all.Count - $script:LastProcScan.Visible
 
-    $procs = @($all | Where-Object { $_.CommandLine -match 'ingest_(aviation|maritime)\.py' })
+    $procs = @($all | Where-Object { $_.CommandLine -match 'ingest_(aviation|maritime|adsbfi)\.py' })
     $script:LastProcScan.Matched = $procs.Count
 
-    foreach ($k in @("air", "conus", "sea", "sea-conus")) {
+    foreach ($k in $Order) {
         $fp     = $Footprints[$k]
-        $script = if ($fp.Script) { "ingest_maritime.py" } else { "ingest_aviation.py" }
+        # The script LEAF for this footprint, taken from the table rather than
+        # assumed. This line read `if ($fp.Script) { "ingest_maritime.py" }`,
+        # which was true while the only footprints with their own script were
+        # the two sea ones -- and silently wrong the moment a third kind of
+        # collector arrived.
+        $script = if ($fp.Script) { Split-Path $fp.Script -Leaf }
+                  else            { "ingest_aviation.py" }
         $aoiArg = if ($fp.SeaAoi) { $fp.SeaAoi } else { $k }
         $hit = @($procs | Where-Object {
             $_.CommandLine -like "*$script*" -and
@@ -747,18 +785,24 @@ function Show-ProcScanWarning {
 }
 
 function Install-All {
-    # ONE COMMAND: everything running by hand stops, all four become
-    # scheduled tasks, all four start.
+    # ONE COMMAND: everything running by hand stops, every footprint becomes a
+    # scheduled task, every one starts.
     #
-    # Ordinary use is `install -Aoi <box>` four times. This exists because
-    # doing it four times by hand is four chances to forget one, and a
+    # Ordinary use is `install -Aoi <box>` once per footprint. This exists
+    # because doing that by hand is one chance per box to forget one, and a
     # forgotten collector is not a visible failure -- it is a gap in an
     # archive that cannot be backfilled, discovered weeks later.
+    #
+    # COUNTED, NOT SPELLED. This list said "four" in six places and grew to
+    # five on 2026-09-25 when the independent aviation channel was added. A
+    # hardcoded count in a summary line is how "All four installed" gets
+    # printed over five boxes with one missing.
 
-    $order = @("air", "conus", "sea", "sea-conus")
+    $order = $Order
+    $n     = $order.Count
 
     Write-Host ""
-    Write-Host "  Clean restart: all four collectors as scheduled tasks" -ForegroundColor Magenta
+    Write-Host ("  Clean restart: all {0} collectors as scheduled tasks" -f $n) -ForegroundColor Magenta
     Write-Host ""
 
     # CHECKED HERE TOO, NOT ONLY IN Install-Collector.
@@ -803,7 +847,7 @@ function Install-All {
     } elseif (Test-ProcScanBlind) {
         # THE EMPTY RESULT IS NOT EVIDENCE HERE.
         #
-        # Step 3 unregisters all four scheduled tasks before recreating them.
+        # Step 3 unregisters every scheduled task before recreating them.
         # Doing that on a scan that could not read the command lines is how
         # four collectors got killed and four tasks got destroyed in the same
         # breath on 2026-09-23. An answer this shell is not privileged to
@@ -811,7 +855,7 @@ function Install-All {
         Show-ProcScanWarning
         if (-not $Force) {
             Write-Host "  REFUSING TO CONTINUE." -ForegroundColor Red
-            Write-Host "  The next step unregisters all four scheduled tasks. It will" -ForegroundColor Red
+            Write-Host ("  The next step unregisters all {0} scheduled tasks. It will" -f $n) -ForegroundColor Red
             Write-Host "  not do that on an answer this window could not read." -ForegroundColor Red
             Write-Host ""
             Write-Host "  Re-run from an elevated PowerShell:" -ForegroundColor Cyan
@@ -838,7 +882,7 @@ function Install-All {
 
     # 3. Install each one. Re-invoking this script per footprint rather than
     #    looping inside, because $TaskName, $Script and $Fp are resolved at
-    #    script scope from $Aoi -- a loop here would install four tasks that
+    #    script scope from $Aoi -- a loop here would install N tasks that
     #    all pointed at the first footprint.
     Write-Host ""
     foreach ($k in $order) {
@@ -858,13 +902,13 @@ function Install-All {
         -not (Get-ScheduledTask -TaskName $Footprints[$_].Task -ErrorAction SilentlyContinue)
     })
     if ($missing.Count) {
-        Write-Host ("  {0} of 4 installed. NOT INSTALLED: {1}" -f `
-                    (4 - $missing.Count), ($missing -join ", ")) -ForegroundColor Red
+        Write-Host ("  {0} of {1} installed. NOT INSTALLED: {2}" -f `
+                    ($n - $missing.Count), $n, ($missing -join ", ")) -ForegroundColor Red
         Write-Host "  Those boxes are collecting nothing. Read the errors above." -ForegroundColor Red
         Write-Host ""
         return
     }
-    Write-Host "  All four installed and started." -ForegroundColor Green
+    Write-Host ("  All {0} installed and started." -f $n) -ForegroundColor Green
     Write-Host ""
     if ($AsSystem) {
         Write-Host "  Running as SYSTEM: starts at boot, before any logon," -ForegroundColor Green
@@ -906,7 +950,7 @@ function Start-Windows {
     # would simply exit with "already running" while the task held the lock.
     # So any installed task for a footprint is stopped first, and said so.
 
-    $order = @("air", "conus", "sea", "sea-conus")
+    $order = $Order
     Write-Host ""
     Write-Host "  Opening one window per collector." -ForegroundColor Magenta
     Write-Host ""
