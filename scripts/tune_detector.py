@@ -45,6 +45,31 @@ that is the finding, and a third pass decides.
 
 Needs detection files from the CURRENT detector (see the water mask fix of
 2026-09-22): run detect_ships.py on every slice first.
+
+READ THIS BEFORE TRUSTING THE CHOSEN GATE  (added 2026-09-25)
+-------------------------------------------------------------
+The rule above minimises **unmatched detections per 1,000 km2**, treating
+every detection AIS did not explain as a cost. That was the only stand-in for
+"false" available when this was written, and the 147-chip read has since
+shown it is the wrong one: of the 1,097 unmatched detections in AIS-heard
+water, roughly **64% are real vessels that did not report**. They are not a
+cost -- they are the output.
+
+So `per_1000km2` is a mixture of clutter and signal, and minimising it
+suppresses both without distinguishing them. The gate this script picks is
+therefore biased toward throwing away dark vessels, by an amount nothing in
+this script can see.
+
+`tune_gate.py` measures the same trade with the noise term estimated from the
+labels instead of assumed, and separates the two jobs a gate can have:
+purity for the detection product, versus thinning at the measured
+contamination rate for the boundary statistic (which is `correct_clutter.py`,
+not a gate at all).
+
+This docstring is a warning rather than a fix because the cost function
+cannot be changed without re-running detection and matching over every raw
+scene, and a cost function altered but not re-run is worse than one that is
+honestly labelled.
 """
 
 from __future__ import annotations
