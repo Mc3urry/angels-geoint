@@ -23,6 +23,29 @@ data/**
 !data/**/
 !data/**/.gitkeep
 
+# EVIDENCE, not data. The rule above is right for 56 GB of raw scenes and
+# wrong for the handful of small files the published conclusion rests on.
+# Until 2026-09-25 none of these were tracked -- including boundary-bands.json,
+# which IS the result. 974 KB total, and each one is here for its own reason:
+#
+#   labels.jsonl              judgement, not computation. Cannot be recomputed
+#                             by anyone, ever. Append-only, last write per chip
+#                             wins, so it also carries who decided what when.
+#   label-sample.json         the draw. Reproducible from its seed only while
+#                             candidates-scored.geojson is byte-identical.
+#   boundary-bands.json       the published numbers. Regenerating them is a
+#                             multi-hour run of 2,000 scattered + 400 shift
+#                             trials.
+#   candidates-scored.geojson the detection set everything else indexes into.
+#                             Regenerable only from the 56 GB of raw scenes.
+#
+# Deliberately NOT here: candidate-pvessel.json and data/events/corrected/
+# (3.2 MB). Both rebuild from the four above in seconds.
+!data/events/labels.jsonl
+!data/events/label-sample.json
+!data/events/boundary-bands.json
+!data/events/candidates-scored.geojson
+
 # Logs
 *.log
 *.log.*

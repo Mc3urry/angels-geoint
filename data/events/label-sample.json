@@ -1,0 +1,2960 @@
+{
+ "drawn": 147,
+ "population": 1097,
+ "per_stratum": 28,
+ "seed": 20260925,
+ "gate": {
+  "min_snr": 15.0,
+  "min_pixels": 6
+ },
+ "reception_kept": [
+  "heard"
+ ],
+ "bands_nm": {
+  "near": 2.0,
+  "mid": 10.0
+ },
+ "what": "a stratified sample of gated candidates for human reading. Verdicts go to labels.jsonl; this file is the draw, and it is reproducible from its seed.",
+ "sample": [
+  {
+   "id": "2024-04-10_38p7301_-74p9585",
+   "lon": -74.95854945783432,
+   "lat": 38.73010103116125,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 15.14,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 16.5,
+   "reception": "heard",
+   "ais_cell_vessels": 118,
+   "nm_to_limit": 6.5,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p8976_-75p2224",
+   "lon": -75.22236875903184,
+   "lat": 36.89761225360814,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 17.55,
+   "pixels": 31,
+   "length_m_approx": 55.7,
+   "uncertainty_m": 28.0,
+   "reception": "heard",
+   "ais_cell_vessels": 11,
+   "nm_to_limit": 9.23,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_38p7297_-74p9584",
+   "lon": -74.95837189510112,
+   "lat": 38.72973414370248,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
+   "snr": 15.17,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.3,
+   "reception": "heard",
+   "ais_cell_vessels": 118,
+   "nm_to_limit": 6.49,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_38p8414_-74p8375",
+   "lon": -74.83754254563462,
+   "lat": 38.84144567830656,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 15.0,
+   "pixels": 7,
+   "length_m_approx": 26.5,
+   "uncertainty_m": 14.0,
+   "reception": "heard",
+   "ais_cell_vessels": 52,
+   "nm_to_limit": 6.2,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p8417_-74p8374",
+   "lon": -74.83739365818175,
+   "lat": 38.84166671035008,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 20.01,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 14.8,
+   "reception": "heard",
+   "ais_cell_vessels": 52,
+   "nm_to_limit": 6.21,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p1382_-74p2370",
+   "lon": -74.23696160351423,
+   "lat": 39.13818335628355,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 19.51,
+   "pixels": 24,
+   "length_m_approx": 49.0,
+   "uncertainty_m": 25.0,
+   "reception": "heard",
+   "ais_cell_vessels": 20,
+   "nm_to_limit": 3.64,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_36p3952_-75p1557",
+   "lon": -75.155731798393,
+   "lat": 36.395171311314236,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:12+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225812_20240901T225841_055478_06C4A7_E53D_COG.SAFE",
+   "snr": 17.51,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 23.1,
+   "reception": "heard",
+   "ais_cell_vessels": 18,
+   "nm_to_limit": 7.39,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_39p2447_-74p4343",
+   "lon": -74.43428662609459,
+   "lat": 39.24465320019998,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225906_20240925T225931_055828_06D27E_5E3B_COG.SAFE",
+   "snr": 15.71,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 17.0,
+   "reception": "heard",
+   "ais_cell_vessels": 64,
+   "nm_to_limit": 6.36,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_39p3165_-74p4147",
+   "lon": -74.41465396128866,
+   "lat": 39.316490187801094,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 15.94,
+   "pixels": 17,
+   "length_m_approx": 41.2,
+   "uncertainty_m": 22.1,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 9.68,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_37p7915_-75p3723",
+   "lon": -75.37228654793427,
+   "lat": 37.791459748435315,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 16.87,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 15.0,
+   "reception": "heard",
+   "ais_cell_vessels": 39,
+   "nm_to_limit": 8.15,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_36p6035_-75p2528",
+   "lon": -75.2528495857409,
+   "lat": 36.60347958175862,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
+   "snr": 18.8,
+   "pixels": 32,
+   "length_m_approx": 56.6,
+   "uncertainty_m": 28.5,
+   "reception": "heard",
+   "ais_cell_vessels": 33,
+   "nm_to_limit": 5.83,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_39p3048_-74p4250",
+   "lon": -74.424995538353,
+   "lat": 39.30480664529389,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:59:03+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
+   "snr": 15.6,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 24.3,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 9.22,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_36p9656_-75p5274",
+   "lon": -75.52735111627834,
+   "lat": 36.965561771497335,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 17.02,
+   "pixels": 22,
+   "length_m_approx": 46.9,
+   "uncertainty_m": 23.7,
+   "reception": "heard",
+   "ais_cell_vessels": 33,
+   "nm_to_limit": 4.94,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p7485_-75p3429",
+   "lon": -75.34289121788208,
+   "lat": 36.748513815711,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 17.69,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 14.5,
+   "reception": "heard",
+   "ais_cell_vessels": 34,
+   "nm_to_limit": 3.32,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p8252_-75p7812",
+   "lon": -75.78122236603886,
+   "lat": 36.8252104033841,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 17.93,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.0,
+   "reception": "heard",
+   "ais_cell_vessels": 241,
+   "nm_to_limit": 3.18,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_38p7801_-74p5750",
+   "lon": -74.57495336069279,
+   "lat": 38.780118738057254,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 15.37,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 14.8,
+   "reception": "heard",
+   "ais_cell_vessels": 26,
+   "nm_to_limit": 4.12,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_36p9543_-75p5653",
+   "lon": -75.56528021347144,
+   "lat": 36.95425449439762,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+   "snr": 15.13,
+   "pixels": 37,
+   "length_m_approx": 60.8,
+   "uncertainty_m": 30.6,
+   "reception": "heard",
+   "ais_cell_vessels": 23,
+   "nm_to_limit": 5.81,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p1206_-74p6355",
+   "lon": -74.63547815793594,
+   "lat": 39.12057426738077,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 15.54,
+   "pixels": 7,
+   "length_m_approx": 26.5,
+   "uncertainty_m": 14.0,
+   "reception": "heard",
+   "ais_cell_vessels": 111,
+   "nm_to_limit": 9.13,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_36p4751_-75p1745",
+   "lon": -75.17446388026026,
+   "lat": 36.475088801500185,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:12+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225812_20240901T225841_055478_06C4A7_E53D_COG.SAFE",
+   "snr": 15.74,
+   "pixels": 28,
+   "length_m_approx": 52.9,
+   "uncertainty_m": 26.6,
+   "reception": "heard",
+   "ais_cell_vessels": 35,
+   "nm_to_limit": 7.94,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_38p0900_-74p4743",
+   "lon": -74.47426933571434,
+   "lat": 38.08999416587034,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 15.54,
+   "pixels": 24,
+   "length_m_approx": 49.0,
+   "uncertainty_m": 24.7,
+   "reception": "heard",
+   "ais_cell_vessels": 17,
+   "nm_to_limit": 8.08,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_36p9407_-75p8726",
+   "lon": -75.87257148574298,
+   "lat": 36.940733487133684,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
+   "snr": 15.08,
+   "pixels": 7,
+   "length_m_approx": 26.5,
+   "uncertainty_m": 13.8,
+   "reception": "heard",
+   "ais_cell_vessels": 171,
+   "nm_to_limit": 6.48,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_38p0707_-74p4665",
+   "lon": -74.46652422579564,
+   "lat": 38.07068337867814,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 16.4,
+   "pixels": 6,
+   "length_m_approx": 24.5,
+   "uncertainty_m": 12.7,
+   "reception": "heard",
+   "ais_cell_vessels": 17,
+   "nm_to_limit": 8.93,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_38p4552_-74p6957",
+   "lon": -74.6957190214965,
+   "lat": 38.455205821551964,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 17.88,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.1,
+   "reception": "heard",
+   "ais_cell_vessels": 64,
+   "nm_to_limit": 4.63,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p6701_-75p5173",
+   "lon": -75.51726743884353,
+   "lat": 36.67009800174681,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 18.35,
+   "pixels": 53,
+   "length_m_approx": 72.8,
+   "uncertainty_m": 36.5,
+   "reception": "heard",
+   "ais_cell_vessels": 46,
+   "nm_to_limit": 5.95,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p9920_-75p2130",
+   "lon": -75.21304908577437,
+   "lat": 36.992016132903274,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 15.37,
+   "pixels": 47,
+   "length_m_approx": 68.6,
+   "uncertainty_m": 34.4,
+   "reception": "heard",
+   "ais_cell_vessels": 9,
+   "nm_to_limit": 6.94,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p2820_-74p3352",
+   "lon": -74.3351669985868,
+   "lat": 39.28203605160965,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 16.35,
+   "pixels": 20,
+   "length_m_approx": 44.7,
+   "uncertainty_m": 23.7,
+   "reception": "heard",
+   "ais_cell_vessels": 57,
+   "nm_to_limit": 6.06,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p7119_-74p9815",
+   "lon": -74.9814882585107,
+   "lat": 38.71190985514348,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 18.27,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 14.9,
+   "reception": "heard",
+   "ais_cell_vessels": 118,
+   "nm_to_limit": 7.65,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p1369_-74p1791",
+   "lon": -74.17910056115859,
+   "lat": 39.13686062312786,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 16.1,
+   "pixels": 13,
+   "length_m_approx": 36.1,
+   "uncertainty_m": 18.7,
+   "reception": "heard",
+   "ais_cell_vessels": 24,
+   "nm_to_limit": 5.28,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_39p1652_-74p4850",
+   "lon": -74.48501341863165,
+   "lat": 39.165200475361175,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 69.05,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 23.0,
+   "reception": "heard",
+   "ais_cell_vessels": 70,
+   "nm_to_limit": 4.48,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p7168_-75p5281",
+   "lon": -75.52808776885657,
+   "lat": 36.7168212294767,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 39.77,
+   "pixels": 74,
+   "length_m_approx": 86.0,
+   "uncertainty_m": 43.1,
+   "reception": "heard",
+   "ais_cell_vessels": 60,
+   "nm_to_limit": 5.76,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p9784_-75p5994",
+   "lon": -75.5993541867483,
+   "lat": 36.9784482516509,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 30.01,
+   "pixels": 112,
+   "length_m_approx": 105.8,
+   "uncertainty_m": 53.0,
+   "reception": "heard",
+   "ais_cell_vessels": 23,
+   "nm_to_limit": 4.02,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p0806_-74p5985",
+   "lon": -74.5984761251162,
+   "lat": 39.08056227229503,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 221.44,
+   "pixels": 120,
+   "length_m_approx": 109.5,
+   "uncertainty_m": 55.0,
+   "reception": "heard",
+   "ais_cell_vessels": 73,
+   "nm_to_limit": 6.91,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p8112_-74p9498",
+   "lon": -74.94981818296255,
+   "lat": 38.81123387548037,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 62.72,
+   "pixels": 46,
+   "length_m_approx": 67.8,
+   "uncertainty_m": 34.2,
+   "reception": "heard",
+   "ais_cell_vessels": 55,
+   "nm_to_limit": 7.65,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_38p3461_-74p9279",
+   "lon": -74.92789628961025,
+   "lat": 38.346135036395054,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 36.06,
+   "pixels": 17,
+   "length_m_approx": 41.2,
+   "uncertainty_m": 21.0,
+   "reception": "heard",
+   "ais_cell_vessels": 30,
+   "nm_to_limit": 5.24,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_36p4303_-75p1166",
+   "lon": -75.11659131729517,
+   "lat": 36.43027234626721,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:12+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225812_20240901T225841_055478_06C4A7_E53D_COG.SAFE",
+   "snr": 128.91,
+   "pixels": 162,
+   "length_m_approx": 127.3,
+   "uncertainty_m": 63.7,
+   "reception": "heard",
+   "ais_cell_vessels": 21,
+   "nm_to_limit": 9.93,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_36p9314_-75p3235",
+   "lon": -75.32346748341516,
+   "lat": 36.93141490161269,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 42.67,
+   "pixels": 19,
+   "length_m_approx": 43.6,
+   "uncertainty_m": 22.0,
+   "reception": "heard",
+   "ais_cell_vessels": 16,
+   "nm_to_limit": 4.06,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_38p2719_-74p6908",
+   "lon": -74.69076816011443,
+   "lat": 38.27186396943562,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 66.79,
+   "pixels": 116,
+   "length_m_approx": 107.7,
+   "uncertainty_m": 54.0,
+   "reception": "heard",
+   "ais_cell_vessels": 49,
+   "nm_to_limit": 5.28,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p5984_-75p1699",
+   "lon": -75.16993440070591,
+   "lat": 36.59842722289267,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 23.67,
+   "pixels": 19,
+   "length_m_approx": 43.6,
+   "uncertainty_m": 22.0,
+   "reception": "heard",
+   "ais_cell_vessels": 19,
+   "nm_to_limit": 9.69,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_36p4591_-75p1830",
+   "lon": -75.18303122851505,
+   "lat": 36.459126504676135,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:10+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225810_20241206T225840_056878_06FC1E_F16F_COG.SAFE",
+   "snr": 47.71,
+   "pixels": 275,
+   "length_m_approx": 165.8,
+   "uncertainty_m": 83.0,
+   "reception": "heard",
+   "ais_cell_vessels": 35,
+   "nm_to_limit": 7.35,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p9160_-75p9224",
+   "lon": -75.92236502589364,
+   "lat": 36.915959770075844,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 31.8,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.1,
+   "reception": "heard",
+   "ais_cell_vessels": 345,
+   "nm_to_limit": 8.8,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_38p9583_-74p7099",
+   "lon": -74.7099045513611,
+   "lat": 38.95833228498907,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 20.54,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.7,
+   "reception": "heard",
+   "ais_cell_vessels": 99,
+   "nm_to_limit": 7.83,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p6726_-75p1957",
+   "lon": -75.19572818545275,
+   "lat": 36.672552870263104,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 22.4,
+   "pixels": 52,
+   "length_m_approx": 72.1,
+   "uncertainty_m": 36.2,
+   "reception": "heard",
+   "ais_cell_vessels": 26,
+   "nm_to_limit": 9.19,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p7136_-75p5164",
+   "lon": -75.51637153634145,
+   "lat": 36.71360164518623,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 41.03,
+   "pixels": 103,
+   "length_m_approx": 101.5,
+   "uncertainty_m": 50.8,
+   "reception": "heard",
+   "ais_cell_vessels": 60,
+   "nm_to_limit": 5.28,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_37p7733_-74p7440",
+   "lon": -74.74396386376026,
+   "lat": 37.773321431990816,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:58:42+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225842_20240621T225907_054428_069F67_4366_COG.SAFE",
+   "snr": 65.08,
+   "pixels": 161,
+   "length_m_approx": 126.9,
+   "uncertainty_m": 63.5,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 4.11,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p6373_-74p8692",
+   "lon": -74.8691776113709,
+   "lat": 38.63730884261818,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 38.41,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.3,
+   "reception": "heard",
+   "ais_cell_vessels": 108,
+   "nm_to_limit": 2.89,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_38p7303_-74p9586",
+   "lon": -74.95864202898053,
+   "lat": 38.730285482733,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 36.33,
+   "pixels": 16,
+   "length_m_approx": 40.0,
+   "uncertainty_m": 20.5,
+   "reception": "heard",
+   "ais_cell_vessels": 118,
+   "nm_to_limit": 6.51,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_38p9227_-74p8194",
+   "lon": -74.81937211878336,
+   "lat": 38.922720160833386,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
+   "snr": 45.97,
+   "pixels": 25,
+   "length_m_approx": 50.0,
+   "uncertainty_m": 25.4,
+   "reception": "heard",
+   "ais_cell_vessels": 169,
+   "nm_to_limit": 9.9,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_36p9620_-75p3430",
+   "lon": -75.34298359857908,
+   "lat": 36.96203291232725,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 41.42,
+   "pixels": 23,
+   "length_m_approx": 48.0,
+   "uncertainty_m": 24.2,
+   "reception": "heard",
+   "ais_cell_vessels": 12,
+   "nm_to_limit": 2.26,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_38p7597_-74p9195",
+   "lon": -74.9194512216834,
+   "lat": 38.759671621505085,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 309.18,
+   "pixels": 217,
+   "length_m_approx": 147.3,
+   "uncertainty_m": 73.8,
+   "reception": "heard",
+   "ais_cell_vessels": 46,
+   "nm_to_limit": 4.92,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p9927_-75p4404",
+   "lon": -75.44037205008158,
+   "lat": 36.99273257672636,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 22.88,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.0,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 2.65,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_39p0042_-73p9029",
+   "lon": -73.90285798713025,
+   "lat": 39.004179497454686,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225905_20241206T225930_056878_06FC1E_BD0B_COG.SAFE",
+   "snr": 23.22,
+   "pixels": 45,
+   "length_m_approx": 67.1,
+   "uncertainty_m": 33.8,
+   "reception": "heard",
+   "ais_cell_vessels": 33,
+   "nm_to_limit": 7.93,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_38p0709_-74p4656",
+   "lon": -74.46558923230216,
+   "lat": 38.070904516368984,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 203.62,
+   "pixels": 219,
+   "length_m_approx": 148.0,
+   "uncertainty_m": 74.1,
+   "reception": "heard",
+   "ais_cell_vessels": 17,
+   "nm_to_limit": 8.96,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_36p9400_-75p9149",
+   "lon": -75.91490553068363,
+   "lat": 36.940009254524355,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 22.18,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.5,
+   "reception": "heard",
+   "ais_cell_vessels": 345,
+   "nm_to_limit": 8.49,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p7482_-75p3437",
+   "lon": -75.34371543359082,
+   "lat": 36.74824907197943,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+   "snr": 27.43,
+   "pixels": 37,
+   "length_m_approx": 60.8,
+   "uncertainty_m": 30.6,
+   "reception": "heard",
+   "ais_cell_vessels": 34,
+   "nm_to_limit": 3.27,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_39p3004_-74p4046",
+   "lon": -74.40455522284671,
+   "lat": 39.30044338909555,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
+   "snr": 61.41,
+   "pixels": 41,
+   "length_m_approx": 64.0,
+   "uncertainty_m": 33.0,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 8.61,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p1412_-74p1082",
+   "lon": -74.10817949328231,
+   "lat": 39.14116203925192,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 22.36,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 21.8,
+   "reception": "heard",
+   "ais_cell_vessels": 20,
+   "nm_to_limit": 4.68,
+   "stratum": {
+    "band": "2-10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_37p2754_-75p5199",
+   "lon": -75.51987671948343,
+   "lat": 37.275385458523644,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 15.49,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 21.4,
+   "reception": "heard",
+   "ais_cell_vessels": 15,
+   "nm_to_limit": 1.64,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_37p1703_-75p2363",
+   "lon": -75.23630061962173,
+   "lat": 37.17034842511407,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 18.05,
+   "pixels": 12,
+   "length_m_approx": 34.6,
+   "uncertainty_m": 17.6,
+   "reception": "heard",
+   "ais_cell_vessels": 7,
+   "nm_to_limit": 1.33,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_36p7642_-75p3823",
+   "lon": -75.38229731446035,
+   "lat": 36.76417305380291,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:58:42+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225842_20240621T225907_054428_069F67_4366_COG.SAFE",
+   "snr": 17.61,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 14.5,
+   "reception": "heard",
+   "ais_cell_vessels": 56,
+   "nm_to_limit": 1.79,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_38p8199_-74p6199",
+   "lon": -74.61985503736553,
+   "lat": 38.819940777919,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 15.15,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.6,
+   "reception": "heard",
+   "ais_cell_vessels": 25,
+   "nm_to_limit": 0.94,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_39p0606_-74p4750",
+   "lon": -74.47499280629955,
+   "lat": 39.06055980329651,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 15.49,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.3,
+   "reception": "heard",
+   "ais_cell_vessels": 19,
+   "nm_to_limit": 1.04,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p7617_-75p3784",
+   "lon": -75.3783505234003,
+   "lat": 36.76168317923334,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 16.86,
+   "pixels": 37,
+   "length_m_approx": 60.8,
+   "uncertainty_m": 30.6,
+   "reception": "heard",
+   "ais_cell_vessels": 56,
+   "nm_to_limit": 1.93,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_39p3769_-74p0716",
+   "lon": -74.07160084485987,
+   "lat": 39.37685124261999,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225905_20241206T225930_056878_06FC1E_BD0B_COG.SAFE",
+   "snr": 17.94,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 16.5,
+   "reception": "heard",
+   "ais_cell_vessels": 28,
+   "nm_to_limit": 0.36,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_38p9177_-74p2853",
+   "lon": -74.2852658609244,
+   "lat": 38.91774516783462,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:59:03+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
+   "snr": 15.77,
+   "pixels": 25,
+   "length_m_approx": 50.0,
+   "uncertainty_m": 25.4,
+   "reception": "heard",
+   "ais_cell_vessels": 18,
+   "nm_to_limit": 1.54,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_39p0610_-74p4751",
+   "lon": -74.47510878660373,
+   "lat": 39.0610214261011,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 16.25,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 16.6,
+   "reception": "heard",
+   "ais_cell_vessels": 19,
+   "nm_to_limit": 1.05,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_37p6868_-74p8669",
+   "lon": -74.86693379732945,
+   "lat": 37.68682351028281,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 31.93,
+   "pixels": 45,
+   "length_m_approx": 67.1,
+   "uncertainty_m": 33.7,
+   "reception": "heard",
+   "ais_cell_vessels": 11,
+   "nm_to_limit": 1.51,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_39p3547_-74p1306",
+   "lon": -74.13058181413456,
+   "lat": 39.354665436228785,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+   "snr": 23.91,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 20.3,
+   "reception": "heard",
+   "ais_cell_vessels": 35,
+   "nm_to_limit": 1.53,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p6935_-75p3577",
+   "lon": -75.35768730777174,
+   "lat": 36.693480849389125,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 24.96,
+   "pixels": 100,
+   "length_m_approx": 100.0,
+   "uncertainty_m": 50.1,
+   "reception": "heard",
+   "ais_cell_vessels": 36,
+   "nm_to_limit": 1.78,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p7407_-74p4128",
+   "lon": -74.41283277844494,
+   "lat": 38.7407052334636,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 308.89,
+   "pixels": 254,
+   "length_m_approx": 159.4,
+   "uncertainty_m": 79.8,
+   "reception": "heard",
+   "ais_cell_vessels": 12,
+   "nm_to_limit": 0.88,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p1798_-73p9367",
+   "lon": -73.93668739768029,
+   "lat": 39.179767762031915,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 39.15,
+   "pixels": 108,
+   "length_m_approx": 103.9,
+   "uncertainty_m": 52.1,
+   "reception": "heard",
+   "ais_cell_vessels": 31,
+   "nm_to_limit": 0.18,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_39p1660_-74p0023",
+   "lon": -74.00231650187234,
+   "lat": 39.165996563961826,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
+   "snr": 37.89,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 21.6,
+   "reception": "heard",
+   "ais_cell_vessels": 33,
+   "nm_to_limit": 1.92,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_36p9774_-75p4228",
+   "lon": -75.42280761161119,
+   "lat": 36.977424757437255,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 44.95,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 21.4,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 1.43,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_38p4257_-74p5714",
+   "lon": -74.57138196961245,
+   "lat": 38.42570019157328,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 25.47,
+   "pixels": 35,
+   "length_m_approx": 59.2,
+   "uncertainty_m": 29.9,
+   "reception": "heard",
+   "ais_cell_vessels": 35,
+   "nm_to_limit": 1.44,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p6677_-75p3574",
+   "lon": -75.35738531340192,
+   "lat": 36.667724604473094,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 28.77,
+   "pixels": 125,
+   "length_m_approx": 111.8,
+   "uncertainty_m": 56.0,
+   "reception": "heard",
+   "ais_cell_vessels": 36,
+   "nm_to_limit": 1.48,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p9774_-75p4228",
+   "lon": -75.42280729032171,
+   "lat": 36.97739345535947,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 51.55,
+   "pixels": 18,
+   "length_m_approx": 42.4,
+   "uncertainty_m": 21.4,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 1.43,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_37p0248_-75p6094",
+   "lon": -75.60942693485279,
+   "lat": 37.02483144862685,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 25.33,
+   "pixels": 70,
+   "length_m_approx": 83.7,
+   "uncertainty_m": 42.0,
+   "reception": "heard",
+   "ais_cell_vessels": 14,
+   "nm_to_limit": 1.75,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_37p3401_-75p4918",
+   "lon": -75.49178308409769,
+   "lat": 37.340109982414035,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+   "snr": 54.64,
+   "pixels": 100,
+   "length_m_approx": 100.0,
+   "uncertainty_m": 50.1,
+   "reception": "heard",
+   "ais_cell_vessels": 14,
+   "nm_to_limit": 1.81,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p2396_-74p2015",
+   "lon": -74.20154943268709,
+   "lat": 39.23963090540583,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 20.67,
+   "pixels": 31,
+   "length_m_approx": 55.7,
+   "uncertainty_m": 28.9,
+   "reception": "heard",
+   "ais_cell_vessels": 23,
+   "nm_to_limit": 0.15,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_37p9567_-75p0213",
+   "lon": -75.02125821720732,
+   "lat": 37.95672465238468,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225841_20240901T225906_055478_06C4A7_DF0B_COG.SAFE",
+   "snr": 28.28,
+   "pixels": 13,
+   "length_m_approx": 36.1,
+   "uncertainty_m": 18.4,
+   "reception": "heard",
+   "ais_cell_vessels": 15,
+   "nm_to_limit": 0.84,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p8714_-75p6939",
+   "lon": -75.69388414655347,
+   "lat": 36.871387210770955,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 43.4,
+   "pixels": 58,
+   "length_m_approx": 76.2,
+   "uncertainty_m": 38.3,
+   "reception": "heard",
+   "ais_cell_vessels": 26,
+   "nm_to_limit": 1.37,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_37p2751_-75p5210",
+   "lon": -75.52095001423436,
+   "lat": 37.275084917009885,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 25.92,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 23.1,
+   "reception": "heard",
+   "ais_cell_vessels": 15,
+   "nm_to_limit": 1.68,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_37p1731_-75p2424",
+   "lon": -75.24239165284565,
+   "lat": 37.1730635211069,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+   "snr": 25.66,
+   "pixels": 29,
+   "length_m_approx": 53.9,
+   "uncertainty_m": 27.1,
+   "reception": "heard",
+   "ais_cell_vessels": 7,
+   "nm_to_limit": 1.0,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p7333_-75p6620",
+   "lon": -75.66196016701764,
+   "lat": 36.73329343580943,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 75.43,
+   "pixels": 74,
+   "length_m_approx": 86.0,
+   "uncertainty_m": 43.2,
+   "reception": "heard",
+   "ais_cell_vessels": 71,
+   "nm_to_limit": 0.46,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_38p4333_-74p5826",
+   "lon": -74.58261222616666,
+   "lat": 38.43329216444665,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
+   "snr": 22.53,
+   "pixels": 70,
+   "length_m_approx": 83.7,
+   "uncertainty_m": 42.0,
+   "reception": "heard",
+   "ais_cell_vessels": 35,
+   "nm_to_limit": 1.99,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_39p2718_-74p1567",
+   "lon": -74.15671214368709,
+   "lat": 39.27182303526825,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 52.08,
+   "pixels": 29,
+   "length_m_approx": 53.9,
+   "uncertainty_m": 28.1,
+   "reception": "heard",
+   "ais_cell_vessels": 21,
+   "nm_to_limit": 0.48,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_38p7149_-74p8595",
+   "lon": -74.85948324260542,
+   "lat": 38.71488701473521,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:59:03+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
+   "snr": 29.05,
+   "pixels": 52,
+   "length_m_approx": 72.1,
+   "uncertainty_m": 36.4,
+   "reception": "heard",
+   "ais_cell_vessels": 26,
+   "nm_to_limit": 1.95,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p6876_-75p6176",
+   "lon": -75.61762338776491,
+   "lat": 36.68759558643247,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 25.79,
+   "pixels": 53,
+   "length_m_approx": 72.8,
+   "uncertainty_m": 36.6,
+   "reception": "heard",
+   "ais_cell_vessels": 57,
+   "nm_to_limit": 1.58,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p8252_-75p6835",
+   "lon": -75.68348022485182,
+   "lat": 36.825173044700456,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 69.03,
+   "pixels": 129,
+   "length_m_approx": 113.6,
+   "uncertainty_m": 56.9,
+   "reception": "heard",
+   "ais_cell_vessels": 117,
+   "nm_to_limit": 1.35,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p9170_-75p7572",
+   "lon": -75.75720014251426,
+   "lat": 36.91702285554994,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 53.15,
+   "pixels": 19,
+   "length_m_approx": 43.6,
+   "uncertainty_m": 22.1,
+   "reception": "heard",
+   "ais_cell_vessels": 18,
+   "nm_to_limit": 0.92,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_38p7158_-74p8603",
+   "lon": -74.86031890736078,
+   "lat": 38.71583356607626,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:59:03+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
+   "snr": 21.17,
+   "pixels": 53,
+   "length_m_approx": 72.8,
+   "uncertainty_m": 36.7,
+   "reception": "heard",
+   "ais_cell_vessels": 26,
+   "nm_to_limit": 1.98,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p9931_-75p3949",
+   "lon": -75.39486409404117,
+   "lat": 36.99310827392725,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 33.38,
+   "pixels": 12,
+   "length_m_approx": 34.6,
+   "uncertainty_m": 17.6,
+   "reception": "heard",
+   "ais_cell_vessels": 15,
+   "nm_to_limit": 0.83,
+   "stratum": {
+    "band": "<=2nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_38p8705_-76p4807",
+   "lon": -76.48065555719062,
+   "lat": 38.870536421010215,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 16.7,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 16.6,
+   "reception": "heard",
+   "ais_cell_vessels": 252,
+   "nm_to_limit": 90.18,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_38p4354_-73p8541",
+   "lon": -73.85408007012953,
+   "lat": 38.43535515410662,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+   "snr": 16.26,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.6,
+   "reception": "heard",
+   "ais_cell_vessels": 10,
+   "nm_to_limit": 31.1,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_38p8359_-75p1186",
+   "lon": -75.11861732280335,
+   "lat": 38.835882944573754,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
+   "snr": 15.64,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.2,
+   "reception": "heard",
+   "ais_cell_vessels": 38,
+   "nm_to_limit": 15.26,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_38p9516_-75p2027",
+   "lon": -75.20273634944942,
+   "lat": 38.95157643432571,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 18.03,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 15.0,
+   "reception": "heard",
+   "ais_cell_vessels": 20,
+   "nm_to_limit": 22.15,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p8215_-75p0256",
+   "lon": -75.02561457495433,
+   "lat": 38.821455006997354,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 20.08,
+   "pixels": 12,
+   "length_m_approx": 34.6,
+   "uncertainty_m": 17.9,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 10.97,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p5090_-74p3238",
+   "lon": -74.3238260571097,
+   "lat": 39.509020710271145,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 19.79,
+   "pixels": 25,
+   "length_m_approx": 50.0,
+   "uncertainty_m": 26.2,
+   "reception": "heard",
+   "ais_cell_vessels": 24,
+   "nm_to_limit": 13.68,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_38p4024_-76p3846",
+   "lon": -76.38455001002576,
+   "lat": 38.40244450655976,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
+   "snr": 16.47,
+   "pixels": 30,
+   "length_m_approx": 54.8,
+   "uncertainty_m": 29.0,
+   "reception": "heard",
+   "ais_cell_vessels": 327,
+   "nm_to_limit": 66.99,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_37p5541_-74p3628",
+   "lon": -74.3627954930208,
+   "lat": 37.55411241447229,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 15.5,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 23.1,
+   "reception": "heard",
+   "ais_cell_vessels": 16,
+   "nm_to_limit": 26.48,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_39p2798_-76p2857",
+   "lon": -76.28568313882494,
+   "lat": 39.279825180547924,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 18.59,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 26.3,
+   "reception": "heard",
+   "ais_cell_vessels": 56,
+   "nm_to_limit": 75.6,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p8395_-73p6832",
+   "lon": -73.68323361844172,
+   "lat": 36.839476509528616,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 16.29,
+   "pixels": 24,
+   "length_m_approx": 49.0,
+   "uncertainty_m": 24.7,
+   "reception": "heard",
+   "ais_cell_vessels": 6,
+   "nm_to_limit": 77.61,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_38p2144_-75p8787",
+   "lon": -75.87873057802001,
+   "lat": 38.21437860840041,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225905_20241206T225930_056878_06FC1E_BD0B_COG.SAFE",
+   "snr": 15.03,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.5,
+   "reception": "heard",
+   "ais_cell_vessels": 7,
+   "nm_to_limit": 42.37,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_36p0884_-75p7637",
+   "lon": -75.76371760546678,
+   "lat": 36.08839336824537,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:09+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225809_20241230T225838_057228_070A00_ED69_COG.SAFE",
+   "snr": 19.11,
+   "pixels": 11,
+   "length_m_approx": 33.2,
+   "uncertainty_m": 17.1,
+   "reception": "heard",
+   "ais_cell_vessels": 0,
+   "nm_to_limit": 14.68,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_36p6234_-74p6946",
+   "lon": -74.69455791313095,
+   "lat": 36.62341457195434,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:12+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225812_20240410T225841_053378_067942_EBC4_COG.SAFE",
+   "snr": 18.36,
+   "pixels": 13,
+   "length_m_approx": 36.1,
+   "uncertainty_m": 18.2,
+   "reception": "heard",
+   "ais_cell_vessels": 21,
+   "nm_to_limit": 33.31,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_39p5717_-75p5627",
+   "lon": -75.56265550855372,
+   "lat": 39.57169136319354,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+   "snr": 17.57,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 17.3,
+   "reception": "heard",
+   "ais_cell_vessels": 385,
+   "nm_to_limit": 60.83,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p5566_-74p8066",
+   "lon": -74.80655139701106,
+   "lat": 36.55658144599886,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:14+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225814_20240528T225843_054078_069350_0BF8_COG.SAFE",
+   "snr": 15.02,
+   "pixels": 121,
+   "length_m_approx": 110.0,
+   "uncertainty_m": 55.1,
+   "reception": "heard",
+   "ais_cell_vessels": 10,
+   "nm_to_limit": 26.29,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p3478_-74p3966",
+   "lon": -74.39657518306427,
+   "lat": 39.347807958563095,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 18.75,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 16.2,
+   "reception": "heard",
+   "ais_cell_vessels": 150,
+   "nm_to_limit": 10.92,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_39p2873_-74p5993",
+   "lon": -74.59932322260074,
+   "lat": 39.287295965389106,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 18.72,
+   "pixels": 37,
+   "length_m_approx": 60.8,
+   "uncertainty_m": 31.4,
+   "reception": "heard",
+   "ais_cell_vessels": 42,
+   "nm_to_limit": 13.48,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_39p5083_-74p3249",
+   "lon": -74.32494917691413,
+   "lat": 39.50830863968926,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 17.62,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 17.7,
+   "reception": "heard",
+   "ais_cell_vessels": 24,
+   "nm_to_limit": 13.7,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_37p0687_-74p4140",
+   "lon": -74.4140477538737,
+   "lat": 37.068677981095774,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225841_20240901T225906_055478_06C4A7_DF0B_COG.SAFE",
+   "snr": 19.37,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 23.1,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 41.25,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_38p4013_-76p3821",
+   "lon": -76.38207746332426,
+   "lat": 38.40125859085192,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225906_20240925T225931_055828_06D27E_5E3B_COG.SAFE",
+   "snr": 17.26,
+   "pixels": 34,
+   "length_m_approx": 58.3,
+   "uncertainty_m": 30.7,
+   "reception": "heard",
+   "ais_cell_vessels": 327,
+   "nm_to_limit": 66.85,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_39p3202_-76p2156",
+   "lon": -76.21556815918707,
+   "lat": 39.320178069879745,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 16.97,
+   "pixels": 10,
+   "length_m_approx": 31.6,
+   "uncertainty_m": 26.3,
+   "reception": "heard",
+   "ais_cell_vessels": 210,
+   "nm_to_limit": 73.77,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_39p1778_-75p0374",
+   "lon": -75.03744849603342,
+   "lat": 39.1777836680874,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225906_20241112T225931_056528_06EE3A_0924_COG.SAFE",
+   "snr": 17.8,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 16.5,
+   "reception": "heard",
+   "ais_cell_vessels": 14,
+   "nm_to_limit": 27.14,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_37p2975_-76p1907",
+   "lon": -76.19070536363657,
+   "lat": 37.29746120555783,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
+   "snr": 17.18,
+   "pixels": 8,
+   "length_m_approx": 28.3,
+   "uncertainty_m": 21.0,
+   "reception": "heard",
+   "ais_cell_vessels": 123,
+   "nm_to_limit": 29.6,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_37p1542_-76p1094",
+   "lon": -76.10943494328137,
+   "lat": 37.15423318143241,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 18.25,
+   "pixels": 38,
+   "length_m_approx": 61.6,
+   "uncertainty_m": 34.5,
+   "reception": "heard",
+   "ais_cell_vessels": 149,
+   "nm_to_limit": 21.43,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_37p3377_-76p3940",
+   "lon": -76.39402312694575,
+   "lat": 37.3376741021766,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 17.88,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.5,
+   "reception": "heard",
+   "ais_cell_vessels": 17,
+   "nm_to_limit": 38.77,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p4134_-74p7413",
+   "lon": -74.74125295876547,
+   "lat": 36.41344260935708,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:14+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225814_20240528T225843_054078_069350_0BF8_COG.SAFE",
+   "snr": 15.88,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.3,
+   "reception": "heard",
+   "ais_cell_vessels": 18,
+   "nm_to_limit": 26.26,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_38p6751_-75p1048",
+   "lon": -75.10477306594662,
+   "lat": 38.6750865283878,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 16.93,
+   "pixels": 25,
+   "length_m_approx": 50.0,
+   "uncertainty_m": 25.4,
+   "reception": "heard",
+   "ais_cell_vessels": 7,
+   "nm_to_limit": 13.67,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_37p1541_-74p6113",
+   "lon": -74.61127519470446,
+   "lat": 37.154090843222285,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+   "snr": 19.11,
+   "pixels": 36,
+   "length_m_approx": 60.0,
+   "uncertainty_m": 30.2,
+   "reception": "heard",
+   "ais_cell_vessels": 14,
+   "nm_to_limit": 29.18,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "at-gate",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_39p4297_-76p0745",
+   "lon": -76.07450059714603,
+   "lat": 39.42967867586605,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 21.51,
+   "pixels": 27,
+   "length_m_approx": 52.0,
+   "uncertainty_m": 30.5,
+   "reception": "heard",
+   "ais_cell_vessels": 77,
+   "nm_to_limit": 71.63,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_38p4364_-74p1089",
+   "lon": -74.10892684249778,
+   "lat": 38.436410801357894,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+   "snr": 35.09,
+   "pixels": 22,
+   "length_m_approx": 46.9,
+   "uncertainty_m": 23.8,
+   "reception": "heard",
+   "ais_cell_vessels": 10,
+   "nm_to_limit": 20.27,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_37p4978_-74p4041",
+   "lon": -74.40412977195683,
+   "lat": 37.49781531985988,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 41.92,
+   "pixels": 26,
+   "length_m_approx": 51.0,
+   "uncertainty_m": 25.7,
+   "reception": "heard",
+   "ais_cell_vessels": 19,
+   "nm_to_limit": 26.31,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p4668_-76p0506",
+   "lon": -76.05062279247618,
+   "lat": 39.46684386487652,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 34.59,
+   "pixels": 38,
+   "length_m_approx": 61.6,
+   "uncertainty_m": 34.7,
+   "reception": "heard",
+   "ais_cell_vessels": 27,
+   "nm_to_limit": 72.05,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p4844_-74p1791",
+   "lon": -74.179071184454,
+   "lat": 38.484359543898066,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+   "snr": 76.93,
+   "pixels": 238,
+   "length_m_approx": 154.3,
+   "uncertainty_m": 77.2,
+   "reception": "heard",
+   "ais_cell_vessels": 11,
+   "nm_to_limit": 16.94,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_37p1504_-74p5240",
+   "lon": -74.52403461573334,
+   "lat": 37.15040910591381,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225840_20240808T225905_055128_06B7CB_5842_COG.SAFE",
+   "snr": 32.11,
+   "pixels": 29,
+   "length_m_approx": 53.9,
+   "uncertainty_m": 27.1,
+   "reception": "heard",
+   "ais_cell_vessels": 11,
+   "nm_to_limit": 34.08,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_36p6486_-73p6721",
+   "lon": -73.67209300905074,
+   "lat": 36.648616644405415,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:58:12+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225812_20240901T225841_055478_06C4A7_E53D_COG.SAFE",
+   "snr": 30.9,
+   "pixels": 24,
+   "length_m_approx": 49.0,
+   "uncertainty_m": 24.7,
+   "reception": "heard",
+   "ais_cell_vessels": 5,
+   "nm_to_limit": 82.89,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_38p0157_-73p8667",
+   "lon": -73.8666832975252,
+   "lat": 38.0156619417475,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 122.91,
+   "pixels": 147,
+   "length_m_approx": 121.2,
+   "uncertainty_m": 60.7,
+   "reception": "heard",
+   "ais_cell_vessels": 13,
+   "nm_to_limit": 36.49,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_38p6072_-75p1207",
+   "lon": -75.12067806068049,
+   "lat": 38.60721741542821,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 23.55,
+   "pixels": 28,
+   "length_m_approx": 52.9,
+   "uncertainty_m": 26.9,
+   "reception": "heard",
+   "ais_cell_vessels": 9,
+   "nm_to_limit": 14.82,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_38p3248_-75p0611",
+   "lon": -75.0611262776293,
+   "lat": 38.32481975659898,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225906_20241112T225931_056528_06EE3A_0924_COG.SAFE",
+   "snr": 30.91,
+   "pixels": 13,
+   "length_m_approx": 36.1,
+   "uncertainty_m": 18.6,
+   "reception": "heard",
+   "ais_cell_vessels": 115,
+   "nm_to_limit": 10.91,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_37p3627_-74p5920",
+   "lon": -74.59201043208901,
+   "lat": 37.362744226490996,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
+   "snr": 335.49,
+   "pixels": 213,
+   "length_m_approx": 145.9,
+   "uncertainty_m": 73.0,
+   "reception": "heard",
+   "ais_cell_vessels": 20,
+   "nm_to_limit": 23.32,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_39p3766_-75p4658",
+   "lon": -75.46580968835444,
+   "lat": 39.376639746249396,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:59:03+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
+   "snr": 28.78,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 20.0,
+   "reception": "heard",
+   "ais_cell_vessels": 285,
+   "nm_to_limit": 48.8,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_37p2637_-76p1224",
+   "lon": -76.12237879309411,
+   "lat": 37.263668121503294,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+   "snr": 29.61,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.1,
+   "reception": "heard",
+   "ais_cell_vessels": 140,
+   "nm_to_limit": 25.82,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_38p8822_-73p8855",
+   "lon": -73.88548861170295,
+   "lat": 38.88215794008201,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:59:08+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+   "snr": 141.27,
+   "pixels": 117,
+   "length_m_approx": 108.2,
+   "uncertainty_m": 54.2,
+   "reception": "heard",
+   "ais_cell_vessels": 22,
+   "nm_to_limit": 13.8,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_37p0789_-74p4797",
+   "lon": -74.47965483896536,
+   "lat": 37.07889439862415,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:43+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+   "snr": 37.58,
+   "pixels": 37,
+   "length_m_approx": 60.8,
+   "uncertainty_m": 30.6,
+   "reception": "heard",
+   "ais_cell_vessels": 18,
+   "nm_to_limit": 38.4,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_39p4027_-75p5017",
+   "lon": -75.50173069413238,
+   "lat": 39.40265928455815,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 104.26,
+   "pixels": 189,
+   "length_m_approx": 137.5,
+   "uncertainty_m": 69.1,
+   "reception": "heard",
+   "ais_cell_vessels": 295,
+   "nm_to_limit": 51.05,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-07-15_38p0120_-73p9086",
+   "lon": -73.90857468321595,
+   "lat": 38.01197820841908,
+   "date": "2024-07-15",
+   "t": "2024-07-15T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+   "snr": 43.71,
+   "pixels": 23,
+   "length_m_approx": 48.0,
+   "uncertainty_m": 24.2,
+   "reception": "heard",
+   "ais_cell_vessels": 14,
+   "nm_to_limit": 34.68,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-08-08_38p8210_-75p0257",
+   "lon": -75.02572429614858,
+   "lat": 38.821037481351354,
+   "date": "2024-08-08",
+   "t": "2024-08-08T22:59:05+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+   "snr": 32.33,
+   "pixels": 14,
+   "length_m_approx": 37.4,
+   "uncertainty_m": 19.3,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 10.96,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-01_38p9225_-75p0996",
+   "lon": -75.09964634662677,
+   "lat": 38.92254519951526,
+   "date": "2024-09-01",
+   "t": "2024-09-01T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
+   "snr": 39.31,
+   "pixels": 27,
+   "length_m_approx": 52.0,
+   "uncertainty_m": 26.5,
+   "reception": "heard",
+   "ais_cell_vessels": 208,
+   "nm_to_limit": 17.3,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-09-25_37p8372_-74p1740",
+   "lon": -74.17396774739416,
+   "lat": 37.837219422017064,
+   "date": "2024-09-25",
+   "t": "2024-09-25T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+   "snr": 20.93,
+   "pixels": 21,
+   "length_m_approx": 45.8,
+   "uncertainty_m": 23.1,
+   "reception": "heard",
+   "ais_cell_vessels": 10,
+   "nm_to_limit": 26.68,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-10-19_38p8212_-75p0259",
+   "lon": -75.02585402357431,
+   "lat": 38.82122095609342,
+   "date": "2024-10-19",
+   "t": "2024-10-19T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+   "snr": 33.2,
+   "pixels": 12,
+   "length_m_approx": 34.6,
+   "uncertainty_m": 17.9,
+   "reception": "heard",
+   "ais_cell_vessels": 133,
+   "nm_to_limit": 10.97,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-11-12_36p9283_-73p8480",
+   "lon": -73.84798935540451,
+   "lat": 36.92832160514956,
+   "date": "2024-11-12",
+   "t": "2024-11-12T22:58:41+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+   "snr": 20.54,
+   "pixels": 40,
+   "length_m_approx": 63.2,
+   "uncertainty_m": 31.8,
+   "reception": "heard",
+   "ais_cell_vessels": 12,
+   "nm_to_limit": 68.1,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-06_37p0734_-74p0638",
+   "lon": -74.06383569110142,
+   "lat": 37.07338762306678,
+   "date": "2024-12-06",
+   "t": "2024-12-06T22:58:40+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
+   "snr": 135.64,
+   "pixels": 215,
+   "length_m_approx": 146.6,
+   "uncertainty_m": 73.4,
+   "reception": "heard",
+   "ais_cell_vessels": 5,
+   "nm_to_limit": 54.0,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-12-30_37p5613_-76p2692",
+   "lon": -76.26923227142193,
+   "lat": 37.56133581170177,
+   "date": "2024-12-30",
+   "t": "2024-12-30T22:58:38+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+   "snr": 41.04,
+   "pixels": 16,
+   "length_m_approx": 40.0,
+   "uncertainty_m": 20.6,
+   "reception": "heard",
+   "ais_cell_vessels": 148,
+   "nm_to_limit": 40.68,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-04-10_39p0610_-76p2913",
+   "lon": -76.29134770621579,
+   "lat": 39.060974338033326,
+   "date": "2024-04-10",
+   "t": "2024-04-10T22:59:06+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+   "snr": 36.01,
+   "pixels": 17,
+   "length_m_approx": 41.2,
+   "uncertainty_m": 33.2,
+   "reception": "heard",
+   "ais_cell_vessels": 168,
+   "nm_to_limit": 84.39,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-04_36p0141_-73p8050",
+   "lon": -73.80498196616664,
+   "lat": 36.014124995542986,
+   "date": "2024-05-04",
+   "t": "2024-05-04T22:58:14+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240504T225814_20240504T225843_053728_068708_452D_COG.SAFE",
+   "snr": 33.7,
+   "pixels": 73,
+   "length_m_approx": 85.4,
+   "uncertainty_m": 42.8,
+   "reception": "heard",
+   "ais_cell_vessels": 5,
+   "nm_to_limit": 59.85,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-05-28_36p5100_-74p7443",
+   "lon": -74.74427853196273,
+   "lat": 36.51003563305434,
+   "date": "2024-05-28",
+   "t": "2024-05-28T22:58:14+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240528T225814_20240528T225843_054078_069350_0BF8_COG.SAFE",
+   "snr": 33.99,
+   "pixels": 88,
+   "length_m_approx": 93.8,
+   "uncertainty_m": 47.0,
+   "reception": "heard",
+   "ais_cell_vessels": 16,
+   "nm_to_limit": 28.4,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  },
+  {
+   "id": "2024-06-21_38p9886_-75p1978",
+   "lon": -75.19779123956994,
+   "lat": 38.98864961769518,
+   "date": "2024-06-21",
+   "t": "2024-06-21T22:59:07+00:00",
+   "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+   "snr": 20.8,
+   "pixels": 9,
+   "length_m_approx": 30.0,
+   "uncertainty_m": 15.8,
+   "reception": "heard",
+   "ais_cell_vessels": 31,
+   "nm_to_limit": 23.35,
+   "stratum": {
+    "band": ">10nm",
+    "strength": "clear",
+    "reception": "heard"
+   }
+  }
+ ]
+}
