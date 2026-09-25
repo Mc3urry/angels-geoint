@@ -493,6 +493,17 @@ def main() -> int:
                          "denominator is scaled, not biased)")
     ap.add_argument("--min-snr", type=float, default=15.0)
     ap.add_argument("--min-pixels", type=int, default=6)
+    # Added for the clutter-corrected re-run. Both default to exactly what
+    # this script did before they existed, so a bare invocation reproduces the
+    # published result byte for byte.
+    ap.add_argument("--candidates", type=Path, default=None,
+                    help="candidate file to analyse (default: "
+                         "candidates-scored.geojson, then candidates.geojson)")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="where to write the result (default: "
+                         "boundary-bands.json). A corrected run MUST pass "
+                         "this; the published result is not to be overwritten "
+                         "by a variant.")
     ap.add_argument("--near-nm", type=float, default=None,
                     help="signed runs only: keep just the water within this "
                          "many nm of the line, on either side. THE LOCAL "
@@ -513,8 +524,8 @@ def main() -> int:
               f" this run covers\n    12 and 24. Run scripts/fetch_limits.py,"
               f" or state the gap in the methods.")
 
-    cand_path = EVENTS / "candidates-scored.geojson"
-    if not cand_path.exists():
+    cand_path = args.candidates or (EVENTS / "candidates-scored.geojson")
+    if not cand_path.exists() and args.candidates is None:
         cand_path = EVENTS / "candidates.geojson"
     if not cand_path.exists():
         print(f"\n  No candidate file in {EVENTS}.\n")
@@ -674,7 +685,8 @@ def main() -> int:
                         list(SIGNED_NAMES), results[key],
                         near_nm=args.near_nm)
 
-    out = EVENTS / "boundary-bands.json"
+    out = args.out or (EVENTS / "boundary-bands.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "bands_nm": [b for b in BANDS_NM if b != float("inf")],
         "reception_kept": sorted(keep),
@@ -685,9 +697,14 @@ def main() -> int:
                  "Limits product; these are the 12, 24 and 200 nm lines."),
         "limits": results,
     }, indent=1), encoding="utf-8")
-    (EVENTS / "candidates-banded.geojson").write_text(json.dumps(doc, indent=1),
-                                                      encoding="utf-8")
-    print(f"\n  wrote {out.name} and candidates-banded.geojson\n")
+    # The banded dump is a by-product of the default run. A variant run must
+    # not clobber it, or the published file silently becomes a variant's.
+    if args.out is None:
+        (EVENTS / "candidates-banded.geojson").write_text(
+            json.dumps(doc, indent=1), encoding="utf-8")
+        print(f"\n  wrote {out.name} and candidates-banded.geojson\n")
+    else:
+        print(f"\n  wrote {out}\n")
     return 0
 
 
