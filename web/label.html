@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ANGELS — read the chips</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* A reading surface, not a dashboard. One image, big, and only the
+     measurements that bear on "is this a vessel". See routes/labels.py for
+     what is deliberately withheld and why. */
+  body { display:block; height:100vh; overflow:hidden; background:var(--paper); }
+  .wrap { display:grid; grid-template-columns:1fr 300px; height:100vh; }
+  .stage { display:flex; align-items:center; justify-content:center;
+           background:#0e1a24; position:relative; }
+  .stage img { max-width:100%; max-height:100vh; image-rendering:pixelated; }
+  .side { border-left:1px solid var(--rule); background:#fff; padding:16px;
+          overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+  h1 { margin:0; font:700 13px/1 var(--mono); letter-spacing:.2em; }
+  .count { font:10px var(--mono); color:var(--ink-3); letter-spacing:.08em;
+           text-transform:uppercase; }
+  .bar { height:4px; background:#e6edf1; border-radius:2px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--accent); }
+  table { border-collapse:collapse; width:100%; }
+  td { padding:3px 0; font:11.5px/1.4 var(--mono); vertical-align:baseline; }
+  td.k { color:var(--ink-3); font-size:9.5px; letter-spacing:.06em;
+         text-transform:uppercase; width:96px; }
+  .keys { display:flex; flex-direction:column; gap:6px; }
+  .keys button { display:flex; align-items:center; gap:9px; width:100%;
+    padding:9px 11px; border:1px solid var(--rule); background:#fff;
+    border-radius:3px; cursor:pointer; font:12px var(--mono); color:var(--ink);
+    text-align:left; }
+  .keys button:hover { border-color:var(--ink-3); }
+  .keys kbd { font:11px var(--mono); background:var(--ink); color:#fff;
+    border-radius:2px; padding:2px 6px; }
+  .keys .v-vessel kbd { background:#2a78d6; }
+  .keys .v-fixed kbd { background:#6b7c89; }
+  .keys .v-clutter kbd { background:#9b2c1f; }
+  .keys .v-ambiguous kbd { background:#7c5412; }
+  textarea { width:100%; min-height:54px; font:11.5px var(--mono);
+    border:1px solid var(--rule); border-radius:3px; padding:7px; resize:vertical; }
+  .hint { font:10px/1.5 var(--mono); color:var(--ink-3); }
+  .done { padding:24px; font:13px var(--mono); color:var(--ink-2); }
+  .blind { font:10px/1.5 system-ui,sans-serif; color:var(--ink-3);
+    border-top:1px solid var(--rule); padding-top:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage"><img id="chip" alt="candidate chip"></div>
+  <div class="side">
+    <h1>READ THE CHIPS</h1>
+    <div>
+      <div class="count" id="count">loading…</div>
+      <div class="bar"><i id="bar" style="width:0%"></i></div>
+    </div>
+
+    <table id="facts"></table>
+
+    <div class="keys">
+      <button class="v-vessel"    data-v="vessel"><kbd>1</kbd> vessel</button>
+      <button class="v-fixed"     data-v="fixed"><kbd>2</kbd> fixed structure</button>
+      <button class="v-clutter"   data-v="clutter"><kbd>3</kbd> clutter</button>
+      <button class="v-ambiguous" data-v="ambiguous"><kbd>4</kbd> ambiguous</button>
+    </div>
+
+    <textarea id="note" placeholder="note (optional) — Enter to submit with the last key"></textarea>
+    <div class="hint">Red ring = the candidate, 300 m across. A hull is a
+      compact bright head; a wind streak is diffuse; a wake has no bright head.
+      <br><br>Keys 1–4. <b>u</b> undoes the last verdict.</div>
+
+    <div class="blind">You are not shown how far this sits from a maritime
+      limit, which stratum it came from, or the chipper's own guess. The
+      first two are the variable under test; the third is an anchor.</div>
+  </div>
+</div>
+
+<script type="module">
+const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
+const $ = (id) => document.getElementById(id);
+
+let items = [], at = 0, total = 0, labelled = 0, last = null;
+
+const fact = (k, v) => v == null || v === "" ? "" :
+  `<tr><td class="k">${k}</td><td>${v}</td></tr>`;
+
+function show() {
+  const it = items[at];
+  if (!it) {
+    document.querySelector(".wrap").innerHTML =
+      `<div class="done">All ${total} read. Verdicts are in
+       data/events/labels.jsonl — see /labels/progress for the tally by
+       stratum.</div>`;
+    return;
+  }
+  $("chip").src = `${API}/labels/chip/${it.key}`;
+  const len = it.length_m_approx == null ? null
+            : `${Math.round(it.length_m_approx)}&nbsp;m (approx)`;
+  $("facts").innerHTML =
+    fact("date", it.date) +
+    fact("strength", it.snr == null ? null : `SNR ${Number(it.snr).toFixed(1)}`) +
+    fact("size", it.pixels == null ? null : `${it.pixels}&nbsp;px`) +
+    fact("length", len) +
+    fact("background", it.background_dn) +
+    fact("AIS here", it.reception) +
+    fact("vessels in cell", it.ais_cell_vessels);
+  $("note").value = "";
+  $("count").textContent =
+    `${labelled} of ${total} read · ${total - labelled} left`;
+  $("bar").style.width = `${total ? (100 * labelled / total).toFixed(1) : 0}%`;
+}
+
+async function send(verdict) {
+  const it = items[at];
+  if (!it) return;
+  const body = { key: it.key, verdict, note: $("note").value,
+                 lon: it.lon, lat: it.lat };
+  await fetch(`${API}/labels`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  last = { ...body };
+  labelled += 1; at += 1;
+  show();
+}
+
+// Undo re-queues the last one at the front rather than deleting a line from
+// the log. The log is append-only on purpose: a verdict that was changed is
+// itself information, and _done() already takes the last write for a key.
+function undo() {
+  if (!last) return;
+  const prev = items.findIndex((x) => x.key === last.key);
+  at = prev >= 0 ? prev : Math.max(0, at - 1);
+  labelled = Math.max(0, labelled - 1);
+  last = null;
+  show();
+}
+
+addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA" && e.key !== "Enter") return;
+  const map = { "1": "vessel", "2": "fixed", "3": "clutter", "4": "ambiguous" };
+  if (map[e.key]) { e.preventDefault(); send(map[e.key]); }
+  else if (e.key === "u") { e.preventDefault(); undo(); }
+});
+document.querySelectorAll(".keys button").forEach((b) =>
+  b.addEventListener("click", () => send(b.dataset.v)));
+
+const q = await (await fetch(`${API}/labels/queue`)).json();
+items = q.items; total = q.total; labelled = q.labelled;
+show();
+</script>
+</body>
+</html>

@@ -133,6 +133,13 @@ def main() -> int:
     ap.add_argument("--min-snr", type=float, default=0.0)
     ap.add_argument("--half", type=int, default=150,
                     help="chip half-width in pixels (150 = 3 km)")
+    ap.add_argument("--sample", default=None,
+                    help="a draw from sample_candidates.py (a filename in "
+                         "data/events). Chips exactly that set and ignores "
+                         "--where/--n/--min-snr: the sampling decision was "
+                         "made there, on strata, and re-deciding it here "
+                         "would quietly replace a designed sample with an "
+                         "evenly-spaced one")
     args = ap.parse_args()
 
     import numpy as np
@@ -141,14 +148,33 @@ def main() -> int:
 
     from angels.adapters.maritime.geolocate import Geolocator
 
-    feats, source = load_candidates(args.where, args.min_snr)
-    if not feats:
-        print(f"\n  No candidates matched ({args.where}, SNR >= "
-              f"{args.min_snr:g}).\n")
-        return 1
-    chosen = feats if args.all else sample(feats, args.n)
-    print(f"\n  {len(feats):,} candidates in {source} ({args.where})")
-    print(f"  chipping {len(chosen)}, evenly spaced by position\n")
+    if args.sample:
+        # A drawn sample carries everything needed to chip it -- position,
+        # scene, and the stratum it was drawn for -- so it is rebuilt into
+        # feature shape rather than matched back against the source file by
+        # coordinate, which would silently drop anything that had been
+        # re-scored since the draw.
+        from angels.config import EVENTS
+        doc = json.loads((EVENTS / args.sample).read_text(encoding="utf-8"))
+        chosen = [{"type": "Feature",
+                   "geometry": {"type": "Point",
+                                "coordinates": [r["lon"], r["lat"]]},
+                   "properties": r}
+                  for r in doc["sample"]]
+        source = args.sample
+        print(f"\n  {doc['drawn']} drawn from {doc['population']:,} gated "
+              f"candidates, {doc['per_stratum']} per stratum, seed "
+              f"{doc['seed']}")
+        print(f"  chipping all of them\n")
+    else:
+        feats, source = load_candidates(args.where, args.min_snr)
+        if not feats:
+            print(f"\n  No candidates matched ({args.where}, SNR >= "
+                  f"{args.min_snr:g}).\n")
+            return 1
+        chosen = feats if args.all else sample(feats, args.n)
+        print(f"\n  {len(feats):,} candidates in {source} ({args.where})")
+        print(f"  chipping {len(chosen)}, evenly spaced by position\n")
 
     by_scene: dict[str, list] = {}
     for f in chosen:
