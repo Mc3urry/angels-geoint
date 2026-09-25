@@ -1,0 +1,130 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
+  "by_length": {
+   "<25 m": 5,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41196860336191,
+     38.96063463688754
+    ]
+   },
+   "properties": {
+    "mmsi": "305826000",
+    "name": "THORCO AURORA",
+    "length_m": 132.0,
+    "fix_uncertainty_m": 22.5,
+    "reports_in_track": 19,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.42287761432647,
+     39.33966849924243
+    ]
+   },
+   "properties": {
+    "mmsi": "367313760",
+    "name": "ST JOHNS RIVER",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 148.5,
+    "reports_in_track": 54,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.02594749500486,
+     38.59119833351616
+    ]
+   },
+   "properties": {
+    "mmsi": "366902060",
+    "name": "BIG STONE PRIDE",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 78.3,
+    "reports_in_track": 58,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.48443196886842,
+     39.168070328277985
+    ]
+   },
+   "properties": {
+    "mmsi": "367596940",
+    "name": "CAPT WILLIE LANDERS",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 33.1,
+    "reports_in_track": 57,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.0848527365493,
+     39.71138463648858
+    ]
+   },
+   "properties": {
+    "mmsi": "338492239",
+    "name": "SEQUOIA",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 1414.6,
+    "reports_in_track": 11,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.55240153724367,
+     39.47714384620496
+    ]
+   },
+   "properties": {
+    "mmsi": "368141470",
+    "name": "IDRIL",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 45.0,
+    "reports_in_track": 39,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

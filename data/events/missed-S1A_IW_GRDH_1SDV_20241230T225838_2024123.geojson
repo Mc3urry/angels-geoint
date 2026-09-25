@@ -1,0 +1,111 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 3,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.97110984352616,
+     36.94354586022704
+    ]
+   },
+   "properties": {
+    "mmsi": "366779420",
+    "name": "ALERT",
+    "length_m": 42.0,
+    "fix_uncertainty_m": 26.2,
+    "reports_in_track": 49,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.22632799113552,
+     37.00332000979927
+    ]
+   },
+   "properties": {
+    "mmsi": "367309860",
+    "name": "ALICIA F. MCALLISTER",
+    "length_m": 30.0,
+    "fix_uncertainty_m": 137.8,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.87429101011645,
+     36.861541006367695
+    ]
+   },
+   "properties": {
+    "mmsi": "367096850",
+    "name": "RUDEE ANGLER",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 63.3,
+    "reports_in_track": 37,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19201579894298,
+     37.15617313020905
+    ]
+   },
+   "properties": {
+    "mmsi": "368053720",
+    "name": "DIAMOND BREEZE",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 412.0,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.16258429747097,
+     37.28558857303804
+    ]
+   },
+   "properties": {
+    "mmsi": "338171693",
+    "name": "GUIDED DISCOVERY",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 165.6,
+    "reports_in_track": 20,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

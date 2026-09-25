@@ -1,0 +1,206 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
+  "by_length": {
+   "<25 m": 3,
+   "25-50 m": 4,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 2,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.0588839787448,
+     38.80268402108138
+    ]
+   },
+   "properties": {
+    "mmsi": "366980160",
+    "name": "BRANDYWINE",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 189.1,
+    "reports_in_track": 55,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.30391234974218,
+     39.33311412774737
+    ]
+   },
+   "properties": {
+    "mmsi": "367546220",
+    "name": "NORTHSTAR COMMANDER",
+    "length_m": 26.0,
+    "fix_uncertainty_m": 87.8,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.13321185211885,
+     38.805911605318265
+    ]
+   },
+   "properties": {
+    "mmsi": "338926420",
+    "name": "CG LAWRENCE LAWSON",
+    "length_m": 46.0,
+    "fix_uncertainty_m": 33.3,
+    "reports_in_track": 38,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.88386853532472,
+     38.8773708338821
+    ]
+   },
+   "properties": {
+    "mmsi": "538005936",
+    "name": "SAGITTARIUS",
+    "length_m": 169.0,
+    "fix_uncertainty_m": 118.2,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.362699580725,
+     39.3701869023569
+    ]
+   },
+   "properties": {
+    "mmsi": "367191410",
+    "name": "GO PURSUIT",
+    "length_m": 45.0,
+    "fix_uncertainty_m": 38.5,
+    "reports_in_track": 53,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.19916612903228,
+     38.97239000000036
+    ]
+   },
+   "properties": {
+    "mmsi": "538004168",
+    "name": "UOG HERMES",
+    "length_m": 229.0,
+    "fix_uncertainty_m": 20.5,
+    "reports_in_track": 18,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.37814414392875,
+     38.33550674576708
+    ]
+   },
+   "properties": {
+    "mmsi": "368053720",
+    "name": "DIAMOND BREEZE",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 147.8,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.24218427808546,
+     39.076962406418076
+    ]
+   },
+   "properties": {
+    "mmsi": "303615000",
+    "name": "PRIDE OF BALTIMORE 2",
+    "length_m": 48.0,
+    "fix_uncertainty_m": 25.4,
+    "reports_in_track": 20,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.1989625,
+     38.972790000000714
+    ]
+   },
+   "properties": {
+    "mmsi": "338447000",
+    "name": "OSG HORIZON",
+    "length_m": 215.0,
+    "fix_uncertainty_m": 20.6,
+    "reports_in_track": 19,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.29210434901972,
+     38.55028631578981
+    ]
+   },
+   "properties": {
+    "mmsi": "338146676",
+    "name": "CAN DO",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 26.0,
+    "reports_in_track": 11,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

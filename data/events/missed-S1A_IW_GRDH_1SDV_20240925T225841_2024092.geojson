@@ -1,0 +1,187 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
+  "by_length": {
+   "<25 m": 3,
+   "25-50 m": 2,
+   "50-100 m": 2,
+   "100-200 m": 0,
+   ">200 m": 2,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.58032104913559,
+     36.99910360584815
+    ]
+   },
+   "properties": {
+    "mmsi": "366906550",
+    "name": "SEA BORN",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 65.0,
+    "reports_in_track": 44,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44458314112052,
+     37.57801880714761
+    ]
+   },
+   "properties": {
+    "mmsi": "319444000",
+    "name": "CRILI",
+    "length_m": 47.0,
+    "fix_uncertainty_m": 49.3,
+    "reports_in_track": 56,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.83939159015955,
+     36.74179392554127
+    ]
+   },
+   "properties": {
+    "mmsi": "353062000",
+    "name": "ORIENTAL WIND",
+    "length_m": 200.0,
+    "fix_uncertainty_m": 83.9,
+    "reports_in_track": 53,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.86445688464516,
+     38.01169623636503
+    ]
+   },
+   "properties": {
+    "mmsi": "249405000",
+    "name": "HELLAS EAGLE",
+    "length_m": 205.0,
+    "fix_uncertainty_m": 72.3,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44200253352892,
+     37.62137066044685
+    ]
+   },
+   "properties": {
+    "mmsi": "368333380",
+    "name": "MOON SHADOW",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 67.8,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.69709555534786,
+     36.80902777799649
+    ]
+   },
+   "properties": {
+    "mmsi": "366961860",
+    "name": "ATLANTIC BOUNTY",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 39.5,
+    "reports_in_track": 19,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3701825047388,
+     37.62609500080707
+    ]
+   },
+   "properties": {
+    "mmsi": "368360310",
+    "name": "MOMENTS IN TIME",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 76.3,
+    "reports_in_track": 39,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57177227144945,
+     37.01067379632422
+    ]
+   },
+   "properties": {
+    "mmsi": "109000120",
+    "name": "109000120",
+    "length_m": 90.0,
+    "fix_uncertainty_m": 175.0,
+    "reports_in_track": 9,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.58348972897045,
+     36.99663302914327
+    ]
+   },
+   "properties": {
+    "mmsi": "109090205",
+    "name": "109090205",
+    "length_m": 97.0,
+    "fix_uncertainty_m": 62.2,
+    "reports_in_track": 21,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  }
+ ]
+}

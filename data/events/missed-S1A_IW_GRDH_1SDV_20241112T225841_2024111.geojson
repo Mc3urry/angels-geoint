@@ -1,0 +1,35 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
+  "by_length": {
+   "<25 m": 1,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.53395291939484,
+     37.56063308164695
+    ]
+   },
+   "properties": {
+    "mmsi": "338183639",
+    "name": "ALCHEMIST",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 194.2,
+    "reports_in_track": 18,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

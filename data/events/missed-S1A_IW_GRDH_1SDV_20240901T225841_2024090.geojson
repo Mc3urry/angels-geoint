@@ -1,0 +1,92 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240901T225841_20240901T225906_055478_06C4A7_DF0B_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 1
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.85324803322027,
+     36.8441077049582
+    ]
+   },
+   "properties": {
+    "mmsi": "367091160",
+    "name": "MISS LIS",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 27.1,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.67740048232332,
+     38.12903968563657
+    ]
+   },
+   "properties": {
+    "mmsi": "311001301",
+    "name": "SEA AXIS",
+    "length_m": 38.0,
+    "fix_uncertainty_m": 201.9,
+    "reports_in_track": 44,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.88815259268995,
+     38.018230452258166
+    ]
+   },
+   "properties": {
+    "mmsi": "368315690",
+    "name": "PRIMASEA",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 69.7,
+    "reports_in_track": 45,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.7382360625462,
+     38.035056773921845
+    ]
+   },
+   "properties": {
+    "mmsi": "338254368",
+    "name": "INTEGRITY",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 567.3,
+    "reports_in_track": 14,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

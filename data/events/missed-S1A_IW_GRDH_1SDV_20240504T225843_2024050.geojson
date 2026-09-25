@@ -1,0 +1,54 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240504T225843_20240504T225908_053728_068708_1D1B_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.77178864996989,
+     36.551682584428846
+    ]
+   },
+   "properties": {
+    "mmsi": "316009445",
+    "name": "DASSIE",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 67.1,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.71994112118517,
+     37.92683132773749
+    ]
+   },
+   "properties": {
+    "mmsi": "368079860",
+    "name": "RING OF KERRY",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 138.7,
+    "reports_in_track": 7,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,9703 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "radius_m": 300.0,
+  "min_dates": 3,
+  "min_fraction": 0.5,
+  "gate_min_snr": 15.0,
+  "gate_min_pixels": 6,
+  "n_sites": 1379,
+  "n_fixed": 145,
+  "dates": [
+   "2024-04-10",
+   "2024-05-04",
+   "2024-05-28",
+   "2024-06-21",
+   "2024-07-15",
+   "2024-08-08",
+   "2024-09-01",
+   "2024-09-25",
+   "2024-10-19",
+   "2024-11-12",
+   "2024-12-06",
+   "2024-12-30",
+   "2026-09-10"
+  ]
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.98226,
+     36.06499
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 83.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.77533,
+     36.08532
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24943,
+     36.22671
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 118.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.79499,
+     36.21438
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.86948,
+     36.40538
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.16034,
+     36.9887
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.18616,
+     36.99587
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.1873,
+     36.99177
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.11912,
+     36.97474
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21267,
+     37.0028
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.10592,
+     36.98141
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": true,
+    "max_snr": 42.6,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.11249,
+     36.96531
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 41.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.02308,
+     36.94943
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.02701,
+     37.00533
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.01205,
+     36.95925
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.09764,
+     36.97306
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.94826,
+     37.03826
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.933,
+     37.01669
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.79669,
+     36.96704
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28"
+    ],
+    "ever_matched": true,
+    "max_snr": 131.4,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.71231,
+     36.90475
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 6,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 99.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.18784,
+     37.14315
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.16294,
+     37.12768
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21039,
+     37.1592
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.14283,
+     37.14003
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.15196,
+     37.16542
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.98488,
+     37.14396
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.6,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 24.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.14765,
+     37.15175
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.96489,
+     37.0537
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.07055,
+     37.04079
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.52041,
+     37.27524
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34548,
+     37.24343
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 39.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.37284,
+     37.23881
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.35092,
+     37.23405
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39067,
+     37.24726
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.37521,
+     37.2507
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34175,
+     37.25141
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 24.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39402,
+     37.33767
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19075,
+     37.29756
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 45.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.14596,
+     37.20772
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.04612,
+     37.22886
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.13651,
+     37.23635
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 24.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.1947,
+     37.57025
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.09386,
+     37.78486
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.18312,
+     37.87995
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 41.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19363,
+     37.94005
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 45.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.00261,
+     37.88413
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.375,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.15445,
+     38.03987
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 145.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19614,
+     37.99819
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.87873,
+     38.21442
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06086,
+     38.32397
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-11-12"
+    ],
+    "ever_matched": false,
+    "max_snr": 49.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.24918,
+     38.25631
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 115.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.24186,
+     38.20572
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.625,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 43.9,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.95583,
+     38.44669
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.6957,
+     38.45504
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.00052,
+     38.57481
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-11-12"
+    ],
+    "ever_matched": false,
+    "max_snr": 30.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.38381,
+     38.40276
+    ]
+   },
+   "properties": {
+    "n_detections": 21,
+    "n_dates_seen": 7,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 35.6,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.38636,
+     38.53499
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.571,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.36059,
+     38.35132
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.286,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 44.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.0936,
+     38.59332
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.583,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.11434,
+     38.66435
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.12068,
+     38.60722
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.10476,
+     38.67505
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.09027,
+     38.65886
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.08975,
+     38.6719
+    ]
+   },
+   "properties": {
+    "n_detections": 12,
+    "n_dates_seen": 12,
+    "n_dates_searched": 12,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 54.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.95855,
+     38.73007
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-08-08",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.3751,
+     38.63926
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.42137,
+     38.70119
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.18112,
+     38.83278
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.727,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 31.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.15988,
+     38.82655
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.19406,
+     38.84482
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.273,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.10881,
+     38.83714
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15"
+    ],
+    "ever_matched": true,
+    "max_snr": 144.0,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.0258,
+     38.82151
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.09204,
+     38.81488
+    ]
+   },
+   "properties": {
+    "n_detections": 12,
+    "n_dates_seen": 9,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 50.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.97878,
+     38.77159
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.545,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 48.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.97543,
+     38.79918
+    ]
+   },
+   "properties": {
+    "n_detections": 10,
+    "n_dates_seen": 9,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 59.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.02988,
+     38.79234
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.364,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 48.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.03421,
+     38.83338
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.05847,
+     38.77622
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.02277,
+     38.74584
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.85538,
+     38.92978
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.727,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 47.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.73678,
+     38.7804
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 58.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.70965,
+     38.95781
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39128,
+     38.83365
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 5,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.833,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 55.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.44894,
+     38.86428
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 48.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.43524,
+     38.89901
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 43.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39167,
+     38.86625
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.429,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 38.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41078,
+     38.79332
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 31.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.28904,
+     38.86893
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 6,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 50.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.18173,
+     39.04824
+    ]
+   },
+   "properties": {
+    "n_detections": 10,
+    "n_dates_seen": 10,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.909,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 142.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.22123,
+     38.97678
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.17777,
+     38.96105
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.583,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.22269,
+     39.02294
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.20417,
+     39.00173
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.11262,
+     38.98604
+    ]
+   },
+   "properties": {
+    "n_detections": 10,
+    "n_dates_seen": 10,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.833,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 94.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.10431,
+     38.9403
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 51.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.97339,
+     39.00889
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.09897,
+     38.92175
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 54.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.01201,
+     38.94194
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.56527,
+     39.08984
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.615,
+    "n_searched_since_first": 13,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-08-08",
+     "2024-10-19",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 61.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.63545,
+     39.12103
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.462,
+    "n_searched_since_first": 13,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-08-08",
+     "2024-10-19",
+     "2024-11-12",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 48.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.23688,
+     39.13821
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39825,
+     39.05927
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 130.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.40763,
+     38.98051
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 109.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.40575,
+     39.10204
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.286,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.38791,
+     38.97185
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34884,
+     38.99769
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-25"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.3921,
+     39.10164
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.286,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.20821,
+     39.12667
+    ]
+   },
+   "properties": {
+    "n_detections": 11,
+    "n_dates_seen": 11,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.917,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 72.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.31517,
+     39.24709
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28"
+    ],
+    "ever_matched": false,
+    "max_snr": 52.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.23605,
+     39.16309
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.273,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37321,
+     39.19437
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.545,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.25518,
+     39.15935
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.33221,
+     39.22863
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 42.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.29228,
+     39.21191
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.308,
+    "n_searched_since_first": 13,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 76.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.28997,
+     39.16178
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37758,
+     39.16704
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.26809,
+     39.18216
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 60.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.27394,
+     39.18042
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.13135,
+     39.17235
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.01337,
+     39.18446
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.03094,
+     39.18334
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.03774,
+     39.17785
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.63529,
+     39.30057
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.40189,
+     39.35723
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.571,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 45.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.4439,
+     39.29976
+    ]
+   },
+   "properties": {
+    "n_detections": 11,
+    "n_dates_seen": 11,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.917,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 35.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.40897,
+     39.30949
+    ]
+   },
+   "properties": {
+    "n_detections": 9,
+    "n_dates_seen": 9,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.3998,
+     39.34651
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 43.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.39643,
+     39.34753
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 59.0,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41168,
+     39.11786
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 74.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.4437,
+     39.18175
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 43.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.43189,
+     39.1789
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.45505,
+     39.18636
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41187,
+     39.17135
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.48725,
+     39.17326
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.48989,
+     39.19111
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.23593,
+     39.30199
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.375,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-25",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 123.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39364,
+     39.18864
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.571,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 58.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34822,
+     39.12356
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 53.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.23595,
+     39.29224
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 45.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.27719,
+     39.26235
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-04"
+    ],
+    "ever_matched": false,
+    "max_snr": 41.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21372,
+     39.30307
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21"
+    ],
+    "ever_matched": true,
+    "max_snr": 38.4,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.22962,
+     39.27892
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 35.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.2247,
+     39.29546
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 30.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.22636,
+     39.30879
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.26822,
+     39.12808
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.3218,
+     39.23156
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.27102,
+     39.19075
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.35149,
+     39.1523
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21555,
+     39.3202
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37606,
+     39.30537
+    ]
+   },
+   "properties": {
+    "n_detections": 9,
+    "n_dates_seen": 9,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.818,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 106.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43612,
+     39.35125
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 69.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37207,
+     39.29621
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.417,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-10-19",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.37788,
+     39.46102
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.6,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.22829,
+     39.41133
+    ]
+   },
+   "properties": {
+    "n_detections": 10,
+    "n_dates_seen": 10,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.833,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 62.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.2926,
+     39.4728
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.25498,
+     39.58353
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21309,
+     39.32704
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.02705,
+     39.41737
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 37.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19155,
+     39.33323
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 4,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.308,
+    "n_searched_since_first": 13,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-10-19",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.03448,
+     39.44432
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 37.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.07812,
+     39.38818
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-08-08"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.12798,
+     39.36897
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.10171,
+     39.38026
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.14966,
+     39.35885
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.09242,
+     39.50278
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.17073,
+     39.34811
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.167,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19148,
+     39.32978
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.17821,
+     39.34006
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 12,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-09-01",
+     "2024-10-19",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 60.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.54083,
+     39.51681
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.273,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-09-25"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.54258,
+     39.43871
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.455,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-07-15",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 50.4,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.56927,
+     39.46401
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.778,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-04-10",
+    "dates": [
+     "2024-04-10",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 103.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.04541,
+     38.60902
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.545,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-05-28",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.85167,
+     38.67568
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-09-25"
+    ],
+    "ever_matched": true,
+    "max_snr": 471.6,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.61255,
+     38.82863
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.636,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 59.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.52586,
+     38.97034
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 8,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.727,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.19727,
+     38.9713
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.182,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-11-12"
+    ],
+    "ever_matched": true,
+    "max_snr": 195.9,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.1271,
+     38.98142
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.273,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 139.9,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.30341,
+     39.16134
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-10-19"
+    ],
+    "ever_matched": true,
+    "max_snr": 26.0,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.56237,
+     39.57155
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-05-04",
+    "dates": [
+     "2024-05-04",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.02692,
+     36.01212
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.77886,
+     36.82842
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.45558,
+     36.86935
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 6,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 140.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.41821,
+     37.15655
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.33005,
+     37.34515
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 38.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.52432,
+     37.44877
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-09-25"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37212,
+     37.7909
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.222,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-11-12"
+    ],
+    "ever_matched": false,
+    "max_snr": 35.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41779,
+     38.0291
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.28955,
+     38.12816
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.857,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 76.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.22518,
+     38.16694
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.571,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 24.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.01437,
+     38.04807
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 57.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.62713,
+     38.50085
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-07-15"
+    ],
+    "ever_matched": true,
+    "max_snr": 415.0,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.86913,
+     38.63684
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.3,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 69.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57496,
+     38.7801
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.3,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.92581,
+     38.78073
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.6,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 50.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.11869,
+     38.83589
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.0939,
+     38.82035
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.83741,
+     38.84159
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.3,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-07-15"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.53539,
+     38.85121
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.2,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21"
+    ],
+    "ever_matched": true,
+    "max_snr": 311.5,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24812,
+     39.0137
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.3,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.80713,
+     38.94775
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 10,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.7,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.52788,
+     39.28294
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.545,
+    "n_searched_since_first": 11,
+    "first_seen": "2024-05-28",
+    "dates": [
+     "2024-05-28",
+     "2024-06-21",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.45957,
+     36.90027
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 7,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 65.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44396,
+     36.90008
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 7,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 68.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.45753,
+     36.8847
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 133.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.4731,
+     36.88462
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 113.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.42839,
+     36.9001
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 109.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44198,
+     36.88475
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 7,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 137.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.912,
+     37.95819
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.286,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.84224,
+     38.6736
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-09-01"
+    ],
+    "ever_matched": true,
+    "max_snr": 221.9,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.13525,
+     38.8975
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.556,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 62.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.19772,
+     38.98856
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.444,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.20263,
+     38.95126
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-08-08",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.22572,
+     39.04514
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.556,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.13992,
+     39.00506
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 120.7,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.20463,
+     39.32085
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-09-25"
+    ],
+    "ever_matched": true,
+    "max_snr": 59.8,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43338,
+     39.3444
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-12-06"
+    ],
+    "ever_matched": true,
+    "max_snr": 144.5,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.29523,
+     39.55843
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-06-21",
+    "dates": [
+     "2024-06-21",
+     "2024-08-08"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.80731,
+     36.83298
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 316.8,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.47107,
+     36.86917
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 139.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43039,
+     36.91553
+    ]
+   },
+   "properties": {
+    "n_detections": 7,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 91.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.41683,
+     36.93112
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 74.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.47508,
+     36.90004
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 86.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44596,
+     36.91558
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 110.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43999,
+     36.86929
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 134.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.4771,
+     36.91556
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 93.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.42645,
+     36.88485
+    ]
+   },
+   "properties": {
+    "n_detections": 8,
+    "n_dates_seen": 6,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 103.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.03028,
+     37.003
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46353,
+     36.93099
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 122.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43239,
+     36.93104
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 105.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43437,
+     36.9464
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 63.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44994,
+     36.94642
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 68.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.45505,
+     36.97746
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 71.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.47907,
+     36.93087
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 76.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46753,
+     36.9618
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 64.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44055,
+     36.99249
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 67.2,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.48112,
+     36.94635
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 84.8,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.41882,
+     36.94651
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 67.2,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.42082,
+     36.96198
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 6,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 94.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.45199,
+     36.96196
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 56.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.44796,
+     36.93103
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 64.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43638,
+     36.96187
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 85.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.40524,
+     36.96199
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 76.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.70895,
+     37.21299
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-06"
+    ],
+    "ever_matched": true,
+    "max_snr": 53.3,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.09641,
+     37.22066
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 128.6,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.15381,
+     37.67446
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.89317,
+     37.8001
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.23344,
+     37.7907
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 31.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.15051,
+     37.92524
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.98153,
+     38.71169
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.8259,
+     38.67227
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": true,
+    "max_snr": 346.4,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.38227,
+     38.66376
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.92124,
+     38.80507
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.571,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": false,
+    "max_snr": 40.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.15614,
+     39.03575
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.625,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 39.5,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.97903,
+     38.96625
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.1,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.74583,
+     39.00337
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.375,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.67665,
+     39.11799
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-08-08",
+     "2024-09-01",
+     "2024-11-12",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 53.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.59959,
+     39.28735
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46588,
+     39.3767
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.429,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 28.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.34436,
+     39.2675
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 13,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 9,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 51.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.16713,
+     39.35333
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-10-19"
+    ],
+    "ever_matched": true,
+    "max_snr": 36.8,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.5482,
+     39.56797
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.25,
+    "n_searched_since_first": 8,
+    "first_seen": "2024-07-15",
+    "dates": [
+     "2024-07-15",
+     "2024-09-01"
+    ],
+    "ever_matched": true,
+    "max_snr": 217.3,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.01483,
+     36.29898
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.286,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 71.5,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46151,
+     36.91549
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 164.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37014,
+     36.93123
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 128.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.39731,
+     36.90037
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 92.8,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3546,
+     36.93133
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 68.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38571,
+     36.93118
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 51.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.39926,
+     36.91563
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 71.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38373,
+     36.91581
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 70.7,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.36816,
+     36.91569
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 72.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.35658,
+     36.94678
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 107.0,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38967,
+     36.96204
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 81.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.35853,
+     36.96203
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 5,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 62.1,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.78171,
+     38.54575
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 5,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.714,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 50.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.03709,
+     38.90834
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 6,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.857,
+    "n_searched_since_first": 7,
+    "first_seen": "2024-08-08",
+    "dates": [
+     "2024-08-08",
+     "2024-09-01",
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 52.5,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.90551,
+     36.72916
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 31.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.10016,
+     37.61924
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.3,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.13584,
+     37.65521
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.9178,
+     37.96346
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 30.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.93966,
+     37.907
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.43296,
+     38.07592
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 33.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.46241,
+     38.0552
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 26.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.52977,
+     38.11507
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 49.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.92326,
+     38.03737
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.60025,
+     38.1546
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 3,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 29.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.04975,
+     38.21603
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-09-25"
+    ],
+    "ever_matched": false,
+    "max_snr": 27.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.20731,
+     38.31423
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 24.8,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.91372,
+     38.52827
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-09-25"
+    ],
+    "ever_matched": true,
+    "max_snr": 332.8,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.12304,
+     38.66434
+    ]
+   },
+   "properties": {
+    "n_detections": 6,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.07713,
+     38.59855
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 18.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.94245,
+     38.89984
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.333,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.02132,
+     38.77066
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.9,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.29744,
+     38.93708
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 11,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.5,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.99735,
+     39.08687
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 6,
+    "first_seen": "2024-09-01",
+    "dates": [
+     "2024-09-01",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.2,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.54439,
+     36.76265
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06"
+    ],
+    "ever_matched": true,
+    "max_snr": 188.2,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.41087,
+     36.88487
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 122.4,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.40889,
+     36.86939
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 117.1,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.42447,
+     36.86945
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 10,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 120.3,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.41287,
+     36.90029
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 49.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.31953,
+     36.90059
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 86.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.33509,
+     36.90056
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 83.5,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.36224,
+     36.86956
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 145.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.30595,
+     36.91607
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 75.9,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3798,
+     36.88506
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 101.8,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.39332,
+     36.8693
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 62.7,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.33311,
+     36.88512
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 107.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.33902,
+     36.93138
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 57.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.32148,
+     36.91582
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 95.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38176,
+     36.90037
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 96.7,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.32349,
+     36.9314
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 68.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3778,
+     36.86951
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 10,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 105.8,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.30399,
+     36.90068
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 100.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3526,
+     36.91577
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 39.9,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.40125,
+     36.93107
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 59.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.33707,
+     36.916
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 54.9,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.31759,
+     36.88518
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 108.0,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.30992,
+     36.94699
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 90.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.42281,
+     36.97741
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 51.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46551,
+     36.94631
+    ]
+   },
+   "properties": {
+    "n_detections": 5,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 54.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.4384,
+     36.97733
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 6,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 36.6,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.34696,
+     36.99311
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 80.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.3294,
+     36.97774
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 90.6,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.31382,
+     36.97776
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 9,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 72.2,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.32742,
+     36.9623
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 59.1,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37221,
+     36.947
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 3,
+    "n_dates_searched": 9,
+    "hit_fraction": 0.75,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 56.8,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37412,
+     36.96211
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 73.5,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.40325,
+     36.94654
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 87.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.4248,
+     36.9928
+    ]
+   },
+   "properties": {
+    "n_detections": 4,
+    "n_dates_seen": 4,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 71.9,
+    "fixed": true,
+    "verdict": "fixed structure"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.32544,
+     36.94679
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 60.4,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.34299,
+     36.96214
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 8,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 59.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38767,
+     36.9466
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 69.2,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.31581,
+     36.99321
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 8,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-11-12",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 66.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.37546,
+     38.46982
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 7,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.3,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.23653,
+     39.01044
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.4,
+    "n_searched_since_first": 5,
+    "first_seen": "2024-09-25",
+    "dates": [
+     "2024-09-25",
+     "2024-12-30"
+    ],
+    "ever_matched": true,
+    "max_snr": 361.4,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.27719,
+     37.3011
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 2,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.9,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.30539,
+     37.52843
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 4,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.15115,
+     37.88002
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 21.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.92897,
+     37.96529
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 6,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 17.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.4333,
+     38.0188
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 5,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.7,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.98612,
+     38.2022
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 3,
+    "n_dates_searched": 10,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-06",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 25.4,
+    "fixed": true,
+    "verdict": "fixed structure (appeared during the year)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.08519,
+     38.38794
+    ]
+   },
+   "properties": {
+    "n_detections": 3,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.3,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.09402,
+     38.65899
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.11464,
+     38.80091
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 16.0,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.17701,
+     38.94746
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-06"
+    ],
+    "ever_matched": true,
+    "max_snr": 523.6,
+    "fixed": false,
+    "verdict": "traffic (AIS explained it at least once)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.41468,
+     39.31655
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 20.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.22997,
+     39.53857
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-11-12"
+    ],
+    "ever_matched": false,
+    "max_snr": 85.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.25137,
+     39.57635
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 0.5,
+    "n_searched_since_first": 4,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 19.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.52411,
+     39.42713
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 10,
+    "hit_fraction": 0.667,
+    "n_searched_since_first": 3,
+    "first_seen": "2024-10-19",
+    "dates": [
+     "2024-10-19",
+     "2024-12-30"
+    ],
+    "ever_matched": false,
+    "max_snr": 32.2,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.69614,
+     39.09792
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 13,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-12-30",
+    "dates": [
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 22.1,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.29885,
+     39.23322
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 12,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-12-30",
+    "dates": [
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 41.6,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.38625,
+     39.18797
+    ]
+   },
+   "properties": {
+    "n_detections": 2,
+    "n_dates_seen": 2,
+    "n_dates_searched": 11,
+    "hit_fraction": 1.0,
+    "n_searched_since_first": 2,
+    "first_seen": "2024-12-30",
+    "dates": [
+     "2024-12-30",
+     "2026-09-10"
+    ],
+    "ever_matched": false,
+    "max_snr": 23.5,
+    "fixed": false,
+    "verdict": "repeat, not yet fixed"
+   }
+  }
+ ]
+}

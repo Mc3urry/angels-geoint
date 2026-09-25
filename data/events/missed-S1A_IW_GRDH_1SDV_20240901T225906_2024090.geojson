@@ -1,0 +1,377 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
+  "by_length": {
+   "<25 m": 13,
+   "25-50 m": 4,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 1,
+   "unknown": 1
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.10193944307633,
+     39.380540144410325
+    ]
+   },
+   "properties": {
+    "mmsi": "367519170",
+    "name": "PATRICIA",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 109.2,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.35229545434254,
+     39.00353818313208
+    ]
+   },
+   "properties": {
+    "mmsi": "338387933",
+    "name": "CARMAVIDO VI",
+    "length_m": 3.0,
+    "fix_uncertainty_m": 35.2,
+    "reports_in_track": 44,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.54913428726934,
+     39.522770000023606
+    ]
+   },
+   "properties": {
+    "mmsi": "368064860",
+    "name": "WEATHERLY",
+    "length_m": 27.0,
+    "fix_uncertainty_m": 160.2,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.08865780391613,
+     39.40853044212494
+    ]
+   },
+   "properties": {
+    "mmsi": "338419449",
+    "name": "MEANDER",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 73.1,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.82087869084125,
+     38.92514869472119
+    ]
+   },
+   "properties": {
+    "mmsi": "367171320",
+    "name": "DEBBIE SUE",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 82.8,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.55183890232922,
+     39.49257615387316
+    ]
+   },
+   "properties": {
+    "mmsi": "338171693",
+    "name": "GUIDED DISCOVERY",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 51.9,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.37883096656952,
+     39.33820209947559
+    ]
+   },
+   "properties": {
+    "mmsi": "533110317",
+    "name": "SALTY COCONUT",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 52.2,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.29448167831538,
+     39.210565271245464
+    ]
+   },
+   "properties": {
+    "mmsi": "367690930",
+    "name": "UNANIMOUS",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 62.5,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.09770100385043,
+     38.84665275959043
+    ]
+   },
+   "properties": {
+    "mmsi": "367141190",
+    "name": "PILOT PHILADELPHIA",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 321.1,
+    "reports_in_track": 55,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19196325115558,
+     39.0274927500246
+    ]
+   },
+   "properties": {
+    "mmsi": "338472242",
+    "name": "MERLYN",
+    "length_m": 9.0,
+    "fix_uncertainty_m": 93.8,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.51590966455359,
+     39.112506533406645
+    ]
+   },
+   "properties": {
+    "mmsi": "368005120",
+    "name": "TWO DUKES",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 126.2,
+    "reports_in_track": 41,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.33309984295187,
+     38.352488988353784
+    ]
+   },
+   "properties": {
+    "mmsi": "538005113",
+    "name": "ALGOMA VISION",
+    "length_m": 229.0,
+    "fix_uncertainty_m": 96.3,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.2479391920536,
+     38.87495005759152
+    ]
+   },
+   "properties": {
+    "mmsi": "338060378",
+    "name": "MURASAKI",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 300.7,
+    "reports_in_track": 45,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.28332385071104,
+     39.176968791673254
+    ]
+   },
+   "properties": {
+    "mmsi": "367769260",
+    "name": "SEVEN DAY WEEKEND",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 83.1,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.05303147471511,
+     39.46826622980565
+    ]
+   },
+   "properties": {
+    "mmsi": "366845180",
+    "name": "SUR LE VENT",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 25.6,
+    "reports_in_track": 47,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.51181775922794,
+     38.73861555947316
+    ]
+   },
+   "properties": {
+    "mmsi": "338466262",
+    "name": "KAIKOA",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 176.2,
+    "reports_in_track": 32,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06938456410222,
+     38.742234564102674
+    ]
+   },
+   "properties": {
+    "mmsi": "338926428",
+    "name": "CGNATHANBRUCKENTHAL",
+    "length_m": 44.0,
+    "fix_uncertainty_m": 20.6,
+    "reports_in_track": 19,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.55841511150783,
+     39.562497721458314
+    ]
+   },
+   "properties": {
+    "mmsi": "338141537",
+    "name": "CLIODHNA",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 72.8,
+    "reports_in_track": 36,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.36340936535959,
+     38.31075019286845
+    ]
+   },
+   "properties": {
+    "mmsi": "368334710",
+    "name": "ENDLESS SUMMER",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 166.5,
+    "reports_in_track": 1,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

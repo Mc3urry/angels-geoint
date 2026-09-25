@@ -1,0 +1,35 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241112T225812_20241112T225841_056528_06EE3A_B696_COG.SAFE",
+  "by_length": {
+   "<25 m": 1,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.76612962860281,
+     35.93930122528465
+    ]
+   },
+   "properties": {
+    "mmsi": "367198000",
+    "name": "US GOVT VESSEL",
+    "length_m": 1.0,
+    "fix_uncertainty_m": 1318.5,
+    "reports_in_track": 3,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

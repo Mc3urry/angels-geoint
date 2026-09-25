@@ -1,0 +1,396 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
+  "by_length": {
+   "<25 m": 17,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 1,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.98409522649183,
+     38.9809200002842
+    ]
+   },
+   "properties": {
+    "mmsi": "338101332",
+    "name": "RXCAPE",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 45.9,
+    "reports_in_track": 45,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.41720110095633,
+     38.894055851899374
+    ]
+   },
+   "properties": {
+    "mmsi": "368232760",
+    "name": "JO-LI",
+    "length_m": 20.0,
+    "fix_uncertainty_m": 330.1,
+    "reports_in_track": 13,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34253696817876,
+     38.60610130108585
+    ]
+   },
+   "properties": {
+    "mmsi": "368107920",
+    "name": "SERENDIPITY 2",
+    "length_m": 21.0,
+    "fix_uncertainty_m": 605.1,
+    "reports_in_track": 10,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.9934745299609,
+     38.38131446973911
+    ]
+   },
+   "properties": {
+    "mmsi": "338347731",
+    "name": "MISS B HAVEN",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 1759.1,
+    "reports_in_track": 14,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.31798770748236,
+     39.31850121161682
+    ]
+   },
+   "properties": {
+    "mmsi": "366939940",
+    "name": "OPA",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 144.5,
+    "reports_in_track": 24,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57418973085635,
+     38.82098714563997
+    ]
+   },
+   "properties": {
+    "mmsi": "378111952",
+    "name": "CREATIVE EDGE",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 160.1,
+    "reports_in_track": 30,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.89862,
+     38.40860000000001
+    ]
+   },
+   "properties": {
+    "mmsi": "368253310",
+    "name": "MISCHIEF",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 20.0,
+    "reports_in_track": 30,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.92209466610689,
+     38.763690004856
+    ]
+   },
+   "properties": {
+    "mmsi": "311057100",
+    "name": "CSL TACOMA",
+    "length_m": 229.0,
+    "fix_uncertainty_m": 44.8,
+    "reports_in_track": 31,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.82376310931517,
+     38.53624360896571
+    ]
+   },
+   "properties": {
+    "mmsi": "338382000",
+    "name": "MARY ANN",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 76.5,
+    "reports_in_track": 22,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.31611577607765,
+     38.85492177858941
+    ]
+   },
+   "properties": {
+    "mmsi": "338381000",
+    "name": "CAPT BOB",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 27.3,
+    "reports_in_track": 24,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.22710160000065,
+     39.00951760000013
+    ]
+   },
+   "properties": {
+    "mmsi": "367596940",
+    "name": "CAPT WILLIE LANDERS",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 20.3,
+    "reports_in_track": 28,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.39034244891377,
+     39.340594445964875
+    ]
+   },
+   "properties": {
+    "mmsi": "338516061",
+    "name": "FIDELIA",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 49.0,
+    "reports_in_track": 22,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.19771030434373,
+     39.25424971141053
+    ]
+   },
+   "properties": {
+    "mmsi": "366920560",
+    "name": "BALD EAGLE II",
+    "length_m": 23.0,
+    "fix_uncertainty_m": 127.0,
+    "reports_in_track": 25,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.267866973492,
+     39.20067609236266
+    ]
+   },
+   "properties": {
+    "mmsi": "368193830",
+    "name": "ROCK HALL",
+    "length_m": 120.0,
+    "fix_uncertainty_m": 107.2,
+    "reports_in_track": 29,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.54461013320815,
+     38.74366825956662
+    ]
+   },
+   "properties": {
+    "mmsi": "338516733",
+    "name": "60",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 167.4,
+    "reports_in_track": 18,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.31195330508632,
+     39.23754954637468
+    ]
+   },
+   "properties": {
+    "mmsi": "338474064",
+    "name": "LAST CALL",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 175.8,
+    "reports_in_track": 23,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.80760001816617,
+     38.69611250281676
+    ]
+   },
+   "properties": {
+    "mmsi": "368320030",
+    "name": "PACKET DREAM",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 168.1,
+    "reports_in_track": 5,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.4307977596884,
+     38.96768966923716
+    ]
+   },
+   "properties": {
+    "mmsi": "367526430",
+    "name": "WALTER MITTY",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 71.4,
+    "reports_in_track": 23,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.47665278472562,
+     39.06339918517421
+    ]
+   },
+   "properties": {
+    "mmsi": "368005120",
+    "name": "TWO DUKES",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 66.2,
+    "reports_in_track": 23,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.44842324585198,
+     39.170746862030555
+    ]
+   },
+   "properties": {
+    "mmsi": "338103245",
+    "name": "ELVIS",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 126.3,
+    "reports_in_track": 24,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

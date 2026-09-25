@@ -1,0 +1,15 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240528T225814_20240528T225843_054078_069350_0BF8_COG.SAFE",
+  "by_length": {
+   "<25 m": 0,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": []
+}

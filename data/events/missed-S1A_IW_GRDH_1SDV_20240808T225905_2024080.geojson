@@ -1,0 +1,149 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
+  "by_length": {
+   "<25 m": 4,
+   "25-50 m": 2,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 1
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.03871950792234,
+     38.51383443414264
+    ]
+   },
+   "properties": {
+    "mmsi": "338347736",
+    "name": "STORM RYDER",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 212.5,
+    "reports_in_track": 31,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.00998486237387,
+     38.2985151796054
+    ]
+   },
+   "properties": {
+    "mmsi": "338236096",
+    "name": "THE HOLDING II",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 612.8,
+    "reports_in_track": 36,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06165579815092,
+     38.74536014571326
+    ]
+   },
+   "properties": {
+    "mmsi": "338926435",
+    "name": "CG ANGELA MCSHAN",
+    "length_m": 46.0,
+    "fix_uncertainty_m": 27.3,
+    "reports_in_track": 39,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.52465999999998,
+     39.25561
+    ]
+   },
+   "properties": {
+    "mmsi": "367137180",
+    "name": "ALLIE B",
+    "length_m": 37.0,
+    "fix_uncertainty_m": 20.0,
+    "reports_in_track": 57,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.97296573009578,
+     38.967089556663815
+    ]
+   },
+   "properties": {
+    "mmsi": "368354960",
+    "name": "RHAPSODY",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 95.6,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.03003547196772,
+     38.73480454653658
+    ]
+   },
+   "properties": {
+    "mmsi": "338495443",
+    "name": "LUNASEA",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 236.1,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.02921384511893,
+     38.276064638148824
+    ]
+   },
+   "properties": {
+    "mmsi": "368046680",
+    "name": "WHISKEY KILO",
+    "length_m": 20.0,
+    "fix_uncertainty_m": 1325.5,
+    "reports_in_track": 19,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240901T225812_20240901T225841_055478_06C4A7_E53D_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.14149110849814,
+     36.583414390307816
+    ]
+   },
+   "properties": {
+    "mmsi": "369970631",
+    "name": "US GOV VESSEL",
+    "length_m": 172.0,
+    "fix_uncertainty_m": 75.4,
+    "reports_in_track": 40,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.31059133721755,
+     36.293700742527605
+    ]
+   },
+   "properties": {
+    "mmsi": "367654150",
+    "name": "BOBALOU",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 40.6,
+    "reports_in_track": 8,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.27160687359577,
+     36.27556136724079
+    ]
+   },
+   "properties": {
+    "mmsi": "338350046",
+    "name": "CAROLINER",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 64.8,
+    "reports_in_track": 3,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

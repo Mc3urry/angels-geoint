@@ -1,0 +1,73 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241112T225906_20241112T225931_056528_06EE3A_0924_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.31002053790104,
+     39.28231615774903
+    ]
+   },
+   "properties": {
+    "mmsi": "366860380",
+    "name": "TENACITY",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 78.3,
+    "reports_in_track": 31,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.07253607130576,
+     38.238916629696725
+    ]
+   },
+   "properties": {
+    "mmsi": "338427107",
+    "name": "LIBERTY",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 50.7,
+    "reports_in_track": 21,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.96697648569176,
+     38.4086830047081
+    ]
+   },
+   "properties": {
+    "mmsi": "367148750",
+    "name": "INSTIGATOR",
+    "length_m": 28.0,
+    "fix_uncertainty_m": 240.5,
+    "reports_in_track": 1,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  }
+ ]
+}

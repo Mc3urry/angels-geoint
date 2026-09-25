@@ -1,0 +1,111 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240410T225812_20240410T225841_053378_067942_EBC4_COG.SAFE",
+  "by_length": {
+   "<25 m": 4,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 1,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.199383279693,
+     36.275411045998986
+    ]
+   },
+   "properties": {
+    "mmsi": "636092887",
+    "name": "PARIS II",
+    "length_m": 300.0,
+    "fix_uncertainty_m": 29.7,
+    "reports_in_track": 56,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.61537999351299,
+     36.38071692418626
+    ]
+   },
+   "properties": {
+    "mmsi": "367429320",
+    "name": "S/V DAYENU",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 70.4,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.93647521683795,
+     36.234556087140106
+    ]
+   },
+   "properties": {
+    "mmsi": "366934030",
+    "name": "MILTON W",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 26.3,
+    "reports_in_track": 52,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.41470066561419,
+     36.09587300011329
+    ]
+   },
+   "properties": {
+    "mmsi": "338357000",
+    "name": "ASSK FIFI",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 30.7,
+    "reports_in_track": 42,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.52541269521583,
+     36.03258269679003
+    ]
+   },
+   "properties": {
+    "mmsi": "368042950",
+    "name": "SNOWCAT II",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 34.2,
+    "reports_in_track": 28,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

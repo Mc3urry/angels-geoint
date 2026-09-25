@@ -1,0 +1,54 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240715T225812_20240715T225841_054778_06AB8D_C664_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.84889337296823,
+     36.281488651934716
+    ]
+   },
+   "properties": {
+    "mmsi": "368312630",
+    "name": "SWAN",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 80.3,
+    "reports_in_track": 42,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.74679000000003,
+     36.255720000000004
+    ]
+   },
+   "properties": {
+    "mmsi": "368337020",
+    "name": "SPARROW",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 20.0,
+    "reports_in_track": 45,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

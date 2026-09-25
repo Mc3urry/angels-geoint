@@ -1,0 +1,415 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
+  "by_length": {
+   "<25 m": 16,
+   "25-50 m": 3,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 2
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.70506157863224,
+     38.38161000383361
+    ]
+   },
+   "properties": {
+    "mmsi": "538071085",
+    "name": "SARAH LISSA",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 139.6,
+    "reports_in_track": 50,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.22405488848369,
+     39.457663864785935
+    ]
+   },
+   "properties": {
+    "mmsi": "368173770",
+    "name": "SELCHIE",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 38.4,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.81615112162922,
+     38.95981556051338
+    ]
+   },
+   "properties": {
+    "mmsi": "338313943",
+    "name": "SUN STAR",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 62.7,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.20676099790359,
+     39.54620183364696
+    ]
+   },
+   "properties": {
+    "mmsi": "367110920",
+    "name": "CALLISTO",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 119.8,
+    "reports_in_track": 49,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.40634296328352,
+     39.29728549498105
+    ]
+   },
+   "properties": {
+    "mmsi": "367157110",
+    "name": "BAYOU DAWN",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 83.5,
+    "reports_in_track": 47,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.12986769496348,
+     38.84129989029786
+    ]
+   },
+   "properties": {
+    "mmsi": "368631000",
+    "name": "F/V CAPE CAUTION",
+    "length_m": 27.0,
+    "fix_uncertainty_m": 120.6,
+    "reports_in_track": 33,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.66161888448357,
+     39.09620157675144
+    ]
+   },
+   "properties": {
+    "mmsi": "316036164",
+    "name": "SINEQUANON",
+    "length_m": 9.0,
+    "fix_uncertainty_m": 104.8,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.18620339088284,
+     39.41741067871191
+    ]
+   },
+   "properties": {
+    "mmsi": "338462844",
+    "name": "COLONIAL CLIPPER",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 29.5,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.72549858086438,
+     39.039272969800855
+    ]
+   },
+   "properties": {
+    "mmsi": "368275710",
+    "name": "KARMA",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 62.8,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.34907090241597,
+     39.38872269825231
+    ]
+   },
+   "properties": {
+    "mmsi": "338145003",
+    "name": "ANDIAMO",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 44.6,
+    "reports_in_track": 37,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.11823730512594,
+     39.53045640452178
+    ]
+   },
+   "properties": {
+    "mmsi": "227344550",
+    "name": "NEMO",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 184.0,
+    "reports_in_track": 39,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.35251044192125,
+     39.37622391508253
+    ]
+   },
+   "properties": {
+    "mmsi": "316001256",
+    "name": "KEMANA",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 69.2,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.23023450327025,
+     39.52108350072686
+    ]
+   },
+   "properties": {
+    "mmsi": "368017080",
+    "name": "ROCK STEADY",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 36.2,
+    "reports_in_track": 39,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.49158579898972,
+     39.25419855134438
+    ]
+   },
+   "properties": {
+    "mmsi": "367795990",
+    "name": "SEA WOLF",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 42.1,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06743299069234,
+     38.74582100071959
+    ]
+   },
+   "properties": {
+    "mmsi": "367684920",
+    "name": "QUE SURA",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 81.1,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.56847623320306,
+     39.256010165541355
+    ]
+   },
+   "properties": {
+    "mmsi": "338234992",
+    "name": "SIGN MAN",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 143.0,
+    "reports_in_track": 28,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06589827239475,
+     38.748719674581984
+    ]
+   },
+   "properties": {
+    "mmsi": "367787260",
+    "name": "DOLPHIN",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 203.2,
+    "reports_in_track": 34,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.39091000000002,
+     38.797740666666655
+    ]
+   },
+   "properties": {
+    "mmsi": "338378549",
+    "name": "JANE MARIE",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 20.1,
+    "reports_in_track": 13,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.55638904644013,
+     38.31302845383249
+    ]
+   },
+   "properties": {
+    "mmsi": "319228900",
+    "name": "SOFIA MARIE",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 547.0,
+    "reports_in_track": 1,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.05465261616109,
+     38.210891670042834
+    ]
+   },
+   "properties": {
+    "mmsi": "367460820",
+    "name": "MAVERICK",
+    "length_m": 20.0,
+    "fix_uncertainty_m": 56.7,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.87831108438252,
+     38.368305178532744
+    ]
+   },
+   "properties": {
+    "mmsi": "368193060",
+    "name": "BRAVO ZULU",
+    "length_m": 33.0,
+    "fix_uncertainty_m": 1473.8,
+    "reports_in_track": 13,
+    "length_class": ">=25 m",
+    "scored": false
+   }
+  }
+ ]
+}

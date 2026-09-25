@@ -1,0 +1,396 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240925T225906_20240925T225931_055828_06D27E_5E3B_COG.SAFE",
+  "by_length": {
+   "<25 m": 9,
+   "25-50 m": 5,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 5
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.42170228484832,
+     38.48378685729351
+    ]
+   },
+   "properties": {
+    "mmsi": "367031390",
+    "name": "CAPTAIN HANK",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 26.9,
+    "reports_in_track": 51,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.06831628348141,
+     39.02665185816838
+    ]
+   },
+   "properties": {
+    "mmsi": "368001660",
+    "name": "CONSULTING TIME III",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 31.7,
+    "reports_in_track": 52,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.43348968576515,
+     39.24225645484662
+    ]
+   },
+   "properties": {
+    "mmsi": "368156470",
+    "name": "BRIDGEPORT",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 77.2,
+    "reports_in_track": 58,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57369401677772,
+     38.489644004849005
+    ]
+   },
+   "properties": {
+    "mmsi": "538071076",
+    "name": "CALLIOPE",
+    "length_m": 42.0,
+    "fix_uncertainty_m": 98.2,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.50485888834976,
+     38.75584277781005
+    ]
+   },
+   "properties": {
+    "mmsi": "368247930",
+    "name": "FINE TUNED",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 32.1,
+    "reports_in_track": 41,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.15158711174877,
+     39.57872594460516
+    ]
+   },
+   "properties": {
+    "mmsi": "366982270",
+    "name": "CASPIAN DAWN",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 114.9,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.58248275446084,
+     39.62129574022439
+    ]
+   },
+   "properties": {
+    "mmsi": "338997000",
+    "name": "MCFARLAND",
+    "length_m": 100.0,
+    "fix_uncertainty_m": 300.9,
+    "reports_in_track": 21,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.92270806201657,
+     38.81062139929499
+    ]
+   },
+   "properties": {
+    "mmsi": "367002660",
+    "name": "SAPPHIRE COAST",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 151.8,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.31827533405118,
+     39.1509590002472
+    ]
+   },
+   "properties": {
+    "mmsi": "366966210",
+    "name": "MCALLISTER SISTERS",
+    "length_m": 30.0,
+    "fix_uncertainty_m": 25.8,
+    "reports_in_track": 53,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.23109683100222,
+     39.288158638239764
+    ]
+   },
+   "properties": {
+    "mmsi": "319031900",
+    "name": "BOARDWALK",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 84.0,
+    "reports_in_track": 55,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.41053024883433,
+     39.3038734973308
+    ]
+   },
+   "properties": {
+    "mmsi": "367113320",
+    "name": "CAPT GASTON",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 143.1,
+    "reports_in_track": 43,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.42368506382911,
+     39.256488927097564
+    ]
+   },
+   "properties": {
+    "mmsi": "368286920",
+    "name": "BLUE MOON",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 136.9,
+    "reports_in_track": 40,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.60838451223879,
+     39.09499281642203
+    ]
+   },
+   "properties": {
+    "mmsi": "368059140",
+    "name": "JUSTIFIED",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 170.5,
+    "reports_in_track": 44,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.30963355426798,
+     39.339457565537415
+    ]
+   },
+   "properties": {
+    "mmsi": "367540250",
+    "name": "MARY J",
+    "length_m": 21.0,
+    "fix_uncertainty_m": 103.8,
+    "reports_in_track": 42,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.33905587371981,
+     38.30328363640879
+    ]
+   },
+   "properties": {
+    "mmsi": "368178040",
+    "name": "NARCISA",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 266.5,
+    "reports_in_track": 28,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.10429734806974,
+     38.79566906077611
+    ]
+   },
+   "properties": {
+    "mmsi": "368321440",
+    "name": "SALTAIR",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 22.2,
+    "reports_in_track": 12,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.47097065543522,
+     39.20708641405576
+    ]
+   },
+   "properties": {
+    "mmsi": "368386240",
+    "name": "KNOW THY SAIL",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 32.3,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.48241776698711,
+     39.18538778004965
+    ]
+   },
+   "properties": {
+    "mmsi": "368353490",
+    "name": "ROSIE BEE",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 66.5,
+    "reports_in_track": 27,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.22863886041728,
+     39.1242319333307
+    ]
+   },
+   "properties": {
+    "mmsi": "228199280",
+    "name": "ULVETANNA",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 318.7,
+    "reports_in_track": 19,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.15812393587788,
+     39.58969775353135
+    ]
+   },
+   "properties": {
+    "mmsi": "227460590",
+    "name": "FELINE",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 45.3,
+    "reports_in_track": 28,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

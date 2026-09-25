@@ -1,0 +1,149 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241019T225842_20241019T225907_056178_06E050_3E2C_COG.SAFE",
+  "by_length": {
+   "<25 m": 5,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 1,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.25207369445184,
+     37.968439513707175
+    ]
+   },
+   "properties": {
+    "mmsi": "368328390",
+    "name": "MAMA BEAR",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 230.2,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.18220000127013,
+     37.80029454552217
+    ]
+   },
+   "properties": {
+    "mmsi": "367029960",
+    "name": "CALUSA COAST",
+    "length_m": 32.0,
+    "fix_uncertainty_m": 46.3,
+    "reports_in_track": 32,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.45920154855668,
+     36.69944465164249
+    ]
+   },
+   "properties": {
+    "mmsi": "538010787",
+    "name": "BASIC EXPLORER",
+    "length_m": 229.0,
+    "fix_uncertainty_m": 40.7,
+    "reports_in_track": 30,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.13986840677558,
+     37.876926075959815
+    ]
+   },
+   "properties": {
+    "mmsi": "366122640",
+    "name": "LIGHTNING BAY",
+    "length_m": 23.0,
+    "fix_uncertainty_m": 182.3,
+    "reports_in_track": 16,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.30470356988354,
+     37.58671714519381
+    ]
+   },
+   "properties": {
+    "mmsi": "368219010",
+    "name": "VENGEANCE",
+    "length_m": 23.0,
+    "fix_uncertainty_m": 38.8,
+    "reports_in_track": 30,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.29110000000003,
+     37.31448
+    ]
+   },
+   "properties": {
+    "mmsi": "367159740",
+    "name": "CASABLANCA",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 20.0,
+    "reports_in_track": 27,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.29336999999998,
+     37.31714236768803
+    ]
+   },
+   "properties": {
+    "mmsi": "338110361",
+    "name": "TRADE WIND",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 20.8,
+    "reports_in_track": 9,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

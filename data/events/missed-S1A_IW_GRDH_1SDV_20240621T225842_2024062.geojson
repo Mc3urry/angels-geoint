@@ -1,0 +1,130 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240621T225842_20240621T225907_054428_069F67_4366_COG.SAFE",
+  "by_length": {
+   "<25 m": 2,
+   "25-50 m": 2,
+   "50-100 m": 1,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.9482380586407,
+     36.69010682593582
+    ]
+   },
+   "properties": {
+    "mmsi": "367489980",
+    "name": "WIDOWMAKER",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 146.5,
+    "reports_in_track": 33,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.74473797187045,
+     37.76927681162752
+    ]
+   },
+   "properties": {
+    "mmsi": "366766840",
+    "name": "DEFENDER",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 39.8,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.58471848264577,
+     37.051075340657356
+    ]
+   },
+   "properties": {
+    "mmsi": "338503179",
+    "name": "INSTIGATOR",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 290.6,
+    "reports_in_track": 5,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.1596930349018,
+     37.704411236460636
+    ]
+   },
+   "properties": {
+    "mmsi": "366906550",
+    "name": "SEA BORN",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 31.2,
+    "reports_in_track": 44,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.30703302325946,
+     37.49746517971674
+    ]
+   },
+   "properties": {
+    "mmsi": "109090205",
+    "name": "109090205",
+    "length_m": 97.0,
+    "fix_uncertainty_m": 24.7,
+    "reports_in_track": 16,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.19571096695,
+     37.66475279760529
+    ]
+   },
+   "properties": {
+    "mmsi": "109000148",
+    "name": "109000148",
+    "length_m": 100.0,
+    "fix_uncertainty_m": 26.4,
+    "reports_in_track": 4,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  }
+ ]
+}

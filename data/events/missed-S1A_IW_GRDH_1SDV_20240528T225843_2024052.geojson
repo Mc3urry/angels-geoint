@@ -1,0 +1,111 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240528T225843_20240528T225908_054078_069350_22EF_COG.SAFE",
+  "by_length": {
+   "<25 m": 4,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24111666674526,
+     37.91418666678888
+    ]
+   },
+   "properties": {
+    "mmsi": "367641680",
+    "name": "HELIOS",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 26.0,
+    "reports_in_track": 34,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.80021238479412,
+     36.96425381990045
+    ]
+   },
+   "properties": {
+    "mmsi": "366920910",
+    "name": "THOMAS DANN",
+    "length_m": 36.0,
+    "fix_uncertainty_m": 123.5,
+    "reports_in_track": 46,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24767525407873,
+     37.75295705106566
+    ]
+   },
+   "properties": {
+    "mmsi": "338116991",
+    "name": "KAOS",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 92.5,
+    "reports_in_track": 48,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.70821091118341,
+     37.22830500055221
+    ]
+   },
+   "properties": {
+    "mmsi": "369044000",
+    "name": "JULE III",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 32.7,
+    "reports_in_track": 36,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.21726957192698,
+     37.97697011203737
+    ]
+   },
+   "properties": {
+    "mmsi": "316028943",
+    "name": "WINDSHADOW IV",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 140.6,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

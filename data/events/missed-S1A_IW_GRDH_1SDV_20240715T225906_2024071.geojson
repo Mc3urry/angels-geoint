@@ -1,0 +1,434 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
+  "by_length": {
+   "<25 m": 11,
+   "25-50 m": 8,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 2
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.58194192333065,
+     38.2764746684874
+    ]
+   },
+   "properties": {
+    "mmsi": "368364540",
+    "name": "SPLASH OF WATER",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 51.8,
+    "reports_in_track": 29,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.30509956488856,
+     38.78049400160925
+    ]
+   },
+   "properties": {
+    "mmsi": "367630490",
+    "name": "SEAHAWK",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 94.9,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.11579400463341,
+     39.43920000409504
+    ]
+   },
+   "properties": {
+    "mmsi": "366798160",
+    "name": "JERSEY DEVIL",
+    "length_m": 30.0,
+    "fix_uncertainty_m": 50.6,
+    "reports_in_track": 43,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.47269820770293,
+     38.797888652835645
+    ]
+   },
+   "properties": {
+    "mmsi": "338311664",
+    "name": "NAUT2GUILTY",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 47.6,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.41638475196521,
+     38.74733460383227
+    ]
+   },
+   "properties": {
+    "mmsi": "563549000",
+    "name": "MAJESTIC",
+    "length_m": 189.0,
+    "fix_uncertainty_m": 66.5,
+    "reports_in_track": 55,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.07429609000775,
+     39.43703181022248
+    ]
+   },
+   "properties": {
+    "mmsi": "367638000",
+    "name": "GOOD TIMES",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 101.7,
+    "reports_in_track": 56,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.07089999916428,
+     38.22172200080593
+    ]
+   },
+   "properties": {
+    "mmsi": "367169710",
+    "name": "CAPT TED",
+    "length_m": 32.0,
+    "fix_uncertainty_m": 29.4,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.2565850003981,
+     39.43040810353658
+    ]
+   },
+   "properties": {
+    "mmsi": "368246170",
+    "name": "YANKEE MARINER",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 41.6,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.46250022275154,
+     39.37745920604626
+    ]
+   },
+   "properties": {
+    "mmsi": "368146010",
+    "name": "DREAMFISH",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 58.2,
+    "reports_in_track": 45,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.02021051231515,
+     39.33212163158406
+    ]
+   },
+   "properties": {
+    "mmsi": "303615000",
+    "name": "PRIDE OF BALTIMORE 2",
+    "length_m": 48.0,
+    "fix_uncertainty_m": 130.3,
+    "reports_in_track": 46,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.789224503046,
+     38.97647494694584
+    ]
+   },
+   "properties": {
+    "mmsi": "367490480",
+    "name": "EVA MARIE",
+    "length_m": 27.0,
+    "fix_uncertainty_m": 58.7,
+    "reports_in_track": 40,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.19946225291085,
+     38.646983437438074
+    ]
+   },
+   "properties": {
+    "mmsi": "338478742",
+    "name": "POPPA FRANCIS",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 204.3,
+    "reports_in_track": 35,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.08758994571485,
+     39.37923628630135
+    ]
+   },
+   "properties": {
+    "mmsi": "338319112",
+    "name": "SALT SHAKER",
+    "length_m": 19.0,
+    "fix_uncertainty_m": 581.4,
+    "reports_in_track": 48,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.4403087602717,
+     38.81093148760336
+    ]
+   },
+   "properties": {
+    "mmsi": "316042359",
+    "name": "POLO",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 73.2,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.15855576822872,
+     39.27502512140143
+    ]
+   },
+   "properties": {
+    "mmsi": "367598880",
+    "name": "CAPT SIG",
+    "length_m": 33.0,
+    "fix_uncertainty_m": 80.9,
+    "reports_in_track": 39,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.04168331960818,
+     39.20884223345941
+    ]
+   },
+   "properties": {
+    "mmsi": "366983220",
+    "name": "WILLIAM LEE",
+    "length_m": 27.0,
+    "fix_uncertainty_m": 102.6,
+    "reports_in_track": 41,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.55992409918633,
+     39.55540508207193
+    ]
+   },
+   "properties": {
+    "mmsi": "235103047",
+    "name": "TONKS",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 54.5,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.07395199863879,
+     39.266110001729714
+    ]
+   },
+   "properties": {
+    "mmsi": "367540250",
+    "name": "MARY J",
+    "length_m": 21.0,
+    "fix_uncertainty_m": 39.1,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.33382704932939,
+     39.084416721329156
+    ]
+   },
+   "properties": {
+    "mmsi": "352003530",
+    "name": "WINTER WHEAT",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 25.0,
+    "reports_in_track": 36,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.37109461920579,
+     39.34860231698314
+    ]
+   },
+   "properties": {
+    "mmsi": "367071470",
+    "name": "MISTY DAWN",
+    "length_m": 35.0,
+    "fix_uncertainty_m": 57.0,
+    "reports_in_track": 41,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.39081511573431,
+     39.33678610262573
+    ]
+   },
+   "properties": {
+    "mmsi": "338236096",
+    "name": "THE HOLDING II",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 274.6,
+    "reports_in_track": 36,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.49672392785055,
+     39.41413951091392
+    ]
+   },
+   "properties": {
+    "mmsi": "338368108",
+    "name": "IN NO HURRY",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 98.1,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

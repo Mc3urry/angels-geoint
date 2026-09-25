@@ -1,0 +1,73 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240504T225814_20240504T225843_053728_068708_452D_COG.SAFE",
+  "by_length": {
+   "<25 m": 3,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.85323676481238,
+     36.367652505827714
+    ]
+   },
+   "properties": {
+    "mmsi": "338453253",
+    "name": "BIG SKIPPER",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 63.1,
+    "reports_in_track": 36,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.75011294270627,
+     36.28719669803377
+    ]
+   },
+   "properties": {
+    "mmsi": "338238883",
+    "name": "TAR BABY",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 24.1,
+    "reports_in_track": 10,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.01100976492694,
+     36.311535534797294
+    ]
+   },
+   "properties": {
+    "mmsi": "366940550",
+    "name": "MABEL ROSE",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 20.3,
+    "reports_in_track": 1,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

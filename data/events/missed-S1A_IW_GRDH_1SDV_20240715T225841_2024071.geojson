@@ -1,0 +1,377 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
+  "by_length": {
+   "<25 m": 10,
+   "25-50 m": 6,
+   "50-100 m": 1,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 1
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.08781684684237,
+     36.92079422146141
+    ]
+   },
+   "properties": {
+    "mmsi": "366893270",
+    "name": "PILOT BOAT PATUXENT",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 301.4,
+    "reports_in_track": 54,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.80706395120666,
+     36.96197719699349
+    ]
+   },
+   "properties": {
+    "mmsi": "366920910",
+    "name": "THOMAS DANN",
+    "length_m": 36.0,
+    "fix_uncertainty_m": 149.7,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.7245423895672,
+     36.63051535333087
+    ]
+   },
+   "properties": {
+    "mmsi": "368122370",
+    "name": "AVENTURA",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 108.9,
+    "reports_in_track": 52,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.43385500189345,
+     37.35006300069034
+    ]
+   },
+   "properties": {
+    "mmsi": "227752830",
+    "name": "YOLA",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 37.7,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.00648375140389,
+     37.05985847145726
+    ]
+   },
+   "properties": {
+    "mmsi": "368164250",
+    "name": "CLOUD MESSENGER",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 162.5,
+    "reports_in_track": 36,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.98667477130721,
+     36.93072717214278
+    ]
+   },
+   "properties": {
+    "mmsi": "368139320",
+    "name": "RICHMOND",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 306.5,
+    "reports_in_track": 56,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.4916954950898,
+     37.34443070441423
+    ]
+   },
+   "properties": {
+    "mmsi": "367586910",
+    "name": "GENESIS GLORY",
+    "length_m": 151.0,
+    "fix_uncertainty_m": 50.7,
+    "reports_in_track": 51,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.1323665783799,
+     37.20830134381804
+    ]
+   },
+   "properties": {
+    "mmsi": "367711530",
+    "name": "CAPE CHARLES",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 144.2,
+    "reports_in_track": 57,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.23930701444851,
+     37.67498046844243
+    ]
+   },
+   "properties": {
+    "mmsi": "367645750",
+    "name": "EVENING STAR",
+    "length_m": 30.0,
+    "fix_uncertainty_m": 93.3,
+    "reports_in_track": 23,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24818576938009,
+     37.84227485070927
+    ]
+   },
+   "properties": {
+    "mmsi": "367395250",
+    "name": "BEACH GIRL",
+    "length_m": 35.0,
+    "fix_uncertainty_m": 57.6,
+    "reports_in_track": 56,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.24244868902673,
+     37.17184967224565
+    ]
+   },
+   "properties": {
+    "mmsi": "368054210",
+    "name": "R /V VIRGINIA",
+    "length_m": 28.0,
+    "fix_uncertainty_m": 23.8,
+    "reports_in_track": 57,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.31409600748202,
+     37.51579000099154
+    ]
+   },
+   "properties": {
+    "mmsi": "368243140",
+    "name": "WANDERER",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 130.2,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.45626904690204,
+     37.629502382148445
+    ]
+   },
+   "properties": {
+    "mmsi": "338469965",
+    "name": "FLOATER",
+    "length_m": 10.0,
+    "fix_uncertainty_m": 30.8,
+    "reports_in_track": 42,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.60687639822777,
+     37.367891492760144
+    ]
+   },
+   "properties": {
+    "mmsi": "338429663",
+    "name": "WAVEFUNKTION",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 142.2,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.7378382052832,
+     38.0840980904348
+    ]
+   },
+   "properties": {
+    "mmsi": "366906550",
+    "name": "SEA BORN",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 54.0,
+    "reports_in_track": 40,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.88902966934626,
+     37.012417589721736
+    ]
+   },
+   "properties": {
+    "mmsi": "367098770",
+    "name": "LADY ANNA",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 56.4,
+    "reports_in_track": 38,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.26008433449022,
+     37.50886284078095
+    ]
+   },
+   "properties": {
+    "mmsi": "211385610",
+    "name": "RE",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 133.6,
+    "reports_in_track": 34,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.76902016871742,
+     38.044139454824524
+    ]
+   },
+   "properties": {
+    "mmsi": "109090205",
+    "name": "109090205",
+    "length_m": 97.0,
+    "fix_uncertainty_m": 281.1,
+    "reports_in_track": 1,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.90082019484021,
+     37.86386055184164
+    ]
+   },
+   "properties": {
+    "mmsi": "338216663",
+    "name": "LADY LOUISE",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 94.3,
+    "reports_in_track": 33,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  }
+ ]
+}

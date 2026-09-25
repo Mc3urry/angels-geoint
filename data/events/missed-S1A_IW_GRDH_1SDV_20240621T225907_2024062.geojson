@@ -1,0 +1,529 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
+  "by_length": {
+   "<25 m": 20,
+   "25-50 m": 3,
+   "50-100 m": 0,
+   "100-200 m": 1,
+   ">200 m": 0,
+   "unknown": 3
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.10887902702649,
+     38.79580870270283
+    ]
+   },
+   "properties": {
+    "mmsi": "368147740",
+    "name": "TAILWINDS",
+    "length_m": 22.0,
+    "fix_uncertainty_m": 20.2,
+    "reports_in_track": 16,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.38424878218973,
+     39.26537719661498
+    ]
+   },
+   "properties": {
+    "mmsi": "338225216",
+    "name": "GRATEFUL II",
+    "length_m": 11.0,
+    "fix_uncertainty_m": 141.3,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.95857818849959,
+     38.573206388084095
+    ]
+   },
+   "properties": {
+    "mmsi": "338394282",
+    "name": "UNDER TAKER",
+    "length_m": 18.0,
+    "fix_uncertainty_m": 277.6,
+    "reports_in_track": 45,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.1714984782609,
+     39.00995000000114
+    ]
+   },
+   "properties": {
+    "mmsi": "338320687",
+    "name": "SAFE HARBOR",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 20.7,
+    "reports_in_track": 17,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.12067528646782,
+     38.255550002229796
+    ]
+   },
+   "properties": {
+    "mmsi": "368146510",
+    "name": "WINDHOVER",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 58.8,
+    "reports_in_track": 35,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.28508466237906,
+     39.12459159734054
+    ]
+   },
+   "properties": {
+    "mmsi": "338244717",
+    "name": "SHARDANA",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 116.3,
+    "reports_in_track": 39,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.33510434467178,
+     38.83388222966755
+    ]
+   },
+   "properties": {
+    "mmsi": "368094360",
+    "name": "VENTUS",
+    "length_m": 12.0,
+    "fix_uncertainty_m": 98.0,
+    "reports_in_track": 39,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.27731653476758,
+     38.86242349109385
+    ]
+   },
+   "properties": {
+    "mmsi": "338385716",
+    "name": "PINCH ME",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 143.7,
+    "reports_in_track": 40,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.5035139660377,
+     39.40582619124913
+    ]
+   },
+   "properties": {
+    "mmsi": "258975000",
+    "name": "HOEGH JEDDAH",
+    "length_m": 199.0,
+    "fix_uncertainty_m": 26.9,
+    "reports_in_track": 57,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.85459341313617,
+     38.93593324890603
+    ]
+   },
+   "properties": {
+    "mmsi": "367511230",
+    "name": "SAGINAW RIVER",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 103.8,
+    "reports_in_track": 54,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.54123277627593,
+     39.152360350280574
+    ]
+   },
+   "properties": {
+    "mmsi": "367798260",
+    "name": "INFINITY",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 108.2,
+    "reports_in_track": 42,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57771944890266,
+     39.22806560726752
+    ]
+   },
+   "properties": {
+    "mmsi": "338451049",
+    "name": "FOUR BOUYS 2",
+    "length_m": 9.0,
+    "fix_uncertainty_m": 63.3,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57428250202997,
+     39.19332700077196
+    ]
+   },
+   "properties": {
+    "mmsi": "368087420",
+    "name": "ESCAPE PLAN",
+    "length_m": 15.0,
+    "fix_uncertainty_m": 32.0,
+    "reports_in_track": 37,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.0527890115734,
+     39.468663608395765
+    ]
+   },
+   "properties": {
+    "mmsi": "367031390",
+    "name": "CAPTAIN HANK",
+    "length_m": 24.0,
+    "fix_uncertainty_m": 61.6,
+    "reports_in_track": 53,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.128574449653,
+     39.336551111736995
+    ]
+   },
+   "properties": {
+    "mmsi": "227961410",
+    "name": "TAO",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 79.3,
+    "reports_in_track": 55,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.80689111140515,
+     38.9797677779398
+    ]
+   },
+   "properties": {
+    "mmsi": "369990286",
+    "name": "CG29286",
+    "length_m": 8.0,
+    "fix_uncertainty_m": 27.3,
+    "reports_in_track": 52,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.12416692322734,
+     38.610732307711636
+    ]
+   },
+   "properties": {
+    "mmsi": "338430402",
+    "name": "CHILLAXIN",
+    "length_m": 16.0,
+    "fix_uncertainty_m": 30.3,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.8091335275335,
+     38.976084226764534
+    ]
+   },
+   "properties": {
+    "mmsi": "369990285",
+    "name": "CG29285",
+    "length_m": 26.0,
+    "fix_uncertainty_m": 108.7,
+    "reports_in_track": 50,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.2856271123942,
+     38.507576933141635
+    ]
+   },
+   "properties": {
+    "mmsi": "339086000",
+    "name": "ABOUT TIME",
+    "length_m": 40.0,
+    "fix_uncertainty_m": 177.5,
+    "reports_in_track": 55,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.34207950798674,
+     38.451516557400105
+    ]
+   },
+   "properties": {
+    "mmsi": "367695440",
+    "name": "ALBETROSS",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 23.1,
+    "reports_in_track": 34,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.77773558223959,
+     38.96836546018849
+    ]
+   },
+   "properties": {
+    "mmsi": "368070350",
+    "name": "CALYPSO",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 107.2,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.44937977897388,
+     38.92839538489005
+    ]
+   },
+   "properties": {
+    "mmsi": "338497877",
+    "name": "LET IT HAPPEN",
+    "length_m": 50.0,
+    "fix_uncertainty_m": 60.3,
+    "reports_in_track": 36,
+    "length_class": "unknown length",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.59758428980206,
+     39.08381571546232
+    ]
+   },
+   "properties": {
+    "mmsi": "367165450",
+    "name": "TREASURE COAST",
+    "length_m": 34.0,
+    "fix_uncertainty_m": 51.0,
+    "reports_in_track": 52,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.27825629916225,
+     39.41797797963998
+    ]
+   },
+   "properties": {
+    "mmsi": "368222960",
+    "name": "ATHENA",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 104.8,
+    "reports_in_track": 43,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.07670656117159,
+     39.08742573897178
+    ]
+   },
+   "properties": {
+    "mmsi": "368283960",
+    "name": "SV REMEDY",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 57.5,
+    "reports_in_track": 42,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.05699826713635,
+     38.22688858577704
+    ]
+   },
+   "properties": {
+    "mmsi": "338316109",
+    "name": "TOW BOAT U.S BAILOUT",
+    "length_m": 9.0,
+    "fix_uncertainty_m": 1677.5,
+    "reports_in_track": 1,
+    "length_class": "<25 m",
+    "scored": false
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.21467934041726,
+     38.64366101934762
+    ]
+   },
+   "properties": {
+    "mmsi": "367620760",
+    "name": "LIGHT REIGN",
+    "length_m": 14.0,
+    "fix_uncertainty_m": 331.6,
+    "reports_in_track": 2,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240925T225812_20240925T225841_055828_06D27E_789A_COG.SAFE",
+  "by_length": {
+   "<25 m": 1,
+   "25-50 m": 0,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 1,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.9807575302188,
+     36.38703594598918
+    ]
+   },
+   "properties": {
+    "mmsi": "215721000",
+    "name": "PETALON",
+    "length_m": 229.0,
+    "fix_uncertainty_m": 48.6,
+    "reports_in_track": 53,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.01273147701329,
+     36.041433771120815
+    ]
+   },
+   "properties": {
+    "mmsi": "368278690",
+    "name": "FINE TUNA",
+    "length_m": 17.0,
+    "fix_uncertainty_m": 31.4,
+    "reports_in_track": 38,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

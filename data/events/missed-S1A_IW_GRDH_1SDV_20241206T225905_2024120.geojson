@@ -1,0 +1,111 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20241206T225905_20241206T225930_056878_06FC1E_BD0B_COG.SAFE",
+  "by_length": {
+   "<25 m": 0,
+   "25-50 m": 3,
+   "50-100 m": 0,
+   "100-200 m": 2,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.53229474634105,
+     39.43016609956726
+    ]
+   },
+   "properties": {
+    "mmsi": "248359000",
+    "name": "ALSIA SWAN",
+    "length_m": 105.0,
+    "fix_uncertainty_m": 165.7,
+    "reports_in_track": 55,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.00104057036651,
+     38.213643719018094
+    ]
+   },
+   "properties": {
+    "mmsi": "367314510",
+    "name": "EMERALD COAST",
+    "length_m": 32.0,
+    "fix_uncertainty_m": 53.3,
+    "reports_in_track": 53,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.46449319401768,
+     39.260066368569845
+    ]
+   },
+   "properties": {
+    "mmsi": "367426660",
+    "name": "THUNDER BAY",
+    "length_m": 25.0,
+    "fix_uncertainty_m": 70.9,
+    "reports_in_track": 40,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.47075442049538,
+     39.37693229705432
+    ]
+   },
+   "properties": {
+    "mmsi": "368253890",
+    "name": "SUSAN ROSE",
+    "length_m": 123.0,
+    "fix_uncertainty_m": 51.6,
+    "reports_in_track": 50,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -74.57201736932166,
+     39.077072026648224
+    ]
+   },
+   "properties": {
+    "mmsi": "367598880",
+    "name": "CAPT SIG",
+    "length_m": 33.0,
+    "fix_uncertainty_m": 20.8,
+    "reports_in_track": 20,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  }
+ ]
+}

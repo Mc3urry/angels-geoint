@@ -1,0 +1,92 @@
+{
+ "type": "FeatureCollection",
+ "properties": {
+  "scene": "S1A_IW_GRDH_1SDV_20240410T225841_20240410T225906_053378_067942_0D89_COG.SAFE",
+  "by_length": {
+   "<25 m": 3,
+   "25-50 m": 1,
+   "50-100 m": 0,
+   "100-200 m": 0,
+   ">200 m": 0,
+   "unknown": 0
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.77308471567079,
+     36.88896742119577
+    ]
+   },
+   "properties": {
+    "mmsi": "366951350",
+    "name": "HANNAH BODEN",
+    "length_m": 39.0,
+    "fix_uncertainty_m": 78.2,
+    "reports_in_track": 44,
+    "length_class": ">=25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.27220142478404,
+     37.80155743297973
+    ]
+   },
+   "properties": {
+    "mmsi": "338494869",
+    "name": "RESCUE III",
+    "length_m": 13.0,
+    "fix_uncertainty_m": 43.3,
+    "reports_in_track": 52,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.90324701010269,
+     37.01513700707847
+    ]
+   },
+   "properties": {
+    "mmsi": "366962410",
+    "name": "LITTLE SAMMIE",
+    "length_m": 23.0,
+    "fix_uncertainty_m": 64.2,
+    "reports_in_track": 41,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -76.24625725243914,
+     37.80260938906547
+    ]
+   },
+   "properties": {
+    "mmsi": "338399097",
+    "name": "TB2",
+    "length_m": 7.0,
+    "fix_uncertainty_m": 70.1,
+    "reports_in_track": 47,
+    "length_class": "<25 m",
+    "scored": true
+   }
+  }
+ ]
+}

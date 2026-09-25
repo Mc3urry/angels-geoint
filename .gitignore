@@ -46,6 +46,22 @@ data/**
 !data/events/boundary-bands.json
 !data/events/candidates-scored.geojson
 
+# And the per-scene record, for the same reason one step further out: without
+# it nothing can be VERIFIED. `scripts/reproduce.py` re-runs the pipeline and
+# compares against the committed numbers, and the only stage with a committed
+# reference to check against is `boundary_analysis.py` -- which needs the
+# searched grids in sar-* and the matched/unmatched split in dark-*. A clone
+# without these can execute four stages and confirm nothing.
+#
+# 21.3 MB on disk, 1.8 MB in git: geojson of repeated coordinates compresses
+# about twelve to one, which is why this is affordable and 56 GB of scenes is
+# not. These are the distilled record of what was looked at and what was
+# found; everything upstream of them stays out.
+!data/events/sar-*.geojson
+!data/events/dark-*.geojson
+!data/events/missed-*.geojson
+!data/events/persistent-sites.geojson
+
 # Logs
 *.log
 *.log.*
