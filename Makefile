@@ -1,4 +1,4 @@
-.PHONY: install dev test lint serve web ingest clean
+.PHONY: install dev test lint serve web ingest reproduce check clean
 
 install:
 	pip install -e .
@@ -25,6 +25,16 @@ web:
 
 ingest:
 	python scripts/ingest_aviation.py
+
+# Can someone else get this result? --check inventories; the bare target runs
+# the cheap stages; --all re-runs the boundary nulls and compares them against
+# the committed numbers. Output goes to data/events/reproduce/ and overwrites
+# nothing.
+check:
+	python scripts/reproduce.py --check
+
+reproduce:
+	python scripts/reproduce.py
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

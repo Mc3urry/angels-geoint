@@ -117,6 +117,35 @@ pointless.
 Credentials go in `.env` (see `.env.example`); it is gitignored and nothing in
 the repo prints a credential value.
 
+## Reproducing the result
+
+The point of a capstone is that someone can check it, so the four small files
+the conclusion rests on and the per-scene record of what was searched are in
+version control — 118 files, about 2 MB in git. The 56 GB of Sentinel-1
+scenes and the 3.2 GB of reference AIS are not, and never will be.
+
+```bash
+pip install -e ".[dev]" && pip install -e ".[ml]"
+python scripts/fetch_limits.py     # the only thing that needs the network
+make check                         # what can run here, and what each gap needs
+make reproduce                     # run it
+python scripts/reproduce.py --all  # and re-run the boundary nulls (slow)
+```
+
+`--all` is the one that matters. Every stochastic step is seeded —
+`boundary_analysis.py` at 20240621, the sampler and the correction at
+20260925 — so a correct re-run is **byte-identical**, and the script compares
+every band, every limit and every p-value against the committed
+`boundary-bands.json` rather than just reporting that it finished. Without
+that comparison, "ran 4, failed 0" means the pipeline executed, not that
+anything reproduced.
+
+Output goes to `data/events/reproduce/`. Nothing committed is overwritten.
+
+What a clone **cannot** regenerate, and the script says so per stage: the
+image chips and the AIS-isolation pass in the dossiers (raw scenes and 3.2 GB
+of parquet), and anything upstream of the detections themselves.
+
 ## Quickstart
 
 Python ≥ 3.11.
