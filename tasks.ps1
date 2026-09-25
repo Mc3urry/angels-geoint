@@ -44,6 +44,15 @@ function Show-Help {
     Write-Host "editable install + test deps"
     Write-Host "    .\tasks.ps1 analysis   " -NoNewline -ForegroundColor Cyan
     Write-Host "phase 4 geospatial stack (heavy)"
+    Write-Host "    .\tasks.ps1 ml         " -NoNewline -ForegroundColor Cyan
+    Write-Host "scikit-learn, for the candidate classifier"
+    Write-Host "    .\tasks.ps1 sar        " -NoNewline -ForegroundColor Cyan
+    Write-Host "rasterio"
+    Write-Host "    .\tasks.ps1 forensics  " -NoNewline -ForegroundColor Cyan
+    Write-Host "pvlib, pillow"
+    Write-Host ""
+    Write-Host "    Install through these, never a bare pip: on this machine" -ForegroundColor DarkGray
+    Write-Host "    `python` is ArcGIS Pro's 3.14t, which has no wheels." -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "    .\tasks.ps1 test       " -NoNewline -ForegroundColor Cyan
     Write-Host "run the suite"
@@ -94,9 +103,20 @@ if ($Task.ToLower() -notin @("help", "clean")) {
 
 switch ($Task.ToLower()) {
 
-    "install"  { & $Py -m pip install -e . }
-    "dev"      { & $Py -m pip install -e ".[dev]" }
-    "analysis" { & $Py -m pip install -e ".[analysis]" }
+    # Every extra declared in pyproject.toml gets a target here, and the
+    # reason is the whole reason this file exists. On 2026-09-25 `pip install
+    # -e ".[ml]"` was run from a bare prompt, went to ArcGIS Pro's Python
+    # 3.14t because that is what `python` means on PATH, found no cp314t
+    # wheel for duckdb, tried to build it from source and died on a missing
+    # nmake. The interpreter guard protects scripts; it cannot protect a bare
+    # `pip`. So there is no extra a person has to install by hand.
+    # tests/test_tasks_targets.py holds this to parity.
+    "install"    { & $Py -m pip install -e . }
+    "dev"        { & $Py -m pip install -e ".[dev]" }
+    "analysis"   { & $Py -m pip install -e ".[analysis]" }
+    "ml"         { & $Py -m pip install -e ".[ml]" }
+    "sar"        { & $Py -m pip install -e ".[sar]" }
+    "forensics"  { & $Py -m pip install -e ".[forensics]" }
 
     "test"     { & $Py -m pytest -q }
     "doctor"   { & $Py scripts\doctor.py }

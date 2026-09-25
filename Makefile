@@ -1,4 +1,4 @@
-.PHONY: install dev test lint serve web ingest reproduce check clean
+.PHONY: install dev analysis ml sar forensics test lint serve web ingest reproduce check clean
 
 install:
 	pip install -e .
@@ -9,6 +9,15 @@ dev:
 # Phase 4 stack. Heavy -- install when you get there, not before.
 analysis:
 	pip install -e ".[analysis]"
+
+ml:
+	pip install -e ".[ml]"
+
+sar:
+	pip install -e ".[sar]"
+
+forensics:
+	pip install -e ".[forensics]"
 
 test:
 	pytest -q

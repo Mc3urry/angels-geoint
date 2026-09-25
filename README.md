@@ -124,8 +124,9 @@ the conclusion rests on and the per-scene record of what was searched are in
 version control — 118 files, about 2 MB in git. The 56 GB of Sentinel-1
 scenes and the 3.2 GB of reference AIS are not, and never will be.
 
-```bash
-pip install -e ".[dev]" && pip install -e ".[ml]"
+```powershell
+.\tasks.ps1 dev                    # never a bare `pip` -- see below
+.\tasks.ps1 ml
 python scripts/fetch_limits.py     # the only thing that needs the network
 make check                         # what can run here, and what each gap needs
 make reproduce                     # run it
@@ -141,6 +142,16 @@ that comparison, "ran 4, failed 0" means the pipeline executed, not that
 anything reproduced.
 
 Output goes to `data/events/reproduce/`. Nothing committed is overwritten.
+
+**Install through `tasks.ps1`, not a bare `pip`.** On the development machine
+the bare command `python` is ArcGIS Pro's conda root — a Python 3.14
+free-threaded build with wheels for almost nothing. `_env.ps1` and
+`scripts/_bootstrap.py` both resolve the right interpreter, but neither can
+protect a hand-typed `pip install`, which on 2026-09-25 went to the ArcGIS
+interpreter, failed to find a cp314t wheel for duckdb, tried to compile it
+and stopped on a missing `nmake`. Every extra in `pyproject.toml` therefore
+has a `tasks.ps1` target, and `tests/test_tasks_targets.py` keeps the two in
+parity.
 
 What a clone **cannot** regenerate, and the script says so per stage: the
 image chips and the AIS-isolation pass in the dossiers (raw scenes and 3.2 GB
