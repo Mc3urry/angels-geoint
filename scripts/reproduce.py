@@ -143,6 +143,21 @@ STAGES = [
 ]
 
 
+def _importable(module: str) -> bool:
+    """Is the package there, without importing it for real.
+
+    A stage that needs scikit-learn should say so in the inventory, not run
+    and fail. The first version declared `soft: ["sklearn"]` and then never
+    consulted it, so a missing optional extra came out as a bare FAILED --
+    indistinguishable from a broken pipeline.
+    """
+    import importlib.util
+    try:
+        return importlib.util.find_spec(module) is not None
+    except (ImportError, ValueError):
+        return False
+
+
 def present(item) -> bool:
     if isinstance(item, Path):
         return item.exists() and (not item.is_dir() or any(item.iterdir()))
@@ -196,6 +211,7 @@ def main() -> int:
     runnable: list[dict] = []
     ready: list[str] = []
     blocked: list[str] = []
+    needs_dep: list[str] = []
     no_cmd = [st["name"] for st in STAGES if not st.get("cmd")]
     for st in STAGES:
         missing = [(i, src) for i, src in st["needs"] if not present(i)]
@@ -207,15 +223,24 @@ def main() -> int:
         for i, src in st.get("optional", []):
             if not present(i):
                 print(f"      degraded {label(i):42} {SOURCES[src]}")
-        if ok:
+        soft = [m for m in st.get("soft", []) if not _importable(m)]
+        for m in soft:
+            print(f"      needs     {m:42} {SOURCES['ml']}")
+        if ok and not soft:
             ready.append(st["name"])
             if st.get("cmd"):
                 runnable.append(st)
+        elif soft:
+            needs_dep.append(st["name"])
         else:
             blocked.append(st["name"])
 
-    print(f"\n    {len(ready)} of {len(STAGES)} stages have all their inputs"
-          f"{'' if not blocked else '; blocked: ' + ', '.join(blocked)}")
+    line = f"\n    {len(ready)} of {len(STAGES)} stages are runnable"
+    if blocked:
+        line += "; blocked on inputs: " + ", ".join(blocked)
+    if needs_dep:
+        line += "; blocked on a package: " + ", ".join(needs_dep)
+    print(line)
     if no_cmd:
         print(f"    {', '.join(no_cmd)}: no command here -- it reaches the "
               f"network, so run it yourself")
@@ -237,9 +262,12 @@ def main() -> int:
             ran.append(st)
             print(f"    {'':20} ok")
         else:
-            failed.append((st["name"], (r.stderr or r.stdout).strip()
-                           .splitlines()[-1:] or ["(no output)"]))
+            tail = (r.stderr or r.stdout).strip().splitlines()[-3:] or \
+                ["(no output)"]
+            failed.append((st["name"], tail))
             print(f"    {'':20} FAILED")
+            for line in tail:
+                print(f"    {'':22} {line[:110]}")
 
     print("\n  VERIFY\n")
     checked = False
@@ -269,7 +297,8 @@ def main() -> int:
     print(f"    ran {len(ran)}, skipped {len(skipped)}, failed {len(failed)}, "
           f"blocked {len(blocked)}")
     for name, err in failed:
-        print(f"      {name}: {err[0][:100]}")
+        for line in err:
+            print(f"      {name}: {line[:110]}")
     print(f"\n    output in {OUT.relative_to(ROOT)} -- nothing committed was "
           f"overwritten\n")
     return 1 if failed else 0

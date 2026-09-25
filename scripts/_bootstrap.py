@@ -33,6 +33,23 @@ than the wrong interpreter is not knowing which interpreter you got.
 It also announces the switch on stderr. A script that quietly relaunches
 itself elsewhere would be its own kind of invisible behaviour, and this file
 exists to make an invisible thing visible.
+
+ONE MORE THING IT FIXES, ADDED 2026-09-25
+
+Several scripts reuse each other -- `from scripts.boundary_analysis import
+limit_sets` and the like -- and that import only works if the REPO ROOT is on
+`sys.path`. Running `python scripts/x.py` puts `scripts/` there, not the root,
+and an editable install of this project maps `angels` alone. So the import
+worked under `PYTHONPATH=.` and failed when run the ordinary way, which is
+exactly the kind of bug that hides until someone else runs the code:
+
+    ModuleNotFoundError: No module named 'scripts'
+
+It surfaced on 2026-09-25 when `reproduce.py` -- whose whole job is to be run
+by someone else -- spawned three of them as subprocesses and all three died.
+The root goes on `sys.path` here, once, for the same reason the interpreter
+switch is here: every script in this directory already imports this module to
+make project imports work, and this is a project import.
 """
 
 from __future__ import annotations
@@ -131,3 +148,10 @@ def ensure() -> None:
 
 
 ensure()
+
+# The repo root, so `scripts.*` imports resolve however the script was started.
+# After ensure(), because a wrong interpreter is the more urgent failure and
+# should not be masked by a path that happens to work.
+_ROOT = str(Path(__file__).resolve().parents[1])
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)

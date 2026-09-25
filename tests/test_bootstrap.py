@@ -247,3 +247,66 @@ def test_a_script_that_imports_the_package_has_a_bootstrap(script: Path) -> None
         f"environment. Do not substitute sys.path.insert -- that hides the "
         f"very failure the bootstrap detects."
     )
+
+
+def test_the_bootstrap_puts_the_repo_root_on_sys_path() -> None:
+    """THE BUG THIS CLOSES.
+
+    Four scripts reuse each other -- `from scripts.boundary_analysis import
+    limit_sets` and the like. That import needs the REPO ROOT on `sys.path`,
+    and `python scripts/x.py` puts `scripts/` there instead; an editable
+    install maps `angels` alone. So every one of them worked under
+    `PYTHONPATH=.` and died when run the ordinary way.
+
+    `test_scripts_import` above could not catch it: pytest.ini sets
+    `pythonpath = ["."]`, so the root is already there when that test runs.
+    The failure only appears in a child process started the way a person
+    starts one, which is what this does.
+
+    It surfaced on 2026-09-25 when `reproduce.py` -- whose entire purpose is
+    to be run by somebody else -- spawned three of them and all three died
+    with ModuleNotFoundError: No module named 'scripts'.
+    """
+    import os
+    import subprocess
+
+    root = Path(__file__).resolve().parents[1]
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+    # Stand in for the editable install: `angels` importable, root not on path.
+    env["PYTHONPATH"] = str(root)
+    probe = ("import sys, _bootstrap, pathlib;"
+             "import scripts.boundary_analysis;"
+             "print('ok')")
+    r = subprocess.run([sys.executable, "-c", probe], cwd=root / "scripts",
+                       capture_output=True, text=True, env=env)
+    assert "ok" in r.stdout, (
+        "a script in scripts/ cannot import scripts.* -- _bootstrap must put "
+        f"the repo root on sys.path:\n{r.stderr[-500:]}")
+
+
+@pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)
+def test_a_script_reusing_another_declares_the_bootstrap_first(script: Path) -> None:
+    """A `scripts.*` import must sit below the bootstrap, not above it.
+
+    Same shape as the third-party rule: the bootstrap is what makes the
+    import resolve, so anything depending on it that runs earlier runs
+    before the thing it depends on exists.
+    """
+    import ast
+    tree = ast.parse(script.read_text(encoding="utf-8"))
+    seen_bootstrap = False
+    for node in tree.body:
+        if isinstance(node, ast.Try) and any(
+                isinstance(n, ast.Import)
+                and any(a.name == "_bootstrap" for a in n.names)
+                for n in node.body):
+            seen_bootstrap = True
+            continue
+        mod = (node.module if isinstance(node, ast.ImportFrom) else None) or ""
+        names = ([a.name for a in node.names]
+                 if isinstance(node, ast.Import) else [])
+        if (mod.startswith("scripts")
+                or any(n.startswith("scripts") for n in names)):
+            assert seen_bootstrap, (
+                f"{script.name} imports {mod or names} at module level before "
+                f"the bootstrap block that makes it resolvable")
