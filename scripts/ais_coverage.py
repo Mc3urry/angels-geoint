@@ -48,9 +48,22 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
 
 from angels.adapters.maritime import coverage
 from angels.adapters.maritime.coverage import HEARD, ReceptionGrid
-from angels.config import AOI_SEA, EVENTS, INTERIM, RAW
+from angels.config import AOI_SEA, AOI_SEA_CONUS, EVENTS, INTERIM, RAW
 
-AIS_STORE = RAW / "maritime"
+# WHICH STORE, AND THEREFORE WHICH BOX AND WHICH RECEIVERS.
+#
+# The bulk store is MarineCadastre: shore-based receivers, months late. The
+# live stores are aisstream, collected by this project's own collectors in
+# the same schema -- which is the whole reason a second reader was never
+# needed. Measuring the two and comparing them is the point: a real-time
+# dark-vessel claim needs the LIVE feed's reception envelope, and there is no
+# reason to assume it matches the bulk one.
+STORES = {
+    "maritime":            (RAW / "maritime",            AOI_SEA,       "bulk, shore-based"),
+    "maritime-live":       (RAW / "maritime-live",       AOI_SEA,       "live, aisstream"),
+    "maritime-live-conus": (RAW / "maritime-live-conus", AOI_SEA_CONUS, "live, aisstream"),
+}
+
 OUT = INTERIM / "coverage"
 
 
@@ -68,16 +81,44 @@ def scene_times() -> list[datetime]:
     return sorted(set(out))
 
 
-def ais_files() -> list[Path]:
-    files = sorted(AIS_STORE.rglob("*.parquet"))
+def day_groups(store: Path) -> list[tuple[str, list[Path]]]:
+    """Every parquet file under the store, GROUPED BY DAY.
+
+    THE GROUPING IS LOAD-BEARING, and it is the one thing that differs
+    between the two kinds of store.
+
+    ReceptionGrid measures how long one vessel goes between reports, so the
+    stream it is fed has to be continuous for as long as that measurement is
+    meant to span. The bulk store writes one file per day, so feeding it a
+    file at a time was already correct. The LIVE store writes a file every
+    20,000 rows or two minutes -- feeding those one at a time would cut every
+    vessel's history into two-minute slices, and almost every gap the grid
+    exists to measure would fall across a join and never be seen. The feed
+    would then look flawless everywhere, which is the failure mode this whole
+    project is about: a measurement that cannot record its own blindness.
+
+    Days, not everything at once, because an interval measured across
+    midnight would span whatever the collector did overnight.
+    """
+    files = sorted(store.rglob("*.parquet"))
     if not files:
-        raise SystemExit(f"\n  No clipped AIS under {AIS_STORE}. "
-                         f"Run scripts/clip_ais.py first.\n")
-    return files
+        raise SystemExit(f"\n  No AIS under {store}.\n")
+
+    groups: dict[str, list[Path]] = {}
+    for f in files:
+        # bulk: date=YYYY-MM-DD/...   live: hour=YYYYMMDDHH/...
+        day = ""
+        for part in f.parts:
+            if part.startswith("date="):
+                day = part[5:]
+            elif part.startswith("hour=") and len(part) >= 13:
+                day = f"{part[5:9]}-{part[9:11]}-{part[11:13]}"
+        groups.setdefault(day or f.stem, []).append(f)
+    return sorted(groups.items())
 
 
-def reports_in(path: Path, window: tuple[datetime, datetime] | None):
-    """(mmsi, t, lon, lat) from one clipped day, ORDERED BY VESSEL AND TIME.
+def reports_in(paths: list[Path], box, window: tuple[datetime, datetime] | None):
+    """(mmsi, t, lon, lat) for one day, ORDERED BY VESSEL AND TIME.
 
     The order is the point: ReceptionGrid.feed_sorted then measures each
     vessel's reporting interval from one row to the next, and the whole day
@@ -85,15 +126,16 @@ def reports_in(path: Path, window: tuple[datetime, datetime] | None):
     """
     import duckdb
 
-    lomin, lamin, lomax, lamax = AOI_SEA
+    lomin, lamin, lomax, lamax = box
     where = [f'"LON" BETWEEN {lomin} AND {lomax}',
              f'"LAT" BETWEEN {lamin} AND {lamax}']
     if window is not None:
         t0, t1 = window
         where += [f"\"BaseDateTime\" >= TIMESTAMP '{t0:%Y-%m-%d %H:%M:%S}'",
                   f"\"BaseDateTime\" <= TIMESTAMP '{t1:%Y-%m-%d %H:%M:%S}'"]
+    listed = ", ".join(f"'{p.as_posix()}'" for p in paths)
     sql = (f'SELECT "MMSI", "BaseDateTime", "LON", "LAT" '
-           f"FROM read_parquet(['{path.as_posix()}']) "
+           f"FROM read_parquet([{listed}]) "
            f"WHERE {' AND '.join(where)} "
            f'ORDER BY "MMSI", "BaseDateTime"')
     for mmsi, t, lon, lat in duckdb.sql(sql).fetchall():
@@ -110,32 +152,43 @@ def main() -> int:
                          "disk, which is what a receiver network's reach is "
                          "a property of")
     ap.add_argument("--cell", type=float, default=coverage.CELL_DEG)
+    ap.add_argument("--store", choices=sorted(STORES), default="maritime",
+                    help="which AIS store to measure. Default is the bulk "
+                         "MarineCadastre archive; the live stores are what "
+                         "this project's own collectors write")
     args = ap.parse_args()
 
-    times = scene_times()
-    if not times:
-        print(f"\n  No detection files in {EVENTS}; nothing to measure "
+    store, box, kind = STORES[args.store]
+
+    # Only the WINDOWED mode needs the pass times; whole-days mode is a
+    # property of the receiver network and has nothing to do with when a
+    # satellite happened to fly over. Requiring them unconditionally made the
+    # script unrunnable against a live feed, which has no passes at all.
+    times = scene_times() if args.window is not None else []
+    if args.window is not None and not times:
+        print(f"\n  No detection files in {EVENTS}; nothing to window "
               f"around.\n")
         return 1
 
     grid = ReceptionGrid(cell_deg=args.cell)
     n_reports = 0
-    files = ais_files()
-    for f in files:
-        # One clipped day at a time. Each is fed separately, so no interval
-        # is ever measured across the join between two days.
+    groups = day_groups(store)
+    for day, paths in groups:
         if args.window is None:
-            n_reports += grid.feed_sorted(reports_in(f, None))
+            n_reports += grid.feed_sorted(reports_in(paths, box, None))
             continue
         half = timedelta(seconds=args.window)
         for t in times:
-            if f"date={t:%Y-%m-%d}" not in str(f):
+            if f"{t:%Y-%m-%d}" != day:
                 continue
-            n_reports += grid.feed_sorted(reports_in(f, (t - half, t + half)))
+            n_reports += grid.feed_sorted(
+                reports_in(paths, box, (t - half, t + half)))
 
     span = ("whole days" if args.window is None
             else f"+/-{args.window / 60:.0f} min around {len(times)} pass(es)")
-    print(f"\n  {n_reports:,} AIS reports, {span}, over {len(files)} date(s)")
+    print(f"\n  store: {args.store}  ({kind})")
+    print(f"  {n_reports:,} AIS reports, {span}, over {len(groups)} date(s), "
+          f"{sum(len(g) for _, g in groups):,} file(s)")
     counts = grid.summary()
     total_cells = len(grid.cells)
     print(f"  {total_cells:,} cells of {args.cell} deg with any AIS at all")
@@ -150,7 +203,7 @@ def main() -> int:
     # not a straight line and neither is the edge.
     print("\n  furthest HEARD cell, by latitude band")
     print(f"    {'band':>14}{'east edge':>12}{'heard cells':>13}")
-    lamin, lamax = AOI_SEA[1], AOI_SEA[3]
+    lamin, lamax = box[1], box[3]
     band = 0.5
     y = lamin
     while y < lamax:
@@ -165,11 +218,29 @@ def main() -> int:
         y += band
 
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "reception.json").write_text(json.dumps(grid.to_json(), indent=1),
-                                        encoding="utf-8")
-    print(f"\n  wrote {OUT / 'reception.json'}")
+    name = ("reception.json" if args.store == "maritime"
+            else f"reception-{args.store}.json")
+    (OUT / name).write_text(json.dumps(grid.to_json(), indent=1),
+                            encoding="utf-8")
+    print(f"\n  wrote {OUT / name}")
 
     # -- score the candidates ----------------------------------------------
+    #
+    # ONLY FROM THE BULK STORE, and this is a guard rather than a preference.
+    #
+    # The candidates are Sentinel-1 detections from twelve 2024 passes. The
+    # live stores hold this week. Scoring 2024 detections against a reception
+    # grid built from last night measures nothing, and it would do it by
+    # OVERWRITING candidates-scored.geojson -- the file boundary_analysis.py
+    # reads, and therefore the file the project's only published result rests
+    # on. A live measurement must not be able to destroy a retrospective one
+    # by being run with the wrong flag.
+    if args.store != "maritime":
+        print(f"\n  Reception only: candidates are 2024 SAR detections and "
+              f"this grid is\n  {kind}. Scoring them against it would "
+              f"measure nothing and would\n  overwrite "
+              f"candidates-scored.geojson. Compare the two grids instead.\n")
+        return 0
 
     cand = EVENTS / "candidates.geojson"
     if not cand.exists():
