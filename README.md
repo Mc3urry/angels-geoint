@@ -143,6 +143,12 @@ anything reproduced.
 
 Output goes to `data/events/reproduce/`. Nothing committed is overwritten.
 
+**It has been run.** 2026-09-25, on the development machine: **18m 20s** for
+the boundary stage and 19m 13s for the pipeline, with **all eight limits
+identical to the committed result** — every band, every chi-square, every
+p-value, scattered and shift, control included. The other stages are seconds:
+classifier 47 s, clutter correction 2.1 s, gate 1.4 s, dossiers 2.6 s.
+
 **Install through `tasks.ps1`, not a bare `pip`.** On the development machine
 the bare command `python` is ArcGIS Pro's conda root — a Python 3.14
 free-threaded build with wheels for almost nothing. `_env.ps1` and

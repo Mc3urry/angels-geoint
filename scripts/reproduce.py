@@ -225,7 +225,7 @@ def boundary_cmd() -> list[str]:
     return cmd
 
 
-def verify_boundary(made: Path) -> list[str]:
+def verify_boundary(made: Path) -> tuple[list[str], list[str]]:
     """Regenerated band numbers against the committed ones, exactly.
 
     Every null in `boundary_analysis.py` is seeded, so a correct re-run is
@@ -234,7 +234,7 @@ def verify_boundary(made: Path) -> list[str]:
     """
     ref = EVENTS / "boundary-bands.json"
     if not ref.exists() or not made.exists():
-        return ["one side missing; nothing to compare"]
+        return (["one side missing; nothing to compare"], [])
     ra = json.loads(ref.read_text(encoding="utf-8"))
     rb = json.loads(made.read_text(encoding="utf-8"))
 
@@ -261,10 +261,10 @@ def verify_boundary(made: Path) -> list[str]:
         out.append("  Band counts below are still meaningful; p-values are "
                    "not. Re-run at the committed settings to verify.")
         if any(k in differ for k in ("trials", "stride", "shift_trials")):
-            return out + note + _band_diffs(ra["limits"], rb["limits"],
-                                            deterministic_only=True)
-        return out + note
-    return _band_diffs(ra["limits"], rb["limits"]) + note
+            return (out + _band_diffs(ra["limits"], rb["limits"],
+                                      deterministic_only=True), note)
+        return (out, note)
+    return (_band_diffs(ra["limits"], rb["limits"]), note)
 
 
 def _band_diffs(a: dict, b: dict, *, deterministic_only: bool = False) -> list[str]:
@@ -297,6 +297,14 @@ def main() -> int:
     ready: list[str] = []
     blocked: list[str] = []
     needs_dep: list[str] = []
+    # Build the lazy commands BEFORE deciding which stages have none. The
+    # first version read this list while the boundary stage's command was
+    # still unbuilt, and announced the most expensive stage in the pipeline
+    # as "no command here -- it reaches the network". It has never touched
+    # the network.
+    for st in STAGES:
+        if st.get("verify") == "boundary" and st.get("cmd") is None:
+            st["cmd"] = boundary_cmd()
     no_cmd = [st["name"] for st in STAGES if not st.get("cmd")]
     for st in STAGES:
         missing = [(i, src) for i, src in st["needs"] if not present(i)]
@@ -308,8 +316,6 @@ def main() -> int:
         for i, src in st.get("optional", []):
             if not present(i):
                 print(f"      degraded {label(i):42} {SOURCES[src]}")
-        if st.get("verify") == "boundary" and st.get("cmd") is None:
-            st["cmd"] = boundary_cmd()
         soft = [m for m in st.get("soft", []) if not _importable(m)]
         for m in soft:
             print(f"      needs     {m:42} {SOURCES['ml']}")
@@ -365,7 +371,7 @@ def main() -> int:
         if st.get("verify") != "boundary":
             continue
         checked = True
-        diffs = verify_boundary(OUT / "boundary-bands.json")
+        diffs, notes = verify_boundary(OUT / "boundary-bands.json")
         if not diffs:
             print("    boundary analysis   IDENTICAL to the committed result")
             print("    every band, every limit, every p-value. The seeds hold.")
@@ -373,6 +379,8 @@ def main() -> int:
             print(f"    boundary analysis   {len(diffs)} DIFFERENCE(S):")
             for d in diffs[:12]:
                 print(f"      {d}")
+        for n in notes:
+            print(f"      note: {n}")
     if not checked:
         why = ("it was skipped as slow -- re-run with --all"
                if "boundary analysis" in skipped else
