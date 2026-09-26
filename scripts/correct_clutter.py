@@ -219,9 +219,16 @@ def main() -> int:
     if excluded:
         print("\n  labelled chips held out of every denominator: "
               + ", ".join(f"{k} {v}" for v, k in sorted(excluded.items())))
-        print("  `no-data` means the candidate falls in the scene's no-data "
-              "border ramp,\n  so there was no ground to read -- a detector "
-              "defect, not a hard chip.")
+        # Glossed only when present. The first version of this printed the
+        # `no-data` explanation unconditionally, so on the run where the last
+        # `no-data` chip was relabelled it still explained the category --
+        # and explained it with a claim about the detector that had by then
+        # been retracted. A report that describes what is not there is the
+        # same defect as one that hides what is.
+        if excluded.get("no-data"):
+            print("  `no-data` means the chip could not be read at all, so "
+                  "there was no\n  ground to judge -- which is not the same "
+                  "as having judged it and found\n  nothing.")
 
     missing = [s for s, (k, n) in rates.items() if n == 0]
     if missing:

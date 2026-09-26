@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -60,12 +61,36 @@ PIXEL_M = 10.0
 NEAR_M = 300.0
 
 
+class NoPixel(RuntimeError):
+    """Newton did not converge, so there is no pixel to report."""
+
+
 def pixel_of(loc, lon: float, lat: float, *, start=None,
-             iters: int = 30) -> tuple[float, float]:
+             iters: int = 30, tol_px: float = 0.5) -> tuple[float, float]:
     """(col, row) for a lon/lat, by Newton's method on loc.lonlat.
 
-    The geolocator only runs forward. It is smooth, so a few Newton steps
-    from the nearest control point converge to well under a pixel.
+    The geolocator only runs forward. It is smooth over most of a scene, so a
+    few Newton steps from the nearest control point converge to well under a
+    pixel -- the median residual over 1,150 candidates is 0.04 px.
+
+    It is not smooth everywhere. On 17 of those 1,150 (1.5%) the iteration
+    walks off and stops, usually pinned against the last column, and the
+    answer is 300 m to 10 km from the truth. There is no middle: a candidate
+    is either at 0.04 px or it is kilometres away.
+
+    Until 2026-09-26 this function returned that answer anyway. Four of the
+    147 hand-read chips were cut from ground kilometres from their candidate
+    and read as if they were the candidate -- three came back 99.8% no-data
+    and were briefly written up as a *detector* defect, which they were not;
+    the detector's own position is right to half a metre. The failure was
+    here, and it was silent.
+
+    So it now verifies. `tol_px` is the accepted round-trip error in pixels;
+    beyond it this raises `NoPixel` rather than returning a number that looks
+    exactly like a good one.
+
+    Callers that have the detector's own `pixel` property should use it and
+    not call this at all. This is for positions that were never a pixel.
     """
     if start is None:
         best = min(loc.gcps, key=lambda g: (g.x - lon) ** 2 + (g.y - lat) ** 2)
@@ -88,6 +113,27 @@ def pixel_of(loc, lon: float, lat: float, *, start=None,
         dcol = (d * ex - b * ey) / det
         drow = (-c * ex + a * ey) / det
         col, row = col + dcol, row + drow
+
+    # The check that was missing. `loc.lonlat` is the same forward map the
+    # detector used, so this compares like with like.
+    x1, y1 = loc.lonlat(col, row)
+    xc, yc = loc.lonlat(col + h, row)
+    xr, yr = loc.lonlat(col, row + h)
+    a, b = (xc - x1) / h, (xr - x1) / h
+    c, d = (yc - y1) / h, (yr - y1) / h
+    det = a * d - b * c
+    if det == 0:
+        raise NoPixel(
+            f"the geolocator is not invertible at ({lon:.5f}, {lat:.5f}): "
+            f"its Jacobian is singular there, so no pixel can be found")
+    ex, ey = lon - x1, lat - y1
+    off = math.hypot((d * ex - b * ey) / det, (-c * ex + a * ey) / det)
+    if not (off <= tol_px):
+        raise NoPixel(
+            f"Newton did not converge for ({lon:.5f}, {lat:.5f}): the best "
+            f"pixel found, ({col:.1f}, {row:.1f}), maps back {off:,.0f} px "
+            f"away -- about {off * 10:,.0f} m. Returning it would hand you a "
+            f"chip of the wrong ground with nothing to say so.")
     return col, row
 
 

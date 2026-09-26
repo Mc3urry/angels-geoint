@@ -44,7 +44,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
         raise
 
 sys.path.insert(0, str(Path(__file__).parent))
-from inspect_misses import chip_png, pixel_of, vv_member  # noqa: E402
+from inspect_misses import NoPixel, chip_png, pixel_of, vv_member  # noqa: E402
 
 from angels.config import EVENTS, INTERIM, RAW  # noqa: E402
 
@@ -181,6 +181,7 @@ def main() -> int:
         by_scene.setdefault(f["properties"].get("scene", ""), []).append(f)
 
     rows = []
+    skipped: list[dict] = []
     for scene, group in sorted(by_scene.items()):
         z = scene_zip(scene) if scene else None
         if z is None:
@@ -193,7 +194,23 @@ def main() -> int:
             for f in group:
                 p = f["properties"]
                 lon, lat = f["geometry"]["coordinates"]
-                col, row = pixel_of(loc, lon, lat)
+                # The detector recorded the pixel it fired on. Use it. The
+                # inversion below is a reconstruction of something we were
+                # handed, and on 1.5% of candidates it reconstructs it
+                # kilometres wrong -- which is how four hand-read chips came
+                # to be cut from the wrong ground.
+                px = p.get("pixel")
+                if px:
+                    col, row = float(px[0]), float(px[1])
+                else:
+                    try:
+                        col, row = pixel_of(loc, lon, lat)
+                    except NoPixel as e:
+                        print(f"    {p.get('date')}  {lat:7.4f} {lon:9.4f}"
+                              f"  NO CHIP: {e}")
+                        skipped.append({"date": p.get("date"), "lon": lon,
+                                        "lat": lat, "why": str(e)})
+                        continue
                 win = Window(max(int(col) - args.half, 0),
                              max(int(row) - args.half, 0),
                              2 * args.half, 2 * args.half)
@@ -231,6 +248,16 @@ def main() -> int:
                 print(f"    {p.get('date')}  {lat:7.4f} {lon:9.4f}  "
                       f"snr {p.get('snr'):6.1f}  len~ {p.get('length_m_approx'):4.0f} m"
                       f"  near x{near_peak / med:5.1f}  -> {verdict}")
+
+    if skipped:
+        # Named, not swallowed. A chip that could not be cut is not a chip
+        # that showed nothing.
+        print(f"\n  {len(skipped)} candidate(s) could not be chipped; "
+              f"they are listed in candidates-skipped.json and are NOT in "
+              f"candidates.csv")
+        OUT.mkdir(parents=True, exist_ok=True)
+        (OUT / "candidates-skipped.json").write_text(
+            json.dumps(skipped, indent=1) + "\n", encoding="utf-8")
 
     if not rows:
         print("\n  Nothing chipped.\n")
