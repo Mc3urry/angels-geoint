@@ -226,6 +226,20 @@ Over 800 tests, and three of them decide whether the rest mean anything:
 | 5 | Land domain (GTFS-RT), cross-domain comparison | scoped |
 | 6 | Inversion classifier, chronolocation | scoped |
 
+## How this project checks itself
+
+Fifteen faults found here share one shape: a routine reporting an outcome its
+own execution did not entitle it to report, with nothing in the output to say
+so. None was an arithmetic error — every quantity computed correctly, every
+time. What failed was what the programs said about what they had done.
+
+One of them produced a published false finding, which was retracted rather
+than deleted. The catalogue, the six techniques that actually caught them, and
+the seven rules adopted in response are in
+[`docs/reporting-defects.md`](docs/reporting-defects.md). It is the most
+reusable thing here, and the reason the headline result survived three
+revisions of its own input.
+
 ## Scope
 
 Targets are **platforms and institutions, never persons** — vessels, aircraft,
