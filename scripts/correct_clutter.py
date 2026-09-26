@@ -89,6 +89,18 @@ def beta_sample(rng: random.Random, a: float, b: float) -> float:
     return x / (x + y) if (x + y) else 0.5
 
 
+
+def _sha256(path: Path) -> str:
+    import hashlib
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _utcnow() -> str:
+    import datetime
+    return (datetime.datetime.now(datetime.timezone.utc)
+            .replace(microsecond=0).isoformat())
+
+
 def load_labels(path: Path) -> dict[tuple[float, float], str]:
     out: dict[str, dict] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -278,6 +290,24 @@ def main() -> int:
         print(f"    {b:10}{before[b]:>9,}{after[b]:>9,}"
               f"{after[b] / before[b]:>8.2f}")
 
+    # Publish the per-band keep-fractions instead of leaving them to be
+    # transcribed. `tune_gate.py` held a hand-copied constant of these, and
+    # after the pass-3 re-read its >10nm value said 0.62 while the
+    # measurement said 0.59 -- so the rule that decides whether a gate may
+    # be applied upstream of the boundary test was being checked against a
+    # number the measurement no longer produced. The digest lets the
+    # consumer tell that for itself rather than trust the file's presence.
+    keep = {b: round(after[b] / before[b], 4) for b in sorted(before)}
+    (args.out_dir / "keep-fractions.json").write_text(json.dumps({
+        "what": "keep-fraction per band under the point correction",
+        "per_band": keep,
+        "labels": args.labels.name,
+        "labels_sha256": _sha256(args.labels),
+        "seed": args.seed,
+        "at": _utcnow(),
+    }, indent=1) + "\n", encoding="utf-8")
+    print(f"\n  per-band keep-fractions -> {args.out_dir / 'keep-fractions.json'}")
+
     report(feats, point, replicate_sets, args)
     print()
     return 0
@@ -447,4 +477,8 @@ def _extreme(feats: list[dict], expected: dict, obs0: dict, n0: int) -> float:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # The report is written by the run, not captured after it.
+    from scripts._report import tee
+    with tee(EVENTS / "corrected" / "report.txt"):
+        _rc = main()
+    raise SystemExit(_rc)

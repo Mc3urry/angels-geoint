@@ -64,6 +64,7 @@ import json
 import math
 import random
 import statistics
+from collections import Counter
 from pathlib import Path
 
 try:
@@ -80,13 +81,46 @@ NOT_VESSEL = ("clutter", "fixed")
 DEFAULT_BINS = (6, 8, 12, 20, 35, 70)
 GATES = (8, 10, 12, 15, 20, 25, 35)
 
-# Keep-fractions the measured contamination justifies, per band, from the
-# 147-chip read. Printed beside the gate's own keep-fractions so the point
-# where a gate stops removing clutter and starts removing vessels is visible
-# rather than argued about.
-JUSTIFIED = {"<=2nm": 0.83, "2-10nm": 0.72, ">10nm": 0.62}
+# Keep-fractions the measured contamination justifies, per band. These are
+# read from the artefact `correct_clutter.py` writes, never transcribed. A
+# hand-copied constant lived here until 2026-09-26, and after the pass-3
+# re-read it said >10nm 0.62 while the measurement said 0.59 -- so the rule
+# that decides whether a gate may go upstream of the boundary test was being
+# checked against a number nothing produced any more. If the artefact is
+# missing, or was written from a different labels.jsonl than the one being
+# read now, this script stops. It does not fall back to a remembered value,
+# because a disqualifier that guesses is not a disqualifier.
+KEEP_FRACTIONS = EVENTS / "corrected" / "keep-fractions.json"
 
 SPLITS, SEED = 50, 20260925
+
+
+
+def load_justified(path: Path, labels: Path) -> dict[str, float]:
+    """The measured keep-fractions, or a refusal -- never a remembered value."""
+    import hashlib
+    if not path.exists():
+        raise SystemExit(
+            f"\n  {path} is missing.\n"
+            "  The justified keep-fractions come from the clutter correction,\n"
+            "  not from a constant in this file. Run:\n"
+            "      python scripts/correct_clutter.py\n"
+            "  and then run this again.\n")
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    want = hashlib.sha256(labels.read_bytes()).hexdigest()
+    got = doc.get("labels_sha256")
+    if got != want:
+        raise SystemExit(
+            f"\n  {path.name} was written from a different {labels.name}.\n"
+            f"      it recorded  {got}\n"
+            f"      current file {want}\n"
+            "  Re-run `python scripts/correct_clutter.py` so the keep-fractions\n"
+            "  describe the labels this script is about to read. Comparing a\n"
+            "  gate against a stale correction is how the last one went wrong.\n")
+    per = doc.get("per_band") or {}
+    if not per:
+        raise SystemExit(f"\n  {path.name} carries no per_band block.\n")
+    return {k: float(v) for k, v in per.items()}
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
@@ -152,10 +186,19 @@ def main() -> int:
         rows.append({"px": p["pixels"], "snr": p["snr"], "band": band,
                      "v": labels.get((round(lon, 6), round(lat, 6)))})
 
+    justified = load_justified(KEEP_FRACTIONS, args.labels)
+
     usable = [r for r in rows if r["v"] in (VESSEL,) + NOT_VESSEL]
+    # Every excluded verdict is named from the data. Spelling `ambiguous`
+    # here and nothing else is how `no-data` would have left the count
+    # without appearing in the sentence that reports the count.
+    excluded = Counter(r["v"] for r in rows
+                       if r["v"] is not None
+                       and r["v"] not in (VESSEL,) + NOT_VESSEL)
     print(f"\n  {len(rows):,} candidates, {len(usable)} usable labels "
           f"({sum(1 for r in usable if r['v'] == VESSEL)} vessel); "
-          f"{sum(1 for r in rows if r['v'] == 'ambiguous')} ambiguous excluded")
+          + (", ".join(f"{k} {v}" for v, k in sorted(excluded.items()))
+             + " excluded" if excluded else "nothing excluded"))
 
     rate: dict[int, float] = {}
     print("\n  P(vessel) per cluster-size bin -- the estimator everything below uses")
@@ -234,12 +277,12 @@ def main() -> int:
             k = sum(1 for r in rows if r["band"] == b and r["px"] >= g)
             frac = k / tot[b] if tot[b] else float("nan")
             keeps.append(frac)
-            cells.append(f"{frac:.3f} / {JUSTIFIED.get(b, float('nan')):.2f}")
+            cells.append(f"{frac:.3f} / {justified.get(b, float('nan')):.2f}")
         spread = max(keeps) / min(keeps) if min(keeps) > 0 else float("inf")
         print(f"    px>={g:<5}" + "".join(f"{c:>20}" for c in cells)
               + f"{spread:>9.2f}")
     print(f"\n    (the clutter correction's own band spread is "
-          f"{max(JUSTIFIED.values()) / min(JUSTIFIED.values()):.2f}x)")
+          f"{max(justified.values()) / min(justified.values()):.2f}x)")
     print("\n  Read the disqualifier before the trade. A gate whose spread "
           "exceeds the\n  contamination's own is removing vessels unevenly, and "
           "must not be applied\n  upstream of the boundary test at any purity.\n")
@@ -247,4 +290,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # The report is written by the run, not captured after it.
+    from scripts._report import tee
+    with tee(EVENTS / "corrected" / "gate-report.txt"):
+        _rc = main()
+    raise SystemExit(_rc)

@@ -71,6 +71,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from collections import Counter
 from pathlib import Path
 
 try:
@@ -226,6 +227,17 @@ def main() -> int:
           f"({sum(1 for r in train if r['verdict'] == VESSEL)} vessel, "
           f"{sum(1 for r in train if r['verdict'] != VESSEL)} not), "
           f"{len(dropped)} ambiguous held out")
+    # Counted from the data, not from a list of verdicts written here. A
+    # verdict added later -- `no-data` was -- must not be able to leave the
+    # fit without saying so; a label that vanishes silently is a label the
+    # report cannot be questioned about.
+    held = Counter(r["verdict"] for r in rows
+                   if r["verdict"] is not None
+                   and r["verdict"] not in (VESSEL,) + tuple(NOT_VESSEL) + DROPPED)
+    if held:
+        print("  also held out: "
+              + ", ".join(f"{v} {k}" for v, k in sorted(held.items()))
+              + "  (neither fitted nor counted as ambiguous)")
 
     X, names = feature_matrix(train)
     X = np.asarray(X, dtype=float)
@@ -379,4 +391,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # The report is written by the run, not captured after it.
+    from scripts._report import tee
+    with tee(EVENTS / "corrected" / "classifier-report.txt"):
+        _rc = main()
+    raise SystemExit(_rc)
