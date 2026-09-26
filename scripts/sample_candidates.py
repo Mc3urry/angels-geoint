@@ -182,6 +182,14 @@ def main() -> int:
                 "lon": lon, "lat": lat,
                 "date": p.get("date"), "t": p.get("t"),
                 "scene": p.get("scene"),
+                # The pixel the detector fired on, carried into the draw so
+                # the chipper never has to reconstruct it. It did reconstruct
+                # it, by Newton iteration on the geolocator, and on 1.5% of
+                # candidates that reconstruction was kilometres wrong without
+                # saying so -- four of these 147 chips were of the wrong
+                # ground. A drawn record should carry everything needed to
+                # chip it; this was the piece it was missing.
+                "pixel": p.get("pixel"),
                 "snr": p.get("snr"), "pixels": p.get("pixels"),
                 "length_m_approx": p.get("length_m_approx"),
                 "uncertainty_m": p.get("uncertainty_m"),
