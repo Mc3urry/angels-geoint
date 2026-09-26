@@ -189,11 +189,27 @@ def main() -> int:
     for s in sorted(pop):
         c = tally.get(s, Counter())
         k = c["vessel"]
-        n = sum(c.values()) if args.ambiguous_as_clutter else \
-            c["vessel"] + c["clutter"] + c["fixed"]
+        # Named explicitly, not sum(c.values()): a verdict added later --
+        # `no-data` was -- would otherwise slide into the denominator and
+        # quietly lower every rate without anything saying so.
+        n = c["vessel"] + c["clutter"] + c["fixed"] + \
+            (c["ambiguous"] if args.ambiguous_as_clutter else 0)
         rates[s] = (k, n)
         r = f"{k / n:.3f}" if n else "  --  "
         print(f"    {s:24}{n:>10}{k:>8}{r:>8}{pop[s]:>12,}")
+
+    excluded: Counter = Counter()
+    for c in tally.values():
+        for v, k in c.items():
+            if v not in ("vessel", "clutter", "fixed") and not (
+                    args.ambiguous_as_clutter and v == "ambiguous"):
+                excluded[v] += k
+    if excluded:
+        print("\n  labelled chips held out of every denominator: "
+              + ", ".join(f"{k} {v}" for v, k in sorted(excluded.items())))
+        print("  `no-data` means the candidate falls in the scene's no-data "
+              "border ramp,\n  so there was no ground to read -- a detector "
+              "defect, not a hard chip.")
 
     missing = [s for s, (k, n) in rates.items() if n == 0]
     if missing:

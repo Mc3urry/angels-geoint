@@ -435,7 +435,7 @@ def main() -> int:
             "assessment": {
                 "p_vessel": p_vessel,
                 "label": None if not lab else {
-                    "verdict": lab.get("verdict"), "reader": lab.get("reader"),
+                    "verdict": lab.get("verdict"),
                     "note": lab.get("note"), "at": lab.get("at")},
                 "ais_isolation": None if isolation is None
                 else round(isolation, 3),

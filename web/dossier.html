@@ -58,6 +58,10 @@
   .pill.fixed { background:#eef1f3; border-color:#6b7c89; }
   .pill.clutter { background:#fbeae7; border-color:#9b2c1f; color:#7d2318; }
   .pill.ambiguous { background:#fbf3e2; border-color:#7c5412; color:#5f400d; }
+  /* The candidate falls in the scene's no-data border ramp: there was no
+     ground to read, which is not the same as having read it and found
+     nothing. Styled apart from clutter so the two are never conflated. */
+  .pill.no-data { background:#2b2b2b; border-color:#000; color:#fff; }
   .pill.thin, .pill.unheard, .pill.intermittent
         { background:#fbf3e2; border-color:#c9a227; color:#5a4708; }
   .idle { padding:60px 26px; font:12px/1.8 var(--mono); color:var(--ink-3); }
@@ -101,8 +105,7 @@ function render(r) {
   const a = r.assessment, g = r.geography, ais = r.ais, p = r.persistence;
   const near = ais.nearest;
   const lab = a.label
-    ? `<span class="pill ${a.label.verdict}">${a.label.verdict}</span>
-       <span style="font-size:10px;color:#6b7c89"> by ${esc(a.label.reader || "?")}</span>`
+    ? `<span class="pill ${a.label.verdict}">${a.label.verdict}</span>`
     : "not read";
   $("#pane").innerHTML = `
     <h2>${esc(r.key)}</h2>
