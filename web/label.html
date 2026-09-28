@@ -42,6 +42,10 @@
   .done { padding:24px; font:13px var(--mono); color:var(--ink-2); }
   .blind { font:10px/1.5 system-ui,sans-serif; color:var(--ink-3);
     border-top:1px solid var(--rule); padding-top:10px; }
+  .review { background:#241c08; border-bottom:2px solid #7c5412; color:#e8dcc0;
+            padding:10px 16px; font:12px/1.55 var(--mono,monospace); }
+  .review ul { margin:6px 0 0; padding-left:18px; }
+  .review li { margin:2px 0; }
 </style>
 </head>
 <body>
@@ -78,6 +82,7 @@
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 const $ = (id) => document.getElementById(id);
 
+let review = null;
 let items = [], at = 0, total = 0, labelled = 0, last = null;
 
 const fact = (k, v) => v == null || v === "" ? "" :
@@ -86,10 +91,15 @@ const fact = (k, v) => v == null || v === "" ? "" :
 function show() {
   const it = items[at];
   if (!it) {
-    document.querySelector(".wrap").innerHTML =
-      `<div class="done">All ${total} read. Verdicts are in
-       data/events/labels.jsonl — see /labels/progress for the tally by
-       stratum.</div>`;
+    document.querySelector(".wrap").innerHTML = review
+      ? `<div class="done">All ${total} read.<br><br>
+         Verdicts are in <b>data/events/${review.out}</b>. The first reader's
+         labels were not touched.<br><br>
+         Now run <b>python scripts/review_agreement.py</b> — it refused to
+         tell you anything until this moment, on purpose.</div>`
+      : `<div class="done">All ${total} read. Verdicts are in
+         data/events/labels.jsonl — see /labels/progress for the tally by
+         stratum.</div>`;
     return;
   }
   $("chip").src = `${API}/labels/chip/${it.key}`;
@@ -146,6 +156,19 @@ document.querySelectorAll(".keys button").forEach((b) =>
 
 const q = await (await fetch(`${API}/labels/queue`)).json();
 items = q.items; total = q.total; labelled = q.labelled;
+review = q.review || null;
+if (review) {
+  // A blind second read. The banner states the protocol where the reader
+  // cannot avoid it, because a protocol agreed to once at the start of an
+  // hour is a protocol half-remembered by chip thirty.
+  const bar = document.createElement("div");
+  bar.className = "review";
+  bar.innerHTML =
+    `<b>Blind second read — ${review.n} chips, writing to ${review.out}</b>`
+    + `<ul>${(review.protocol || []).map(t =>
+         `<li>${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</li>`).join("")}</ul>`;
+  document.body.insertBefore(bar, document.body.firstChild);
+}
 show();
 </script>
 </body>

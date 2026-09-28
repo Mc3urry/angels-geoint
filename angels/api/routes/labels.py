@@ -65,6 +65,20 @@ CHIPS = INTERIM / "candidates"
 SAMPLE = EVENTS / "label-sample.json"
 LABELS = EVENTS / "labels.jsonl"
 
+# A REVIEW SESSION MAKES labels.jsonl READ-ONLY
+#
+# All 147 verdicts were made by one reader. Validating them means a second
+# reader on a subset and a published agreement rate -- which only works if the
+# second read cannot touch the first. When review-session.json exists:
+#
+#   the queue serves only that session's keys, blinded exactly as before
+#   POST appends to the session's own file and NEVER to labels.jsonl
+#   progress reports the reviewer's own counts, not the first reader's
+#
+# The last point is not fussiness. Showing a blind reader the distribution
+# they are being compared against is a way of telling them the answer.
+SESSION = EVENTS / "review-session.json"
+
 # Fixed, and fixed BEFORE the first image is read. A vocabulary settled
 # afterwards is a vocabulary fitted to what was seen.
 #
@@ -77,6 +91,28 @@ VERDICTS = ("vessel", "fixed", "clutter", "ambiguous")
 # all the offshore ones, puts fatigue and stratum on the same axis -- and
 # fatigue would then look like a difference between bands.
 SHUFFLE_SEED = 20260925
+
+
+
+def _session() -> dict | None:
+    """The open review session, or None. Read fresh: a session may be
+    created or finished while the server is up."""
+    if not SESSION.exists():
+        return None
+    try:
+        doc = json.loads(SESSION.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        raise HTTPException(500, f"{SESSION.name} is not valid JSON")
+    if not doc.get("keys") or not doc.get("out"):
+        raise HTTPException(500, f"{SESSION.name} carries no keys or no out")
+    return doc
+
+
+def _target() -> tuple[Path, dict | None]:
+    """Where verdicts go, and the session governing them if there is one."""
+    sess = _session()
+    return (EVENTS / sess["out"], sess) if sess else (LABELS, None)
+
 
 
 def _rows() -> dict[str, dict]:
@@ -156,10 +192,16 @@ def _queue() -> list[dict]:
 
 
 def _done() -> dict[str, dict]:
+    """Verdicts already recorded IN THE ACTIVE FILE.
+
+    During a review session that is the reviewer's own file, so the queue
+    skips what they have read and not what the first reader read.
+    """
+    path, _ = _target()
     out: dict[str, dict] = {}
-    if not LABELS.exists():
+    if not path.exists():
         return out
-    for line in LABELS.read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         try:
@@ -174,6 +216,10 @@ def _done() -> dict[str, dict]:
 @router.get("/queue")
 def queue(include_done: bool = False) -> dict:
     items = _queue()
+    sess = _session()
+    if sess:
+        want = set(sess["keys"])
+        items = [i for i in items if i["key"] in want]
     done = _done()
     todo = [i for i in items if include_done or i["key"] not in done]
     return {
@@ -181,6 +227,12 @@ def queue(include_done: bool = False) -> dict:
         "total": len(items),
         "labelled": len(done),
         "remaining": len(items) - len(done),
+        "review": None if not sess else {
+            "who": sess.get("who"),
+            "n": sess.get("n"),
+            "out": sess.get("out"),
+            "protocol": sess.get("protocol", []),
+        },
         "items": todo,
     }
 
@@ -212,15 +264,23 @@ def label(v: Verdict) -> dict:
         "lon": v.lon, "lat": v.lat,
         "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
-    LABELS.parent.mkdir(parents=True, exist_ok=True)
+    path, sess = _target()
+    if sess:
+        if v.key not in set(sess["keys"]):
+            raise HTTPException(400, "that chip is not in the open review "
+                                     "session")
+        rec["reader"] = sess.get("who")
+        rec["session"] = SESSION.name
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Append and flush per verdict. A labelling session that loses the last
     # forty judgements to a crash is a labelling session done twice.
-    with LABELS.open("a", encoding="utf-8") as fh:
+    with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(rec) + "\n")
         fh.flush()
     done = _done()
-    return {"ok": True, "labelled": len(done),
-            "remaining": max(0, len(_queue()) - len(done))}
+    total = len(sess["keys"]) if sess else len(_queue())
+    return {"ok": True, "written_to": path.name, "labelled": len(done),
+            "remaining": max(0, total - len(done))}
 
 
 @router.get("/progress")
@@ -248,6 +308,19 @@ def progress() -> dict:
         per_stratum.setdefault(name, {})
         per_stratum[name][got["verdict"]] = \
             per_stratum[name].get(got["verdict"], 0) + 1
+
+    sess = _session()
+    if sess and len(done) < len(sess["keys"]):
+        # Mid-review, the stratum breakdown is withheld. It is keyed on the
+        # distance band -- the variable under test -- and a reader who checks
+        # progress and sees how their verdicts are falling across bands has
+        # been told something about the hypothesis while they still have
+        # chips left to judge. It returns once the session is complete.
+        return {"labelled": len(done),
+                "remaining": len(sess["keys"]) - len(done),
+                "by_verdict": tally,
+                "by_stratum": None,
+                "by_stratum_withheld": "until this review session is complete"}
 
     return {"labelled": len(done), "by_verdict": tally,
             "by_stratum": per_stratum}

@@ -39,12 +39,26 @@ data/**
 #   candidates-scored.geojson the detection set everything else indexes into.
 #                             Regenerable only from the 56 GB of raw scenes.
 #
+#   review-session.json       the PRE-REGISTRATION for a blind second read:
+#                             which chips, drawn from which seed, against a
+#                             SHA-256 of labels.jsonl at draw time, with the
+#                             protocol and the analysis plan written down
+#                             BEFORE the first chip was looked at. Committing
+#                             it before the reading starts is the whole of its
+#                             evidentiary value -- an analysis plan produced
+#                             after the numbers is not an analysis plan.
+#   labels-review-*.jsonl     the second reader's verdicts, kept separate from
+#                             labels.jsonl so the first read cannot be edited
+#                             into agreement with the second.
+#
 # Deliberately NOT here: candidate-pvessel.json and data/events/corrected/
 # (3.2 MB). Both rebuild from the four above in seconds.
 !data/events/labels.jsonl
 !data/events/label-sample.json
 !data/events/boundary-bands.json
 !data/events/candidates-scored.geojson
+!data/events/review-session.json
+!data/events/labels-review-*.jsonl
 
 # And the per-scene record, for the same reason one step further out: without
 # it nothing can be VERIFIED. `scripts/reproduce.py` re-runs the pipeline and
