@@ -67,7 +67,7 @@
       <button class="v-ambiguous" data-v="ambiguous"><kbd>4</kbd> ambiguous</button>
     </div>
 
-    <textarea id="note" placeholder="note (optional) — Enter to submit with the last key"></textarea>
+    <textarea id="note" placeholder="note (optional) — Enter when done, then 1–4"></textarea>
     <div class="hint">Red ring = the candidate, 300 m across. A hull is a
       compact bright head; a wind streak is diffuse; a wake has no bright head.
       <br><br>Keys 1–4. <b>u</b> undoes the last verdict.</div>
@@ -146,7 +146,16 @@ function undo() {
 }
 
 addEventListener("keydown", (e) => {
-  if (e.target.tagName === "TEXTAREA" && e.key !== "Enter") return;
+  if (e.target.tagName === "TEXTAREA") {
+    // Enter finishes the note and hands the keyboard back, so the verdict
+    // key lands on the page rather than in the text. Without this there was
+    // no keyboard route out of the box at all: 1-4 typed digits into the
+    // note and Enter fell through to nothing, while the placeholder promised
+    // "Enter to submit with the last key" -- a control that did not exist,
+    // described confidently, which is this project's defect in a tooltip.
+    if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+    return;
+  }
   const map = { "1": "vessel", "2": "fixed", "3": "clutter", "4": "ambiguous" };
   if (map[e.key]) { e.preventDefault(); send(map[e.key]); }
   else if (e.key === "u") { e.preventDefault(); undo(); }
@@ -154,9 +163,43 @@ addEventListener("keydown", (e) => {
 document.querySelectorAll(".keys button").forEach((b) =>
   b.addEventListener("click", () => send(b.dataset.v)));
 
-const q = await (await fetch(`${API}/labels/queue`)).json();
+// A page that renders nothing looks exactly like a page with nothing to
+// show. Both failures below produce a blank screen and no console message a
+// reader would think to look for, so both say so on the page instead.
+function fatal(html) {
+  document.querySelector(".wrap").innerHTML = `<div class="done">${html}</div>`;
+  throw new Error("label.html cannot start");
+}
+
+if (location.protocol === "file:") {
+  // Opened by double-clicking. A type="module" script under file:// is
+  // blocked by CORS before it can run, so in the usual case this line is
+  // never even reached -- it catches the browsers that do run it, and the
+  // message below is repeated in the README for the ones that do not.
+  fatal(`This page has to be served, not opened from disk.<br><br>
+     Start the API with <b>.\\tasks.ps1 serve</b> and open
+     <b>http://127.0.0.1:8000/label.html</b><br><br>
+     Opened from a file:// URL the browser blocks the script that loads the
+     chips, and the page goes blank with nothing to say why.`);
+}
+
+let q;
+try {
+  const res = await fetch(`${API}/labels/queue`);
+  if (!res.ok) fatal(`The API answered ${res.status} for /labels/queue.`);
+  q = await res.json();
+} catch (err) {
+  fatal(`Could not reach the API at <b>${API || location.origin}</b>.<br><br>
+     Start it with <b>.\\tasks.ps1 serve</b>, then reload.<br><br>
+     <span style="opacity:.7">${String(err)}</span>`);
+}
 items = q.items; total = q.total; labelled = q.labelled;
 review = q.review || null;
+if (!items.length && !total) {
+  fatal(`The queue is empty and nothing has been read.<br><br>
+     If a review session is open, its chips may not have been generated:
+     run <b>python scripts/inspect_candidates.py --sample label-sample.json</b>.`);
+}
 if (review) {
   // A blind second read. The banner states the protocol where the reader
   // cannot avoid it, because a protocol agreed to once at the start of an

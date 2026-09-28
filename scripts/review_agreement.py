@@ -97,6 +97,20 @@ def kappa(pairs: list[tuple[str, str]]) -> tuple[float, float, float, float]:
     return po, pe, k, se
 
 
+
+def _report(title: str, pairs: list[tuple[str, str]], sess: dict) -> None:
+    po, pe, k, se = kappa(pairs)
+    print(f"\n  {title}")
+    print(f"    raw agreement    {po * 100:5.1f}%      "
+          f"chance {pe * 100:4.1f}%")
+    if k == k:
+        print(f"    Cohen's kappa    {k:5.3f}   95% "
+              f"[{k - 1.96 * se:.3f}, {k + 1.96 * se:.3f}]   {_gloss(k)}")
+    else:
+        print("    Cohen's kappa    undefined -- one category carries "
+              "everything")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--partial", action="store_true",
@@ -150,6 +164,22 @@ def main() -> int:
         print("\n  *** PARTIAL: this session is not finished. Every figure "
               "below is contaminated\n  *** by being computable before the "
               "read was complete. Do not publish it.")
+
+    if sess.get("amendments"):
+        print("\n  amendments to the plan, declared before the read:")
+        for am in sess["amendments"]:
+            print(f"    {am['at']}  {am['what']}")
+
+    # The collapsed figure is primary, and the reason is not a preference.
+    # `fixed` in the first read came from cross-date persistence, not from
+    # the chip, so a second reader with one image in front of them cannot
+    # reach it. Charging them for that measures a definitional gap neither
+    # reader chose. Merged, both readers are answering the same question:
+    # is a real target present.
+    merged = [("vessel" if a == "fixed" else a,
+               "vessel" if b == "fixed" else b) for a, b in pairs]
+    _report("three-way (fixed merged into vessel) -- PRIMARY", merged, sess)
+    _report("four-way, as labelled", pairs, sess)
 
     po, pe, k, se = kappa(pairs)
     print(f"\n  n = {len(pairs)}")

@@ -226,6 +226,18 @@ Over 800 tests, and three of them decide whether the rest mean anything:
 | 5 | Land domain (GTFS-RT), cross-domain comparison | scoped |
 | 6 | Inversion classifier, chronolocation | scoped |
 
+## Reading chips
+
+The labelling and review surface is served by the API, not opened from disk:
+
+```powershell
+.\tasks.ps1 serve          # then open http://127.0.0.1:8000/label.html
+```
+
+Opening `web/label.html` from a `file://` URL leaves it blank — the browser
+blocks the module script that fetches the chips — so the page now says so
+instead of rendering nothing.
+
 ## How this project checks itself
 
 Sixteen faults found here share one shape: a routine reporting an outcome its
