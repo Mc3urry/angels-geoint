@@ -58,6 +58,11 @@ data/**
 !data/events/boundary-bands.json
 !data/events/candidates-scored.geojson
 !data/events/review-session.json
+# ...and the archived rounds. The rule above named one exact filename while
+# the scheme it serves produces numbered archives, so `git add` refused
+# review-session-01.json -- the round whose whole evidentiary value is being
+# in the repository.
+!data/events/review-session-*.json
 !data/events/labels-review-*.jsonl
 
 # And the per-scene record, for the same reason one step further out: without
