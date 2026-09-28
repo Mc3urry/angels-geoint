@@ -1,10 +1,11 @@
 # The defect that kept coming back
 
-*A methods note. Written 2026-09-26, after the fifteenth recorded sighting.*
+*A methods note. Written 2026-09-26 after the fifteenth recorded sighting;
+a sixteenth arrived the next morning and is section 3.J.*
 
-Over the course of this project, fifteen separate faults were found that share
+Over the course of this project, sixteen separate faults were found that share
 a single shape. None of them was an arithmetic error. Every quantity this
-pipeline computes, it computed correctly every time. What failed, fifteen
+pipeline computes, it computed correctly every time. What failed, sixteen
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -53,9 +54,9 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached fifteen. A few logged entries
+The running count in the worklog reached sixteen. A few logged entries
 contained more than one instance, so the grouping below has more rows than
-fifteen; the count is of sightings, not of lines of code.
+sixteen; the count is of sightings, not of lines of code.
 
 ### A. "No" and "cannot tell" share a return value
 
@@ -178,6 +179,38 @@ being treated as disqualifying.
 Re-cut with a 3 km context view beside a 5× centre view, **eight of fifteen
 proposed downgrades reversed.**
 
+### J. "Missing" that means "missing where I looked"
+
+Every run of `build_dossiers.py` printed:
+
+    2024-09-25: NO AIS FILE -- 59 candidates cannot be assessed for isolation
+
+The file existed. `data/raw/maritime/date=2024-09-25/ais.parquet`, 434,668
+rows, on disk for five days before the message was first believed. The script
+looked only for the *national* day in `data/reference/ais/`, which eleven
+dates have because they were fetched as GeoParquet and which this one never
+had, because it arrived as a legacy CSV zip instead.
+
+**This is the most expensive of the sixteen**, and not because of its size.
+The other fifteen produced a wrong number or a wrong sentence, and a wrong
+number invites checking. This one produced a **standing, accepted
+limitation**: printed every run, written into the dossier's `CAVEATS` list,
+carried on 59 records, and entered in the project backlog as a task whose
+stated remedy was to unzip a file that did not need unzipping. It was believed
+for a week, by everyone who saw it, because a missing file is an ordinary
+thing and the message was specific and confident.
+
+A defect that manufactures a plausible limitation is more durable than one
+that manufactures a wrong answer, because nobody audits a limitation. They
+work around it.
+
+The fix had to carry a caveat rather than simply switch sources. The two
+artefacts are not equivalent: the clipped file stops at `AOI_SEA`, so a
+candidate near the AOI edge reads as **more isolated than it is** — and
+isolation feeds the strength score, so an unstated substitution would inflate
+the exact quantity the project is trying to measure. The fallback is used and
+declared, on every affected record, in the sentence the viewer renders.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -272,7 +305,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. Fifteen were found, one of them
+The defence is not that no mistakes were made. Sixteen were found, one of them
 published and withdrawn. The defence is that **the mistakes were found by the
 project's own machinery, they were recorded rather than tidied away, and the
 result did not depend on any of them.** Every correction moved the headline

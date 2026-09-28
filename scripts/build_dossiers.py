@@ -84,7 +84,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
     if _e.name != "_bootstrap":
         raise
 
-from angels.config import EVENTS, INTERIM, REFERENCE
+from angels.config import EVENTS, INTERIM, RAW, REFERENCE
 
 CHIPS = INTERIM / "candidates"
 AIS_DIR = REFERENCE / "ais"
@@ -189,7 +189,88 @@ def persistence_index() -> list[tuple[float, float, dict]]:
              f["properties"]) for f in doc.get("features", [])]
 
 
-def nearest_ais(feats: list[dict]) -> tuple[dict[int, dict], set[str]]:
+
+def ais_source(date: str) -> tuple[Path | None, str, str | None]:
+    """Where this date's AIS lives, and what using it costs.
+
+    Two artefacts can answer "was anything reporting near this candidate", and
+    they are NOT equivalent:
+
+        data/reference/ais/ais-<date>.parquet   the national day, as downloaded
+        data/raw/maritime/date=<date>/ais.parquet   the same day clipped to AOI_SEA
+
+    This function used to be a single `path.exists()` against the first one.
+    2024-09-25 arrived as a legacy CSV zip rather than MarineCadastre's
+    GeoParquet, so no national file was ever written for it -- while the
+    clipped file sat on disk, 434,668 rows of it, since 22 September. Every
+    run printed "NO AIS FILE -- 59 candidates cannot be assessed" and 59
+    dossiers carried an unknown they did not need to carry.
+
+    That is this project's recurring defect once more: the check reported
+    "missing" when it meant "missing at the one path I looked". So it now
+    looks in both, and says which it used -- because they differ in a way that
+    matters. The clipped file stops at AOI_SEA, so a vessel reporting just
+    outside the AOI is absent from it, and a candidate near the AOI edge will
+    read as more isolated than it is. That is a caveat to state, not a reason
+    to prefer silence: an isolation measured against a slightly smaller haystack
+    is worth more than no isolation at all, provided the dossier says so.
+    """
+    national = AIS_DIR / f"ais-{date}.parquet"
+    if national.exists():
+        return national, "national", None
+    clipped = RAW / "maritime" / f"date={date}" / "ais.parquet"
+    if clipped.exists():
+        return clipped, "clipped", (
+            "AIS for this date was read from the AOI-clipped file; the national "
+            "day was never written. A vessel reporting outside AOI_SEA is not in "
+            "it, so a candidate near the AOI edge may read as more isolated than "
+            "it is.")
+    return None, "none", None
+
+
+# The two artefacts carry the same facts under different names, and the
+# national one hides its position inside a WKB point. Normalised here, once,
+# so the search below never has to know which it got.
+_SCHEMAS = {
+    "national": (["mmsi", "base_date_time", "vessel_name", "sog", "geometry"],
+                 "base_date_time"),
+    "clipped": (["MMSI", "BaseDateTime", "VesselName", "SOG", "LON", "LAT"],
+                "BaseDateTime"),
+}
+
+
+def ais_reports(path, kind: str, lo, hi):
+    """Yield (lon, lat, t, mmsi, name, sog) for reports between lo and hi."""
+    import pyarrow as pa
+    import pyarrow.compute as pc
+    import pyarrow.parquet as pq
+
+    cols, tcol = _SCHEMAS[kind]
+    for b in pq.ParquetFile(path).iter_batches(batch_size=500_000, columns=cols):
+        col = b.column(tcol)
+        b = b.filter(pc.and_(
+            pc.greater_equal(col, pa.scalar(lo, type=col.type)),
+            pc.less_equal(col, pa.scalar(hi, type=col.type))))
+        if b.num_rows == 0:
+            continue
+        ts = b.column(tcol).to_pylist()
+        mm = b.column(cols[0]).to_pylist()
+        nm = b.column(cols[2]).to_pylist()
+        sg = b.column(cols[3]).to_pylist()
+        if kind == "national":
+            xs_ys = [struct.unpack_from("<dd", w, 5)
+                     for w in b.column("geometry").to_pylist()]
+        else:
+            xs_ys = list(zip(b.column("LON").to_pylist(),
+                             b.column("LAT").to_pylist(), strict=True))
+        for j, (x, y) in enumerate(xs_ys):
+            tt = ts[j]
+            if tt.tzinfo is None:
+                tt = tt.replace(tzinfo=timezone.utc)
+            yield x, y, tt, mm[j], nm[j], sg[j]
+
+
+def nearest_ais(feats: list[dict]) -> tuple[dict[int, dict], set[str], dict[str, str]]:
     """Nearest AIS report in space, within the matching time window.
 
     Streamed and grid-indexed: the naive loop over every report for every
@@ -205,44 +286,31 @@ def nearest_ais(feats: list[dict]) -> tuple[dict[int, dict], set[str]]:
 
     found: dict[int, dict] = {}
     missing: set[str] = set()
+    degraded: dict[str, str] = {}
     for date, idxs in sorted(by_date.items()):
-        path = AIS_DIR / f"ais-{date}.parquet"
-        if not path.exists():
+        path, kind, caveat = ais_source(date)
+        if path is None:
             # A date with no AIS file is a date we did not look at. Returning
             # "no report found" for it would turn a missing file into maximum
             # evidence of silence -- the exact inversion this project has now
             # tripped over three times in other guises.
             missing.add(date)
-            print(f"    {date}: NO AIS FILE -- {len(idxs)} candidates cannot "
-                  f"be assessed for isolation")
+            print(f"    {date}: NO AIS FILE anywhere -- {len(idxs)} candidates "
+                  f"cannot be assessed for isolation")
             continue
+        if caveat:
+            degraded[date] = caveat
+            print(f"    {date}: using the AOI-clipped file ({len(idxs)} "
+                  f"candidates); the national day was never written")
         times = [datetime.fromisoformat(feats[i]["properties"]["t"])
                  for i in idxs]
         lo = (min(times) - timedelta(seconds=AIS_WINDOW_S)).replace(tzinfo=None)
         hi = (max(times) + timedelta(seconds=AIS_WINDOW_S)).replace(tzinfo=None)
 
         grid: dict[tuple[int, int], list] = defaultdict(list)
-        pf = pq.ParquetFile(path)
-        for b in pf.iter_batches(batch_size=500_000, columns=[
-                "mmsi", "base_date_time", "vessel_name", "sog", "geometry"]):
-            col = b.column("base_date_time")
-            b = b.filter(pc.and_(
-                pc.greater_equal(col, pa.scalar(lo, type=col.type)),
-                pc.less_equal(col, pa.scalar(hi, type=col.type))))
-            if b.num_rows == 0:
-                continue
-            ts = b.column("base_date_time").to_pylist()
-            gs = b.column("geometry").to_pylist()
-            mm = b.column("mmsi").to_pylist()
-            nm = b.column("vessel_name").to_pylist()
-            sg = b.column("sog").to_pylist()
-            for j, w in enumerate(gs):
-                x, y = struct.unpack_from("<dd", w, 5)
-                tt = ts[j]
-                if tt.tzinfo is None:
-                    tt = tt.replace(tzinfo=timezone.utc)
-                grid[(int(x / AIS_CELL_DEG), int(y / AIS_CELL_DEG))].append(
-                    (x, y, tt, mm[j], nm[j], sg[j]))
+        for x, y, tt, mmsi, name, sog in ais_reports(path, kind, lo, hi):
+            grid[(int(x / AIS_CELL_DEG), int(y / AIS_CELL_DEG))].append(
+                (x, y, tt, mmsi, name, sog))
 
         reach = int(AIS_MAX_M / 111_320.0 / AIS_CELL_DEG) + 1
         for i, st in zip(idxs, times, strict=True):
@@ -273,7 +341,7 @@ def nearest_ais(feats: list[dict]) -> tuple[dict[int, dict], set[str]]:
         print(f"    {date}: {len(idxs):>4} candidates, "
               f"{sum(1 for i in idxs if i in found):>4} with a report within "
               f"{AIS_MAX_M / 1000:.0f} km")
-    return found, missing
+    return found, missing, degraded
 
 
 def main() -> int:
@@ -332,12 +400,19 @@ def main() -> int:
 
     ais: dict[int, dict] = {}
     no_ais_dates: set[str] = set()
+    ais_caveats: dict[str, str] = {}
     if not args.no_ais:
         print("\n  nearest AIS report per candidate:")
-        ais, no_ais_dates = nearest_ais(feats)
+        ais, no_ais_dates, ais_caveats = nearest_ais(feats)
         if no_ais_dates:
             print(f"    {len(no_ais_dates)} date(s) without an AIS file: "
                   f"{', '.join(sorted(no_ais_dates))}")
+        if ais_caveats:
+            # Printed, and carried onto every record of those dates. An
+            # isolation measured against a smaller haystack is usable; an
+            # isolation whose provenance is invisible is not.
+            print(f"    {len(ais_caveats)} date(s) read from the AOI-clipped "
+                  f"file: {', '.join(sorted(ais_caveats))}")
 
     records = []
     for i, f in enumerate(feats):
@@ -439,9 +514,10 @@ def main() -> int:
                     "note": lab.get("note"), "at": lab.get("at")},
                 "ais_isolation": None if isolation is None
                 else round(isolation, 3),
+                "ais_source_caveat": ais_caveats.get(date),
                 "strength": round(score, 4),
                 "why": _why(p_vessel, recep, rep, isolation, near, radius,
-                        looked),
+                        looked, ais_caveats.get(date)),
             },
             "chip": None,
             "caveats": CAVEATS,
@@ -541,9 +617,12 @@ def _ranking_bias(records: list[dict], top: int = 100) -> dict:
     }
 
 
-def _why(p_vessel, recep, rep, isolation, near, radius, looked) -> list[str]:
+def _why(p_vessel, recep, rep, isolation, near, radius, looked,
+         ais_caveat=None) -> list[str]:
     """The score's reasons, in words, because a number alone is not evidence."""
     out = []
+    if ais_caveat:
+        out.append(ais_caveat)
     if p_vessel is None:
         out.append("no P(vessel): not scored by the classifier")
     elif p_vessel >= 0.8:

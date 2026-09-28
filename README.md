@@ -228,7 +228,7 @@ Over 800 tests, and three of them decide whether the rest mean anything:
 
 ## How this project checks itself
 
-Fifteen faults found here share one shape: a routine reporting an outcome its
+Sixteen faults found here share one shape: a routine reporting an outcome its
 own execution did not entitle it to report, with nothing in the output to say
 so. None was an arithmetic error — every quantity computed correctly, every
 time. What failed was what the programs said about what they had done.
