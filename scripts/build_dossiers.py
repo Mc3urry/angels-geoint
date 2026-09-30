@@ -270,6 +270,69 @@ def ais_reports(path, kind: str, lo, hi):
             yield x, y, tt, mm[j], nm[j], sg[j]
 
 
+
+# A candidate this close to a much brighter one, in the same scene, is very
+# likely that one's sidelobe or azimuth ambiguity rather than a second object.
+NEIGHBOUR_M = 300.0
+DOMINATES = 3.0
+
+
+def bright_neighbours(feats: list[dict]) -> dict[int, dict]:
+    """Flag candidates that sit beside a much brighter return.
+
+    THE DECISION THIS ENCODES, 2026-09-30.
+
+    150 of 1,150 candidates (13.0%) lie within 300 m of another in the same
+    scene -- 86 pairs. That looks like a 7.5% double count until the pairs
+    are opened up: the within-pair snr ratio has a median of 1.28 and only
+    **7 of 86 exceed 3**. A ship and its own sidelobe are wildly unequal;
+    two real vessels are comparable. So duplication is about 7 of 1,150,
+    **0.6%**, and the other 79 pairs are what a fishing ground or an
+    anchorage looks like.
+
+    They are FLAGGED, NOT MERGED, and that is a choice rather than laziness.
+    Merging needs a rule, and any rule at this separation also merges a
+    tug and its barge, a trawler and its partner boat, a ship and the
+    small craft alongside it. A flag reports a measurement; a merge invents
+    a correction, and 0.6% cannot move a ratio computed across distance
+    bands. The dossier shows it, the count keeps it, and a reader can
+    subtract if they disagree.
+
+    Confirmed against the hand-read labels: the three largest of these in
+    the 147-chip sample are exactly the three chips read independently as
+    sidelobes of a brighter neighbour.
+    """
+    by_scene: dict[str, list[int]] = defaultdict(list)
+    for i, f in enumerate(feats):
+        by_scene[f["properties"].get("scene", "")].append(i)
+
+    out: dict[int, dict] = {}
+    for idxs in by_scene.values():
+        for a in idxs:
+            pa = feats[a]["properties"]
+            lon_a, lat_a = feats[a]["geometry"]["coordinates"][:2]
+            snr_a = float(pa.get("snr") or 0)
+            best = None
+            for b in idxs:
+                if b == a:
+                    continue
+                lon_b, lat_b = feats[b]["geometry"]["coordinates"][:2]
+                d = haversine_m(lon_a, lat_a, lon_b, lat_b)
+                if d > NEIGHBOUR_M:
+                    continue
+                snr_b = float(feats[b]["properties"].get("snr") or 0)
+                if snr_a <= 0 or snr_b / max(snr_a, 1e-9) < DOMINATES:
+                    continue
+                if best is None or d < best["distance_m"]:
+                    best = {"distance_m": round(d, 1),
+                            "their_snr": round(snr_b, 1),
+                            "our_snr": round(snr_a, 1),
+                            "ratio": round(snr_b / max(snr_a, 1e-9), 1)}
+            if best:
+                out[a] = best
+    return out
+
+
 def nearest_ais(feats: list[dict]) -> tuple[dict[int, dict], set[str], dict[str, str]]:
     """Nearest AIS report in space, within the matching time window.
 
@@ -399,6 +462,15 @@ def main() -> int:
     ts_lines, cz_lines = sets.get(TS_NAME), sets.get(CZ_NAME)
 
     ais: dict[int, dict] = {}
+    neighbours = bright_neighbours(feats)
+    if neighbours:
+        print(f"\n  {len(neighbours)} candidate(s) sit within "
+              f"{NEIGHBOUR_M:.0f} m of a return more than {DOMINATES:.0f}x "
+              f"brighter\n  ({100 * len(neighbours) / len(feats):.1f}%). "
+              f"Flagged on each record, NOT removed from the count: any "
+              f"merge\n  rule at this separation also merges a tug and its "
+              f"barge. See bright_neighbours().")
+
     no_ais_dates: set[str] = set()
     ais_caveats: dict[str, str] = {}
     if not args.no_ais:
@@ -515,6 +587,8 @@ def main() -> int:
                 "ais_isolation": None if isolation is None
                 else round(isolation, 3),
                 "ais_source_caveat": ais_caveats.get(date),
+                # Not subtracted from the count -- see bright_neighbours().
+                "bright_neighbour": neighbours.get(i),
                 "strength": round(score, 4),
                 "why": _why(p_vessel, recep, rep, isolation, near, radius,
                         looked, ais_caveats.get(date)),

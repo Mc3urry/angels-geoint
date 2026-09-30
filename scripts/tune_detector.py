@@ -70,6 +70,28 @@ This docstring is a warning rather than a fix because the cost function
 cannot be changed without re-running detection and matching over every raw
 scene, and a cost function altered but not re-run is worse than one that is
 honestly labelled.
+
+CORRECTION, 2026-09-30
+----------------------
+The paragraph above is wrong about one thing, and it mattered: the raw
+detections have been on disk the whole time. `data/events/sar-*.geojson`
+holds **17,110** clusters at k = 6 sigma -- everything the detector found,
+floor and all -- and `scripts/floor_audit.py` now measures the discarded
+population directly, without re-running anything:
+
+    kept by the floor        2,413  (14.1%)
+    DISCARDED by the floor  14,697  (85.9%)
+
+So "a question for the raw detection files" was answerable all along. What is
+still true, and is the real obstacle, is narrower: **there are no labels
+below the floor.** The 147 hand-read chips were drawn from the gated set, so
+they say nothing about the 14,697, and no cost function can weigh a
+population nobody has looked at.
+
+That is why this script's chooser is still not to be trusted below the
+labelled range, and why `floor_audit.py` reports a bound rather than a
+correction. Getting further needs a sample drawn from the discarded set and
+read blind -- with the 2026-09-28 reader study as the budget.
 """
 
 from __future__ import annotations
