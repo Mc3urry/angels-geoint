@@ -111,6 +111,91 @@ def _report(title: str, pairs: list[tuple[str, str]], sess: dict) -> None:
               "everything")
 
 
+
+def band_of(key: str, first: dict, sample: dict) -> str:
+    """Near-line or not. Coarse on purpose -- see stability()."""
+    r = first.get(key)
+    if not r:
+        return "?"
+    k = (round(r["lon"], 6), round(r["lat"], 6))
+    b = sample.get(k, "?")
+    return "<=2nm" if b == "<=2nm" else (">2nm" if b != "?" else "?")
+
+
+def stability(first: dict) -> None:
+    """Is the same reader measuring the same way from one session to the next?
+
+    Nobody asked this until round 2 came back at kappa 0.080 and the obvious
+    explanation -- that round 2 deliberately over-sampled the harder near-line
+    band -- turned out to be wrong.
+
+    The test is a control that was in the design by accident: both rounds
+    contain about thirty chips from beyond 2 nm. Same reader, same rubric,
+    comparable material. If agreement on THOSE holds between rounds, a drop in
+    the overall figure is about the chips. If it falls too, the reader moved,
+    and no contrast computed across that boundary means anything.
+
+    It fell: 59% to 33% at 2-10 nm and 70% to 40% beyond 10 nm. Round 2's far
+    sample even leans towards the band that agreed better in round 1, so the
+    drop is if anything understated.
+
+    Kept as a permanent check rather than the throwaway script it started as,
+    because a project that measures inter-reader agreement and never measures
+    within-reader agreement is reporting half of its own reliability.
+    """
+    # Sorted by ROUND, not by filename. Plain sorted() puts
+    # labels-review-joshua-02.jsonl before labels-review-joshua.jsonl,
+    # because '-' sorts before '.', and the first version of this printed
+    # round 2 -> round 1 and reported the change with the sign reversed --
+    # a report confidently wrong about which way things went, inside the
+    # function whose job is to say whether a reader drifted.
+    def round_of(path: Path) -> int:
+        tail = path.stem.rsplit("-", 1)[-1]
+        return int(tail) if tail.isdigit() else 1
+
+    rounds = sorted(EVENTS.glob("labels-review-*.jsonl"), key=round_of)
+    if len(rounds) < 2:
+        return
+    sample = {}
+    sp = EVENTS / "label-sample.json"
+    if sp.exists():
+        for rec in json.loads(sp.read_text(encoding="utf-8"))["sample"]:
+            sample[(round(rec["lon"], 6), round(rec["lat"], 6))] = \
+                rec["stratum"]["band"]
+
+    print("\n  WITHIN-READER STABILITY, round over round")
+    print("  The same reader on comparable chips. A drop here means a "
+          "contrast computed\n  across these rounds confounds whatever it "
+          "measures with the reader's own drift.")
+    print(f"\n    {'round':28}{'n':>4}{'agree':>8}")
+    seen = []
+    for path in rounds:
+        rev = last_per_key(path)
+        for grp in (">2nm", "<=2nm"):
+            ks = [k for k in rev
+                  if band_of(k, first, sample) == grp and k in first]
+            if not ks:
+                continue
+            ag = sum(1 for k in ks
+                     if first[k]["verdict"] == rev[k]["verdict"]) / len(ks)
+            print(f"    {path.stem + '  ' + grp:28}{len(ks):>4}{ag * 100:>7.0f}%")
+            seen.append((path.stem, grp, len(ks), ag))
+
+    far = [t for t in seen if t[1] == ">2nm"]
+    if len(far) >= 2:
+        # Signed as a change, not a "drop": a fall reads negative.
+        change = (far[-1][3] - far[0][3]) * 100
+        print(f"\n    beyond 2 nm, first round to last: "
+              f"{far[0][3] * 100:.0f}% -> {far[-1][3] * 100:.0f}%  "
+              f"({change:+.0f} points)")
+        if abs(change) >= 10:
+            print("    The reader is NOT stable across sessions. Rounds must "
+                  "not be pooled, and\n    a band contrast spanning them is "
+                  "not interpretable.")
+        else:
+            print("    Stable enough to compare rounds.")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--partial", action="store_true",
@@ -204,6 +289,8 @@ def main() -> int:
     print("    " + f"{'total':11}"
           + "".join(f"{sum(m[(r, c)] for r in used):>11}" for c in used)
           + f"{len(pairs):>9}")
+
+    stability(first)
 
     bad = [t for t in rows if t[1] != t[2]]
     print(f"\n  {len(bad)} disagreement(s), listed in full because a rate "

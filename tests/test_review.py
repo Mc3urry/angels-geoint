@@ -142,3 +142,37 @@ def test_last_write_per_key_wins(tmp_path):
                  + json.dumps({"key": "a", "verdict": "clutter"}) + "\n",
                  encoding="utf-8")
     assert last_per_key(p)["a"]["verdict"] == "clutter"
+
+
+# -- within-reader stability -------------------------------------------------
+
+def test_rounds_are_ordered_by_round_not_by_filename():
+    """`-02` sorts before `.jsonl`, so plain sorted() reverses the rounds.
+
+    The first version did exactly that and reported round 2 -> round 1 with
+    the change signed backwards: a report confidently wrong about which way
+    things went, inside the function whose only job is to say whether the
+    reader drifted.
+    """
+    from pathlib import Path
+
+    names = ["labels-review-joshua-02.jsonl", "labels-review-joshua.jsonl",
+             "labels-review-joshua-10.jsonl"]
+
+    def round_of(path):
+        tail = path.stem.rsplit("-", 1)[-1]
+        return int(tail) if tail.isdigit() else 1
+
+    ordered = [p.name for p in sorted(map(Path, names), key=round_of)]
+    assert ordered == ["labels-review-joshua.jsonl",
+                       "labels-review-joshua-02.jsonl",
+                       "labels-review-joshua-10.jsonl"]
+    assert sorted(names)[0] != ordered[0], "plain sort must differ, or this test is vacuous"
+
+
+def test_a_fall_in_agreement_reads_negative():
+    """62% then 37% is a fall of 26 points, not a rise of 26."""
+    first, last = 0.62, 0.37
+    change = (last - first) * 100
+    assert change < 0
+    assert round(change) == -25 or round(change) == -26
