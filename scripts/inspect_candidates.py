@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -239,6 +240,22 @@ def main() -> int:
                     "length_m_approx": p.get("length_m_approx"),
                     "reception": p.get("reception"),
                     "background_dn": round(med, 1),
+                    # WHERE THE MARK ACTUALLY WENT.
+                    #
+                    # chip_png draws it at (col - win.col_off) * scale, which
+                    # is the chip centre only when the window was not clipped
+                    # by the scene edge. Five of the 147 chips were clipped,
+                    # one by 595 m, and nothing downstream could tell -- they
+                    # were read at magnifications cropped about the image
+                    # centre, so those verdicts describe ground beside the
+                    # candidate. Recorded rather than left to be assumed.
+                    "chip_w": arr.shape[1] * 2,
+                    "chip_h": arr.shape[0] * 2,
+                    "mark_x": round(oc * 2, 1),
+                    "mark_y": round(orow * 2, 1),
+                    "mark_offcentre_m": round(
+                        math.hypot(oc - arr.shape[1] / 2,
+                                   orow - arr.shape[0] / 2) * PIXEL_M),
                     "near_peak_x_bg": round(near_peak / med, 1) if med else "",
                     "chip_peak_x_bg": round(chip_peak / med, 1) if med else "",
                     "chip_peak_offset_m": round(off_m),
@@ -248,6 +265,21 @@ def main() -> int:
                 print(f"    {p.get('date')}  {lat:7.4f} {lon:9.4f}  "
                       f"snr {p.get('snr'):6.1f}  len~ {p.get('length_m_approx'):4.0f} m"
                       f"  near x{near_peak / med:5.1f}  -> {verdict}")
+
+    # A chip whose mark is not near its centre was clipped by the scene edge,
+    # and anything that crops it about the image centre -- a contact sheet, a
+    # magnified re-read -- is then looking at ground beside the candidate. One
+    # of the 147 is displaced by 247 m and its verdict had to be redone.
+    # 30 m is three pixels: comfortably above the sub-pixel wobble of an
+    # intensity-weighted centroid, comfortably below anything that matters.
+    CLIPPED_M = 30
+    odd = [r for r in rows if (r.get("mark_offcentre_m") or 0) >= CLIPPED_M]
+    if odd:
+        print(f"\n  {len(odd)} chip(s) do NOT carry the candidate at their "
+              f"centre -- the window was clipped by the\n  scene edge. Crop "
+              f"these about mark_x/mark_y, not about the image centre:")
+        for r in sorted(odd, key=lambda r: -r["mark_offcentre_m"]):
+            print(f"    {r['mark_offcentre_m']:>5} m off   {r['png']}")
 
     if skipped:
         # Named, not swallowed. A chip that could not be cut is not a chip
