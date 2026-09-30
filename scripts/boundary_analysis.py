@@ -479,6 +479,32 @@ def expectation(per_pass) -> dict[str, float]:
     return out
 
 
+
+def untestable(obs_by_band: dict, names: list[str]) -> str | None:
+    """Why this limit set cannot be tested, or None if it can be.
+
+    A chi-square over bands needs candidates in more than one band. The
+    200 nm EEZ has none: AOI_SEA stops near 160 nm, so every one of the
+    1,097 candidates falls in the catch-all "> 25 nm" bin, chi2 is exactly
+    0.0 and p comes out 1.0000.
+
+    Printed beside the other limit sets, that reads as "tested, no effect".
+    It means "never got within 25 nm of this line". Those are opposite
+    claims and the table gave them the same number.
+
+    Derived here from the counts rather than stored in the artefact, so it
+    cannot go stale against them -- the lesson from the keep-fraction
+    constant that said 0.62 while the measurement said 0.59.
+    """
+    near = [b for b in names if not b.startswith(">")]
+    if sum(obs_by_band.get(b, 0) for b in near) == 0:
+        return ("no candidate lies within {} of this line, so every one falls "
+                "in the catch-all band: there is one non-empty cell and "
+                "nothing to compare it with".format(near[-1].split()[0] + " nm"
+                                                    if near else "range"))
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--reception", default="heard",
@@ -631,6 +657,12 @@ def main() -> int:
                                 searched, exp, stat, args.shift_trials)
         p_shift_c, _ = shift_p(ctl_by_pass, area_by_pass, band_or_none,
                                searched, exp_ctl, stat_c, args.shift_trials)
+        no_test = untestable(obs_total, names)
+        if no_test:
+            print(f"    NOT TESTED -- {no_test}.")
+            print("    The p-values below would be 1.0000 by construction. "
+                  "They are not evidence\n    of an absent effect; they are "
+                  "the absence of a test.")
         print(f"    candidates      chi2 {stat:8.1f}   scattered p = "
               f"{p_iid:.4f}   SHIFTED p = {p_shift:.4f}")
         print(f"    AIS-seen ships  chi2 {stat_c:8.1f}   scattered p = "
@@ -654,6 +686,10 @@ def main() -> int:
             "ais_seen_by_band": {b: ctl_total.get(b, 0) for b in names},
             "ais_seen_expected": {b: round(exp_ctl.get(b, 0.0), 2)
                                   for b in names},
+            # Carried so a consumer that never reads the printout still
+            # cannot mistake "no test" for "no effect".
+            "testable": no_test is None,
+            "untestable_because": no_test,
             "chi2": round(stat, 2), "p_scattered": p_iid, "p_shift": p_shift,
             "shift_trials_used": used,
             "chi2_control": round(stat_c, 2), "p_control_scattered": p_iid_c,

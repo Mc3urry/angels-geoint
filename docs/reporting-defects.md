@@ -3,9 +3,9 @@
 *A methods note. Written 2026-09-26 after the fifteenth recorded sighting;
 a sixteenth arrived the next morning and is section 3.J.*
 
-Over the course of this project, sixteen separate faults were found that share
+Over the course of this project, seventeen separate faults were found that share
 a single shape. None of them was an arithmetic error. Every quantity this
-pipeline computes, it computed correctly every time. What failed, sixteen
+pipeline computes, it computed correctly every time. What failed, seventeen
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -54,9 +54,9 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached sixteen. A few logged entries
+The running count in the worklog reached seventeen. A few logged entries
 contained more than one instance, so the grouping below has more rows than
-sixteen; the count is of sightings, not of lines of code.
+seventeen; the count is of sightings, not of lines of code.
 
 ### A. "No" and "cannot tell" share a return value
 
@@ -211,6 +211,24 @@ isolation feeds the strength score, so an unstated substitution would inflate
 the exact quantity the project is trying to measure. The fallback is used and
 declared, on every affected record, in the sentence the viewer renders.
 
+### K. A p-value that means "no test", printed as one that means "no effect"
+
+`boundary-bands.json` reports eight limit sets. The **200 nm EEZ** row shows
+chi-square 0.0 and p 1.0000 — because AOI_SEA stops near 160 nm, so all 1,097
+candidates land in the catch-all band and there is a single non-empty cell.
+Both numbers are what the arithmetic must produce when there is nothing to
+compare.
+
+Beside the 12 and 24 nm rows, it reads as *tested, no effect*. It means
+*never tested*. A reader scanning the table cannot tell, and the table is the
+part of a study people read.
+
+This is the only sighting so far that sits in the **results** rather than in a
+script's output, a log, or a tooltip — which makes it the one most likely to
+have reached a reader as a false conclusion. It is now derived from the counts
+at report time, printed as NOT TESTED with the reason, and carried into the
+artefact as a flag for consumers that never see the printout.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -305,7 +323,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. Sixteen were found, one of them
+The defence is not that no mistakes were made. Seventeen were found, one of them
 published and withdrawn. The defence is that **the mistakes were found by the
 project's own machinery, they were recorded rather than tidied away, and the
 result did not depend on any of them.** Every correction moved the headline

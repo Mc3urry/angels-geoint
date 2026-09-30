@@ -50,9 +50,17 @@ near 1.0.
 Stated rather than buried: the **3 nm state seaward line** (Submerged Lands
 Act) is not in NOAA's Maritime Limits product and is still missing, the
 **200 nm EEZ** lies outside the study box so its result is an empty cell
-rather than a measured null, and no candidate has yet been read by a human.
-The near-line bands hold single-digit counts, so this bounds what was looked
-for rather than settling what is there.
+rather than a measured null — `boundary_analysis.py` now marks that limit set
+NOT TESTED and says why, instead of printing the p = 1.0000 it produces by
+construction. The near-line bands hold single-digit counts, so this bounds
+what was looked for rather than settling what is there.
+
+**97 of the 147 chips have now been read by a second human**, blind. The
+first round (40 chips, simple random) gives Cohen's kappa **0.467**. The
+second round found something sharper: on comparable chips the same reader's
+agreement fell 26 points between sessions, so **within-reader stability is
+poor and is a first-class limitation** — see
+[`docs/reporting-defects.md`](docs/reporting-defects.md) and FINDINGS.
 
 ## The live platform
 
