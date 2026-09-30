@@ -234,6 +234,21 @@ Over 800 tests, and three of them decide whether the rest mean anything:
 | 5 | Land domain (GTFS-RT), cross-domain comparison | scoped |
 | 6 | Inversion classifier, chronolocation | scoped |
 
+## Running the tests
+
+```powershell
+.\tasks.ps1 test           # Windows
+make check                 # elsewhere
+```
+
+**Not `python -m pytest`.** On a machine with ArcGIS Pro installed, `python`
+is its bundled 3.14t, which has neither pytest nor this project — you get
+`No module named pytest` and nothing is tested. Python prints that before any
+file in this repository is read, so it cannot be caught from here, only
+warned about. If pytest *is* present but the project is not, the root
+`conftest.py` stops the run and names the interpreter rather than letting the
+suite fail module by module as though the code were broken.
+
 ## Reading chips
 
 The labelling and review surface is served by the API, not opened from disk:

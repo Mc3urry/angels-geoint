@@ -266,6 +266,59 @@ def was_collecting(root: Path, t: datetime,
 # one collector at a time
 # --------------------------------------------------------------------------
 
+
+# How long a lock may predate the boot before we call it certainly stale.
+# A live collector never rewrites its lock -- it is written once at acquire --
+# so a lock timestamped before this machine started cannot have a running
+# owner. The margin is for clock skew across a reboot: an RTC that settles a
+# little after boot could otherwise make a fresh lock look ancient.
+PREBOOT_MARGIN_S = 120
+
+
+def _boot_time() -> float | None:
+    """Unix time this machine booted, or None if it cannot be determined.
+
+    No third-party dependency. Windows gets GetTickCount64 (milliseconds
+    since boot, monotonic across sleep), Linux reads btime out of /proc/stat.
+    Anything else returns None and the caller falls back to the PID check.
+    """
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            ms = ctypes.windll.kernel32.GetTickCount64()
+            return datetime.now(timezone.utc).timestamp() - ms / 1000.0
+        with open("/proc/stat", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("btime "):
+                    return float(line.split()[1])
+    except Exception:
+        return None
+    return None
+
+
+def _predates_boot(held_t: float | None) -> bool:
+    """Was this lock written before the machine started?
+
+    THE DEFECT THIS EXISTS FOR, 2026-09-29.
+
+    The laptop died at 08:45 UTC. Four collectors restarted themselves.
+    `aviation-independent` did not, for nine hours, because its lock named
+    pid 3608 from four days earlier and after the reboot some unrelated
+    Windows process held that number. `_process_alive(3608)` answered the
+    question it was asked -- is there a process with this number -- which was
+    not the question that mattered: is MY collector running.
+
+    A PID is only meaningful within one boot. Comparing the lock's timestamp
+    against boot time settles it without needing to identify the process at
+    all: if the lock was written before this machine started, whatever wrote
+    it is gone, whoever holds that number now.
+    """
+    boot = _boot_time()
+    if boot is None or held_t is None:
+        return False
+    return held_t < boot - PREBOOT_MARGIN_S
+
+
 def _process_alive(pid: int) -> bool:
     """Is this PID a running process?
 
@@ -383,7 +436,16 @@ class CollectorLock:
             except (json.JSONDecodeError, OSError):
                 held = {}
             pid = int(held.get("pid", 0))
-            if pid and pid != os.getpid() and _process_alive(pid):
+            try:
+                held_t = float(held.get("t")) if held.get("t") else None
+            except (TypeError, ValueError):
+                held_t = None
+            # Boot time first. A PID means nothing across a reboot, and
+            # asking _process_alive about one is how a collector stayed down
+            # for nine hours on 2026-09-29 behind a recycled number.
+            stale_by_boot = _predates_boot(held_t)
+            if (pid and pid != os.getpid() and not stale_by_boot
+                    and _process_alive(pid)):
                 raise AlreadyRunning(pid, held.get("iso", "?"),
                                      held.get("session", "?"))
             # Otherwise the holder is gone; the lock is a leftover.
