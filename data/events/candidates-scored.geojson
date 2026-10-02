@@ -7,10 +7,11 @@
   "persistence": {
    "radius_m": 300.0,
    "min_dates": 3,
-   "min_fraction": 0.5
+   "min_fraction": 0.5,
+   "require_never_matched": false
   },
-  "n_candidates": 1150,
-  "n_dropped_as_fixed": 766,
+  "n_candidates": 1107,
+  "n_dropped_as_fixed": 809,
   "dates": [
    "2024-04-10",
    "2024-05-04",
@@ -31,7 +32,7 @@
   "reception_span": "whole days",
   "reception_cell_deg": 0.05,
   "reception_counts": {
-   "heard": 1097,
+   "heard": 1054,
    "thin": 36,
    "unheard": 2,
    "intermittent": 15
@@ -3733,36 +3734,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.24173552892042,
-     38.20503829762245
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 26.03,
-    "peak_dn": 572.0,
-    "background_dn": 81.9,
-    "sigma_dn": 18.83,
-    "pixels": 13,
-    "length_m_approx": 36.1,
-    "pixel": [
-     3530.6,
-     2375.7
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
-    "t": "2024-04-10T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 20.4,
-    "date": "2024-04-10",
-    "reception": "heard",
-    "ais_cell_vessels": 92
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.3332334436405,
      38.33913360641877
     ]
@@ -3906,66 +3877,6 @@
     "date": "2024-04-10",
     "reception": "heard",
     "ais_cell_vessels": 225
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38353138650287,
-     38.40299477165592
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 27.97,
-    "peak_dn": 1210.0,
-    "background_dn": 68.2,
-    "sigma_dn": 40.83,
-    "pixels": 115,
-    "length_m_approx": 107.2,
-    "pixel": [
-     2722.6,
-     4723.8
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
-    "t": "2024-04-10T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 54.5,
-    "date": "2024-04-10",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38459949064631,
-     38.40241534556564
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 25.53,
-    "peak_dn": 1215.0,
-    "background_dn": 70.2,
-    "sigma_dn": 44.85,
-    "pixels": 32,
-    "length_m_approx": 56.6,
-    "pixel": [
-     2712.2,
-     4719.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
-    "t": "2024-04-10T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 29.9,
-    "date": "2024-04-10",
-    "reception": "heard",
-    "ais_cell_vessels": 327
    }
   },
   {
@@ -6456,36 +6367,6 @@
     "date": "2024-04-10",
     "reception": "heard",
     "ais_cell_vessels": 133
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.3964171175321,
-     39.34735119526876
-    ]
-   },
-   "properties": {
-    "confidence": 0.828,
-    "snr": 16.55,
-    "peak_dn": 250.0,
-    "background_dn": 47.6,
-    "sigma_dn": 12.23,
-    "pixels": 8,
-    "length_m_approx": 28.3,
-    "pixel": [
-     21545.0,
-     11948.5
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240410T225906_20240410T225931_053378_067942_A9AE_COG.SAFE",
-    "t": "2024-04-10T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 16.8,
-    "date": "2024-04-10",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
@@ -9133,96 +9014,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.38302676729252,
-     38.40229110068002
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 35.26,
-    "peak_dn": 1690.0,
-    "background_dn": 128.0,
-    "sigma_dn": 44.3,
-    "pixels": 24,
-    "length_m_approx": 49.0,
-    "pixel": [
-     2766.1,
-     4707.8
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
-    "t": "2024-05-04T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 26.3,
-    "date": "2024-05-04",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38454578817188,
-     38.40239950452042
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 31.96,
-    "peak_dn": 1613.0,
-    "background_dn": 129.0,
-    "sigma_dn": 46.44,
-    "pixels": 24,
-    "length_m_approx": 49.0,
-    "pixel": [
-     2753.3,
-     4711.3
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
-    "t": "2024-05-04T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 26.3,
-    "date": "2024-05-04",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38205767197425,
-     38.401299423424824
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 21.35,
-    "peak_dn": 1259.0,
-    "background_dn": 130.9,
-    "sigma_dn": 52.83,
-    "pixels": 29,
-    "length_m_approx": 53.9,
-    "pixel": [
-     2772.3,
-     4695.6
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240504T225908_20240504T225933_053728_068708_0753_COG.SAFE",
-    "t": "2024-05-04T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 28.6,
-    "date": "2024-05-04",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -73.88548861170295,
      38.88215794008201
     ]
@@ -11623,96 +11414,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.3835246415843,
-     38.4030896510648
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 27.03,
-    "peak_dn": 1269.0,
-    "background_dn": 90.9,
-    "sigma_dn": 43.59,
-    "pixels": 100,
-    "length_m_approx": 100.0,
-    "pixel": [
-     2752.2,
-     4718.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
-    "t": "2024-05-28T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 50.9,
-    "date": "2024-05-28",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38456006454027,
-     38.402445352058805
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 20.65,
-    "peak_dn": 1041.0,
-    "background_dn": 91.6,
-    "sigma_dn": 45.98,
-    "pixels": 28,
-    "length_m_approx": 52.9,
-    "pixel": [
-     2742.0,
-     4713.0
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
-    "t": "2024-05-28T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 28.1,
-    "date": "2024-05-28",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38500572481146,
-     38.40455565305329
-    ]
-   },
-   "properties": {
-    "confidence": 0.804,
-    "snr": 16.08,
-    "peak_dn": 1110.0,
-    "background_dn": 92.9,
-    "sigma_dn": 63.26,
-    "pixels": 16,
-    "length_m_approx": 40.0,
-    "pixel": [
-     2742.6,
-     4736.3
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
-    "t": "2024-05-28T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 22.2,
-    "date": "2024-05-28",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -74.86903682770382,
      38.636526857705604
     ]
@@ -12246,36 +11947,6 @@
     "date": "2024-05-28",
     "reception": "heard",
     "ais_cell_vessels": 114
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.39651664666457,
-     39.347785103994966
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 26.73,
-    "peak_dn": 439.0,
-    "background_dn": 55.8,
-    "sigma_dn": 14.33,
-    "pixels": 14,
-    "length_m_approx": 37.4,
-    "pixel": [
-     21573.6,
-     11948.4
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240528T225908_20240528T225933_054078_069350_6AD3_COG.SAFE",
-    "t": "2024-05-28T22:59:08+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 20.3,
-    "date": "2024-05-28",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
@@ -12996,36 +12667,6 @@
     "date": "2024-06-21",
     "reception": "heard",
     "ais_cell_vessels": 20
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.39657518306427,
-     39.347807958563095
-    ]
-   },
-   "properties": {
-    "confidence": 0.938,
-    "snr": 18.75,
-    "peak_dn": 238.0,
-    "background_dn": 43.4,
-    "sigma_dn": 10.38,
-    "pixels": 8,
-    "length_m_approx": 28.3,
-    "pixel": [
-     21557.5,
-     11951.0
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240621T225907_20240621T225932_054428_069F67_7A4F_COG.SAFE",
-    "t": "2024-06-21T22:59:07+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 16.2,
-    "date": "2024-06-21",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
@@ -13866,36 +13507,6 @@
     "date": "2024-07-15",
     "reception": "heard",
     "ais_cell_vessels": 47
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.44034432743702,
-     36.99269428184705
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 45.94,
-    "peak_dn": 927.0,
-    "background_dn": 78.3,
-    "sigma_dn": 18.47,
-    "pixels": 20,
-    "length_m_approx": 44.7,
-    "pixel": [
-     8039.3,
-     4787.4
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240715T225841_20240715T225906_054778_06AB8D_6E9C_COG.SAFE",
-    "t": "2024-07-15T22:58:41+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 22.6,
-    "date": "2024-07-15",
-    "reception": "heard",
-    "ais_cell_vessels": 13
    }
   },
   {
@@ -14803,36 +14414,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.24200709160719,
-     38.20572979321976
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 20.3,
-    "peak_dn": 517.0,
-    "background_dn": 89.3,
-    "sigma_dn": 21.07,
-    "pixels": 10,
-    "length_m_approx": 31.6,
-    "pixel": [
-     3560.5,
-     2377.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
-    "t": "2024-07-15T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 18.5,
-    "date": "2024-07-15",
-    "reception": "heard",
-    "ais_cell_vessels": 92
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.07114211167202,
      38.22329451912154
     ]
@@ -15396,36 +14977,6 @@
     "date": "2024-07-15",
     "reception": "heard",
     "ais_cell_vessels": 17
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.13957356787954,
-     39.005027371660425
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 21.22,
-    "peak_dn": 311.0,
-    "background_dn": 50.8,
-    "sigma_dn": 12.26,
-    "pixels": 13,
-    "length_m_approx": 36.1,
-    "pixel": [
-     14604.1,
-     9298.3
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240715T225906_20240715T225931_054778_06AB8D_3AB4_COG.SAFE",
-    "t": "2024-07-15T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 18.7,
-    "date": "2024-07-15",
-    "reception": "heard",
-    "ais_cell_vessels": 240
    }
   },
   {
@@ -16506,36 +16057,6 @@
     "date": "2024-08-08",
     "reception": "heard",
     "ais_cell_vessels": 65
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.39668115480683,
-     39.347837052892984
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 24.96,
-    "peak_dn": 448.0,
-    "background_dn": 63.0,
-    "sigma_dn": 15.42,
-    "pixels": 13,
-    "length_m_approx": 36.1,
-    "pixel": [
-     21577.2,
-     11948.5
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240808T225905_20240808T225930_055128_06B7CB_54A3_COG.SAFE",
-    "t": "2024-08-08T22:59:05+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 19.7,
-    "date": "2024-08-08",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
@@ -18343,36 +17864,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.24190463706307,
-     38.20554896898809
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 28.27,
-    "peak_dn": 315.0,
-    "background_dn": 41.2,
-    "sigma_dn": 9.69,
-    "pixels": 15,
-    "length_m_approx": 38.7,
-    "pixel": [
-     3576.3,
-     2373.4
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 21.6,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 92
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.35188289989134,
      38.30388832488936
     ]
@@ -18763,66 +18254,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.38384805926935,
-     38.40352518084069
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 25.33,
-    "peak_dn": 1564.0,
-    "background_dn": 61.1,
-    "sigma_dn": 59.33,
-    "pixels": 82,
-    "length_m_approx": 90.6,
-    "pixel": [
-     2767.0,
-     4721.9
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 46.3,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38282491062571,
-     38.40244655698348
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 24.72,
-    "peak_dn": 1530.0,
-    "background_dn": 61.0,
-    "sigma_dn": 59.42,
-    "pixels": 22,
-    "length_m_approx": 46.9,
-    "pixel": [
-     2773.5,
-     4708.7
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 25.3,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.30830919601874,
      38.3565273822991
     ]
@@ -18883,36 +18314,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.38455001002576,
-     38.40244450655976
-    ]
-   },
-   "properties": {
-    "confidence": 0.823,
-    "snr": 16.47,
-    "peak_dn": 1101.0,
-    "background_dn": 61.3,
-    "sigma_dn": 63.14,
-    "pixels": 30,
-    "length_m_approx": 54.8,
-    "pixel": [
-     2758.7,
-     4711.4
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 29.0,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.27124804753886,
      38.50508297416899
     ]
@@ -18936,36 +18337,6 @@
     "date": "2024-09-01",
     "reception": "heard",
     "ais_cell_vessels": 14
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38490788572255,
-     38.40474023197014
-    ]
-   },
-   "properties": {
-    "confidence": 0.764,
-    "snr": 15.27,
-    "peak_dn": 1312.0,
-    "background_dn": 65.4,
-    "sigma_dn": 81.62,
-    "pixels": 33,
-    "length_m_approx": 57.4,
-    "pixel": [
-     2760.4,
-     4736.6
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 30.3,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 327
    }
   },
   {
@@ -19783,36 +19154,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -75.13974524781321,
-     39.00544745088727
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 23.25,
-    "peak_dn": 299.0,
-    "background_dn": 38.7,
-    "sigma_dn": 11.2,
-    "pixels": 11,
-    "length_m_approx": 33.2,
-    "pixel": [
-     14619.0,
-     9301.0
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 17.3,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 240
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -75.1234318760082,
      38.94756941325653
     ]
@@ -20016,36 +19357,6 @@
     "date": "2024-09-01",
     "reception": "heard",
     "ais_cell_vessels": 14
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.39657905731283,
-     39.34792328176166
-    ]
-   },
-   "properties": {
-    "confidence": 0.84,
-    "snr": 16.8,
-    "peak_dn": 259.0,
-    "background_dn": 50.4,
-    "sigma_dn": 12.42,
-    "pixels": 8,
-    "length_m_approx": 28.3,
-    "pixel": [
-     21590.2,
-     11947.9
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240901T225906_20240901T225931_055478_06C4A7_0344_COG.SAFE",
-    "t": "2024-09-01T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 16.2,
-    "date": "2024-09-01",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
@@ -20653,36 +19964,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -75.48107469476014,
-     36.946302314157165
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 45.5,
-    "peak_dn": 1190.0,
-    "background_dn": 93.5,
-    "sigma_dn": 24.1,
-    "pixels": 17,
-    "length_m_approx": 41.2,
-    "pixel": [
-     7610.5,
-     4348.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
-    "t": "2024-09-25T22:58:41+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 20.9,
-    "date": "2024-09-25",
-    "reception": "heard",
-    "ais_cell_vessels": 18
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -75.42280761161119,
      36.977424757437255
     ]
@@ -20703,36 +19984,6 @@
     "t": "2024-09-25T22:58:41+00:00",
     "sensor": "sentinel1-vv-cfar",
     "uncertainty_m": 21.4,
-    "date": "2024-09-25",
-    "reception": "heard",
-    "ais_cell_vessels": 13
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.44035913770026,
-     36.992770653724776
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 21.4,
-    "peak_dn": 558.0,
-    "background_dn": 84.3,
-    "sigma_dn": 22.14,
-    "pixels": 12,
-    "length_m_approx": 34.6,
-    "pixel": [
-     8060.9,
-     4783.6
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240925T225841_20240925T225906_055828_06D27E_E17A_COG.SAFE",
-    "t": "2024-09-25T22:58:41+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 17.6,
     "date": "2024-09-25",
     "reception": "heard",
     "ais_cell_vessels": 13
@@ -21486,66 +20737,6 @@
     "date": "2024-09-25",
     "reception": "heard",
     "ais_cell_vessels": 181
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38459432906424,
-     38.40243604120992
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 29.0,
-    "peak_dn": 1651.0,
-    "background_dn": 110.0,
-    "sigma_dn": 53.14,
-    "pixels": 33,
-    "length_m_approx": 57.4,
-    "pixel": [
-     2765.5,
-     4708.7
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240925T225906_20240925T225931_055828_06D27E_5E3B_COG.SAFE",
-    "t": "2024-09-25T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 30.3,
-    "date": "2024-09-25",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38207746332426,
-     38.40125859085192
-    ]
-   },
-   "properties": {
-    "confidence": 0.863,
-    "snr": 17.26,
-    "peak_dn": 1160.0,
-    "background_dn": 112.3,
-    "sigma_dn": 60.72,
-    "pixels": 34,
-    "length_m_approx": 58.3,
-    "pixel": [
-     2784.7,
-     4692.1
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20240925T225906_20240925T225931_055828_06D27E_5E3B_COG.SAFE",
-    "t": "2024-09-25T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 30.7,
-    "date": "2024-09-25",
-    "reception": "heard",
-    "ais_cell_vessels": 327
    }
   },
   {
@@ -23863,96 +23054,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.38252788471448,
-     38.40189991764088
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 35.62,
-    "peak_dn": 1608.0,
-    "background_dn": 92.7,
-    "sigma_dn": 42.54,
-    "pixels": 112,
-    "length_m_approx": 105.8,
-    "pixel": [
-     2777.7,
-     4699.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
-    "t": "2024-10-19T22:59:07+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 53.8,
-    "date": "2024-10-19",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38458096921028,
-     38.40239967710024
-    ]
-   },
-   "properties": {
-    "confidence": 0.832,
-    "snr": 16.65,
-    "peak_dn": 780.0,
-    "background_dn": 91.9,
-    "sigma_dn": 41.34,
-    "pixels": 30,
-    "length_m_approx": 54.8,
-    "pixel": [
-     2761.2,
-     4707.8
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
-    "t": "2024-10-19T22:59:07+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 29.0,
-    "date": "2024-10-19",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38409296045704,
-     38.40381012813127
-    ]
-   },
-   "properties": {
-    "confidence": 0.751,
-    "snr": 15.03,
-    "peak_dn": 855.0,
-    "background_dn": 92.8,
-    "sigma_dn": 50.72,
-    "pixels": 37,
-    "length_m_approx": 60.8,
-    "pixel": [
-     2768.3,
-     4722.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
-    "t": "2024-10-19T22:59:07+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 31.9,
-    "date": "2024-10-19",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.23176328841465,
      38.535535811139944
     ]
@@ -25146,36 +24247,6 @@
     "date": "2024-10-19",
     "reception": "heard",
     "ais_cell_vessels": 203
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.13971707298353,
-     39.005274763090135
-    ]
-   },
-   "properties": {
-    "confidence": 0.848,
-    "snr": 16.95,
-    "peak_dn": 237.0,
-    "background_dn": 45.6,
-    "sigma_dn": 11.29,
-    "pixels": 8,
-    "length_m_approx": 28.3,
-    "pixel": [
-     14621.8,
-     9295.9
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241019T225907_20241019T225932_056178_06E050_7B5A_COG.SAFE",
-    "t": "2024-10-19T22:59:07+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 15.0,
-    "date": "2024-10-19",
-    "reception": "heard",
-    "ais_cell_vessels": 240
    }
   },
   {
@@ -27583,66 +26654,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -75.48111756842937,
-     36.946366844683254
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 26.59,
-    "peak_dn": 739.0,
-    "background_dn": 98.0,
-    "sigma_dn": 24.11,
-    "pixels": 22,
-    "length_m_approx": 46.9,
-    "pixel": [
-     7595.9,
-     4351.6
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
-    "t": "2024-11-12T22:58:41+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 23.7,
-    "date": "2024-11-12",
-    "reception": "heard",
-    "ais_cell_vessels": 18
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.44037205008158,
-     36.99273257672636
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 22.88,
-    "peak_dn": 648.0,
-    "background_dn": 98.9,
-    "sigma_dn": 24.01,
-    "pixels": 14,
-    "length_m_approx": 37.4,
-    "pixel": [
-     8046.4,
-     4785.8
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241112T225841_20241112T225906_056528_06EE3A_AB9D_COG.SAFE",
-    "t": "2024-11-12T22:58:41+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 19.0,
-    "date": "2024-11-12",
-    "reception": "heard",
-    "ais_cell_vessels": 13
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -74.40802356966968,
      37.292131431804314
     ]
@@ -27756,36 +26767,6 @@
     "date": "2024-11-12",
     "reception": "heard",
     "ais_cell_vessels": 221
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.13960559856454,
-     39.00428753024362
-    ]
-   },
-   "properties": {
-    "confidence": 0.869,
-    "snr": 17.38,
-    "peak_dn": 473.0,
-    "background_dn": 91.1,
-    "sigma_dn": 21.97,
-    "pixels": 9,
-    "length_m_approx": 30.0,
-    "pixel": [
-     14611.0,
-     9287.9
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241112T225906_20241112T225931_056528_06EE3A_0924_COG.SAFE",
-    "t": "2024-11-12T22:59:06+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 15.8,
-    "date": "2024-11-12",
-    "reception": "heard",
-    "ais_cell_vessels": 240
    }
   },
   {
@@ -28296,36 +27277,6 @@
     "date": "2024-12-06",
     "reception": "heard",
     "ais_cell_vessels": 171
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.48112785642823,
-     36.94645212351438
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 37.6,
-    "peak_dn": 994.0,
-    "background_dn": 96.0,
-    "sigma_dn": 23.89,
-    "pixels": 22,
-    "length_m_approx": 46.9,
-    "pixel": [
-     7602.8,
-     4351.8
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241206T225840_20241206T225905_056878_06FC1E_3016_COG.SAFE",
-    "t": "2024-12-06T22:58:40+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 23.7,
-    "date": "2024-12-06",
-    "reception": "heard",
-    "ais_cell_vessels": 18
    }
   },
   {
@@ -30313,66 +29264,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -75.4810696805574,
-     36.946159967787736
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 84.81,
-    "peak_dn": 1138.0,
-    "background_dn": 52.5,
-    "sigma_dn": 12.8,
-    "pixels": 40,
-    "length_m_approx": 63.2,
-    "pixel": [
-     7601.8,
-     4349.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
-    "t": "2024-12-30T22:58:38+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 31.8,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 18
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -75.44035926583716,
-     36.99275295257631
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 67.17,
-    "peak_dn": 1124.0,
-    "background_dn": 60.2,
-    "sigma_dn": 15.84,
-    "pixels": 23,
-    "length_m_approx": 48.0,
-    "pixel": [
-     8052.4,
-     4785.9
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225838_20241230T225903_057228_070A00_A927_COG.SAFE",
-    "t": "2024-12-30T22:58:38+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 24.2,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 13
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -75.42280729032171,
      36.97739345535947
     ]
@@ -32053,36 +30944,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.24182584525725,
-     38.20594950134543
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 19.15,
-    "peak_dn": 538.0,
-    "background_dn": 64.3,
-    "sigma_dn": 24.73,
-    "pixels": 9,
-    "length_m_approx": 30.0,
-    "pixel": [
-     3576.0,
-     2378.1
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 17.8,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 92
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -75.083853641344,
      38.387746623341336
     ]
@@ -32173,66 +31034,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -76.38349318630914,
-     38.40307358945808
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 35.04,
-    "peak_dn": 1737.0,
-    "background_dn": 87.1,
-    "sigma_dn": 47.09,
-    "pixels": 97,
-    "length_m_approx": 98.5,
-    "pixel": [
-     2767.3,
-     4717.0
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 50.2,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38455088205882,
-     38.40241259602803
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 27.99,
-    "peak_dn": 1462.0,
-    "background_dn": 88.1,
-    "sigma_dn": 49.09,
-    "pixels": 38,
-    "length_m_approx": 61.6,
-    "pixel": [
-     2756.8,
-     4711.6
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 32.3,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 327
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -76.48192534744246,
      38.5190697966738
     ]
@@ -32256,36 +31057,6 @@
     "date": "2024-12-30",
     "reception": "heard",
     "ais_cell_vessels": 28
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -76.38231694778253,
-     38.40132140965549
-    ]
-   },
-   "properties": {
-    "confidence": 0.93,
-    "snr": 18.6,
-    "peak_dn": 1227.0,
-    "background_dn": 90.5,
-    "sigma_dn": 61.12,
-    "pixels": 17,
-    "length_m_approx": 41.2,
-    "pixel": [
-     2773.7,
-     4696.4
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 22.7,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 327
    }
   },
   {
@@ -33343,36 +32114,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     -75.13973216736576,
-     39.005279264925264
-    ]
-   },
-   "properties": {
-    "confidence": 0.869,
-    "snr": 17.37,
-    "peak_dn": 174.0,
-    "background_dn": 32.3,
-    "sigma_dn": 8.16,
-    "pixels": 9,
-    "length_m_approx": 30.0,
-    "pixel": [
-     14616.9,
-     9300.0
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 15.8,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 240
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      -75.10416493936077,
      38.93972114945924
     ]
@@ -34026,36 +32767,6 @@
     "date": "2024-12-30",
     "reception": "heard",
     "ais_cell_vessels": 16
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     -74.3958674587441,
-     39.34637929788401
-    ]
-   },
-   "properties": {
-    "confidence": 0.95,
-    "snr": 59.04,
-    "peak_dn": 641.0,
-    "background_dn": 36.0,
-    "sigma_dn": 10.25,
-    "pixels": 21,
-    "length_m_approx": 45.8,
-    "pixel": [
-     21591.6,
-     11931.2
-    ],
-    "scene": "S1A_IW_GRDH_1SDV_20241230T225903_20241230T225928_057228_070A00_44C7_COG.SAFE",
-    "t": "2024-12-30T22:59:03+00:00",
-    "sensor": "sentinel1-vv-cfar",
-    "uncertainty_m": 24.3,
-    "date": "2024-12-30",
-    "reception": "heard",
-    "ais_cell_vessels": 150
    }
   },
   {
