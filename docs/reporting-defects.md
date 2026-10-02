@@ -1,11 +1,13 @@
 # The defect that kept coming back
 
-*A methods note. Written 2026-09-26 after the fifteenth recorded sighting;
-a sixteenth arrived the next morning and is section 3.J.*
+*A methods note. Written 2026-09-26 after the fifteenth recorded sighting; a
+sixteenth arrived the next morning and is section 3.J. Extended 2026-10-02 at
+twenty-seven, with mechanisms L to R — every one of them committed after this
+document existed and was being actively watched for.*
 
-Over the course of this project, seventeen separate faults were found that share
-a single shape. None of them was an arithmetic error. Every quantity this
-pipeline computes, it computed correctly every time. What failed, seventeen
+Over the course of this project, **twenty-seven** separate faults were found
+that share a single shape. Almost none was an arithmetic error. Every quantity
+this pipeline computes, it computed correctly. What failed, twenty-seven
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -54,9 +56,15 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached seventeen. A few logged entries
-contained more than one instance, so the grouping below has more rows than
-seventeen; the count is of sightings, not of lines of code.
+The running count in the worklog reached **twenty-seven**. A few logged
+entries contained more than one instance, so the grouping below has more rows
+than that; the count is of sightings, not of lines of code.
+
+Mechanisms A to K came from the maritime domain. L to R were added as the
+project moved to aviation, and they are the more instructive half: by then
+the class was known, named, documented in this file, and being actively
+watched for. **Knowing the failure mode did not prevent it.** Three of the
+seven were committed by someone who had read this document that week.
 
 ### A. "No" and "cannot tell" share a return value
 
@@ -191,8 +199,8 @@ looked only for the *national* day in `data/reference/ais/`, which eleven
 dates have because they were fetched as GeoParquet and which this one never
 had, because it arrived as a legacy CSV zip instead.
 
-**This is the most expensive of the sixteen**, and not because of its size.
-The other fifteen produced a wrong number or a wrong sentence, and a wrong
+**This was the most expensive of the first sixteen**, and not because of its
+size. The others produced a wrong number or a wrong sentence, and a wrong
 number invites checking. This one produced a **standing, accepted
 limitation**: printed every run, written into the dossier's `CAVEATS` list,
 carried on 59 records, and entered in the project backlog as a task whose
@@ -229,6 +237,93 @@ have reached a reader as a false conclusion. It is now derived from the counts
 at report time, printed as NOT TESTED with the reason, and carried into the
 artefact as a flag for consumers that never see the printout.
 
+### L. A fix that does not retract the readings the broken instrument took
+
+`check_tisb.py` read the aircraft list from `d.get("ac")`; adsb.fi returns it
+under `aircraft`. The probe printed **"0 aircraft within 70 nm of DC"** every
+time it was ever run — a confident negative produced by looking in the wrong
+place. The bug was found, fixed and written up on 25 September.
+
+**The conclusion it had produced was never revisited.** "Air can never have a
+discrepancy layer. Six sources were tested and none returned MLAT" stood in
+the plan for a week after the instrument was repaired, and shaped which
+detectors were built. Eight days of collection later: 1.27% of position rows
+carry a position the aircraft did not report.
+
+Fixing an instrument does not retract the readings it took.
+
+### M. An error message that is true, and an inference from it that is not
+
+`HTTP 500` from BOEM was recorded as "the service is down", written into
+FINDINGS, into a commit message, and said twice in conversation as "almost
+certainly transient". One request settled it: `returnCountOnly=true` answers
+`{"count":5746}` instantly. The server was fine. The request was asking for
+every national polyline with geometry in one call, and ArcGIS answered 500
+instead of a clean `exceededTransferLimit`.
+
+A status code is a fact about a response. "The service is down" is a claim
+about a cause, and it was asserted three times in writing without one cheap
+request spent on testing it.
+
+The same shape, one week earlier: a 0-byte `.git/index.lock` was correctly
+diagnosed as dead and **confidently attributed to the wrong process**. It had
+been created by this project's own "read-only" `git status`, which takes the
+lock whatever `GIT_OPTIONAL_LOCKS` says.
+
+### N. A guard written for a class, defeated by the next instance of it
+
+`describe_sla` was written specifically to stop a wrong file being accepted as
+the 3 nm limit line. The next day it passed **153 MB of 483 polygons**: it
+checked that the JSON parsed, that there was no error object, that features
+existed and that nothing was truncated. It printed `BDRY_NAME_TEXT: None` —
+the identifying field absent from every feature — and still said OK.
+
+The same week, a rule adopted after two failed fetches read *"when a fetch
+fails twice with **4xx**, verify the endpoint exists"*. The next instance
+arrived as a **5xx** and the rule did not fire. It had been specified by the
+symptom in front of it rather than by the principle.
+
+### O. A pooled quantity whose membership is a directory listing
+
+`"any limit"` — the primary pooled outcome — was built from every group found
+in `data/reference/limits`. **Twice in one day a file appearing in that folder
+redefined it**: once by 483 polygons, once by a legitimate new line. The first
+moved 548 detections into the within-2 nm band and took the headline ratio
+from 0.396 to 5.938, reversing the gradient *toward the hypothesis*.
+
+Every individually named limit still looked correct throughout.
+
+### P. A stored measurement without the inputs that define it
+
+`label-sample.json` records the seed, the gate, the reception filter and the
+band edges. It does not record **which limit lines the distance was measured
+to**. All 147 chips carry `nm_to_limit` and a stratum derived from it, and
+nothing says what it is a distance to. Adding one line moved stored and
+recomputed values apart by **22.9 nm**, and the only reason that was visible
+is that a test happened to compare them.
+
+### Q. Branches that do not cover the cases
+
+The shift-null report had three branches for four combinations. `if p_shift >
+alpha` came first and swallowed both "neither survives" and "the control
+survives and the candidates do not", printing *"nothing here survives"* for
+both. True of the candidates; silent about the control, which was the
+informative half. Wrong by omission through four published runs, and
+unexaminable because the branch logic lived inside a `print`.
+
+### R. A container that reports a size it does not hold
+
+Two in one afternoon, opposite ways round.
+
+A `defaultdict` reported **122 distinct aircraft** while every list was empty:
+`tracks[h].append(f(ts))` creates the key before evaluating the argument, and
+the argument raised on every row. Keys without values.
+
+A dict comprehension `{(k[0], k[1]): v for k, v in units.items()}` silently
+dropped the day dimension: **565 units became 78**, the control group fell to
+four, and the result flipped from −0.00007 to +0.00443 — from refuted to not
+refuted, in the direction of the hypothesis. Values without a word.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -259,6 +354,31 @@ notices. The `collector.ps1` parity tests were checked three ways this way.
 **Looking at the artefact at the right magnification** — and measuring, rather
 than assuming, what the display is showing.
 
+**An exact zero is instrumented, not believed.** "0 cells recovered" was the
+output of a check that had failed on 100% of rows. The habit is cheap: when a
+number comes back exactly zero, add counters to every stage before writing it
+down.
+
+**Two implementations of one specification, compared.** The scratch
+computation and the committed script disagreed, and the committed one was
+wrong in the favourable direction. This only worked because the first result
+was written down *before* the second was built. An implementation checked
+against nothing is checked against the author's intentions.
+
+**Reading all of a record's keys, not the one expected.** A query for
+`p_shift_control` on an artefact that stores `p_control_shift` returned
+`None`, which is indistinguishable from the value being absent, and was one
+sentence from becoming a reported defect.
+
+**Asking which way an amendment cuts.** Excluding TIS-B removed the large,
+eye-catching values and left a series with no step at all. An amendment that
+makes a positive result *less* likely is one that can be trusted; the reverse
+needs an argument.
+
+**Stating a prediction before running.** The scattered null was predicted to
+reject and did not. The prediction being wrong is what exposed that the
+maritime intuition did not transfer to a difference-of-differences statistic.
+
 ## 5. The rules adopted
 
 Each of these exists because something went wrong that it would have stopped.
@@ -282,6 +402,29 @@ Each of these exists because something went wrong that it would have stopped.
    is the same defect one level up.
 7. **Retractions stay in place.** A false finding that was published is marked
    RETRACTED with a pointer to what replaced it, not deleted.
+8. **Fixing an instrument does not retract its readings.** When a probe is
+   found to have been broken, every conclusion it produced is revisited —
+   explicitly, as a listed task — not left standing because the bug is closed.
+9. **A status code is a fact; its cause is an inference.** No claim about why
+   a request failed is written into a finding, a commit or a plan until one
+   cheap request has tested it. For a REST service that is a count or metadata
+   query, which separates "server down" from "my request is too big" in
+   milliseconds.
+10. **A rule is specified by its principle, not by the symptom in front of
+    it.** A rule naming `4xx` does not fire on `5xx`. Write the reason, not
+    the instance.
+11. **A pooled quantity declares its membership in code and records it in the
+    artefact.** Never inferred from which files happen to be in a directory.
+12. **An artefact storing a derived measurement records the inputs that define
+    it**, in the same file. A distance records what it is a distance to.
+13. **A line of output that states a conclusion is a named function**, tested
+    for every combination of its inputs, with one test asserting that N
+    distinct cases produce N distinct sentences. The count is what catches a
+    missing branch; a swallowed case looks correct in isolation.
+14. **An exact zero is instrumented before it is believed.**
+15. **A predicted count is a delta against a baseline that was measured**, not
+    against earlier arithmetic. Three chained predictions off one real
+    measurement produced a confident wrong number.
 
 ## 6. What it cost, and what it bought
 
@@ -323,12 +466,28 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. Seventeen were found, one of them
-published and withdrawn. The defence is that **the mistakes were found by the
-project's own machinery, they were recorded rather than tidied away, and the
-result did not depend on any of them.** Every correction moved the headline
-number in the direction that would have helped the hypothesis, and it still
-did not arrive.
+The defence is not that no mistakes were made. **Twenty-seven** were found,
+one of them published and withdrawn. The defence is that **the mistakes were
+found by the project's own machinery, they were recorded rather than tidied
+away, and the result did not depend on any of them.** Every correction moved
+the headline number in the direction that would have helped the hypothesis,
+and it still did not arrive.
+
+**And the second half of the catalogue is the stronger evidence, because it
+is worse.** Mechanisms L to R were all committed *after* this document
+existed, by someone who had read it that week and could recite the class on
+request. One of them — 483 polygons accepted as a legal boundary line —
+produced a fifteen-fold rise in the headline ratio and reversed its gradient,
+in the direction of the hypothesis, and was caught by a comparability check
+that reported it as "not comparable" rather than as a corrupted input. It was
+hours from being published.
+
+That is the honest shape of the claim. Not *these mistakes were prevented* —
+they were not, and knowing the failure mode in detail did not prevent them —
+but *the machinery caught them, every time, and the record of catching them
+is public.* A second domain was built on the same machinery and returned the
+same answer. The argument for believing the result is the catalogue, not the
+absence of one.
 
 *A note on the numbers in this document.* Every figure above was re-derived
 from the artefacts by a script, not copied from the worklog, and one of them
