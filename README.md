@@ -330,11 +330,34 @@ the seven rules adopted in response are in
 reusable thing here, and the reason the headline result survived three
 revisions of its own input.
 
+## The domains are not equally equipped
+
+Sea has both halves: AIS self-reports, Sentinel-1 observes without consent.
+Land has only the cooperative half built. **Air was recorded for a week as
+structurally incapable of the comparison** — until the probe that established
+that was found to have been reading the wrong JSON key and answering
+"0 aircraft" every time it ran.
+
+Eight days of adsb.fi now show **19,604 of 1,545,237 position rows (1.27%)
+carrying a position the aircraft did not report** — MLAT solved from receiver
+timing geometry, TIS-B uplinked from ground radar. The air domain does have an
+independent channel. What it does not yet have is a measurement of that
+channel's own coverage, which is the aviation analogue of searched water and
+the thing that has to exist before any aviation absence means anything.
+
+The finding, its retraction and the measurement are in
+[`docs/aviation-asymmetry.md`](docs/aviation-asymmetry.md).
+
 ## Scope
 
 Targets are **platforms and institutions, never persons** — vessels, aircraft,
 facilities, organisations, and aggregate spatial patterns. That boundary is
 deliberate, and the reasoning is in [`docs/architecture.md`](docs/architecture.md).
+
+It bites hardest in the air. An airliner or a state aircraft is an
+institution; a private light aircraft with its transponder off is a person
+with wings. If the aviation domain is built out, that distinction belongs in
+the code and not in this paragraph.
 
 ## License
 
