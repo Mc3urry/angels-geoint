@@ -25,8 +25,10 @@ manufacture the result.
 
 The rule, the denominator and its limits are in
 angels/core/detectors/persistence.py. In one line: seen on at least
---min-dates dates, on at least half the passes that actually searched the
-spot, and never once explained by AIS.
+--min-dates dates and on at least half the passes that actually searched the
+spot. The third clause -- never once explained by AIS -- came off on
+2026-09-30 because it exempted working berths; `--require-never-matched`
+restores it and reproduces the old list.
 
 THE GATE
 
@@ -100,8 +102,15 @@ def main() -> int:
     ap.add_argument("--min-dates", type=int, default=persistence.MIN_DATES)
     ap.add_argument("--min-fraction", type=float,
                     default=persistence.MIN_FRACTION)
+    ap.add_argument("--require-never-matched", action="store_true",
+                    default=persistence.REQUIRE_NEVER_MATCHED,
+                    help="the pre-2026-09-30 rule: a site AIS ever explained "
+                         "is never called fixed. Off by default since the "
+                         "veto exempted working berths; pass it to reproduce "
+                         "the old candidate list")
     args = ap.parse_args()
-    rule = {"min_dates": args.min_dates, "min_fraction": args.min_fraction}
+    rule = {"min_dates": args.min_dates, "min_fraction": args.min_fraction,
+            "require_never_matched": args.require_never_matched}
 
     files = sorted(EVENTS.glob("sar-*.geojson"))
     if not files:
@@ -195,6 +204,7 @@ def main() -> int:
         "properties": {
             "radius_m": args.radius, "min_dates": args.min_dates,
             "min_fraction": args.min_fraction,
+            "require_never_matched": args.require_never_matched,
             "gate_min_snr": args.min_snr, "gate_min_pixels": args.min_pixels,
             "n_sites": len(sites), "n_fixed": len(fixed),
             "dates": sorted(per_date),

@@ -55,17 +55,77 @@ def test_one_sighting_is_never_fixed() -> None:
     assert ix.sites[0].verdict() == "one pass only"
 
 
-def test_a_site_ais_once_explained_is_traffic_not_furniture() -> None:
-    """AN ANCHORAGE IS ALSO ALWAYS OCCUPIED -- by different vessels, which
-    report themselves. Dropping it would drop the one place a vessel going
-    dark at anchor could be seen."""
+def _berth() -> SiteIndex:
+    """Cove Point in miniature: the same 300 m on every pass, AIS explaining
+    exactly one of them. A working berth."""
     ix = SiteIndex()
     for i, d in enumerate(DATES):
         ix.add(-76.30, 38.13, d, matched=(i == 1))
     for d in DATES:
         ix.mark_searched(d, lambda lon, lat: True)
-    assert not ix.fixed()
-    assert "traffic" in ix.sites[0].verdict()
+    return ix
+
+
+def test_a_structure_is_still_a_structure_when_a_ship_ties_up_to_it() -> None:
+    """2026-09-30. The never-matched veto exempted working berths, piers and
+    terminals -- the fixed structures MOST likely to have a reporting vessel
+    alongside. Cove Point LNG pier: 7 of 7 passes, hit_fraction 1.00, and
+    called `traffic` because AIS explained one detection there once."""
+    s = _berth().sites[0]
+    assert s.ever_matched
+    assert s.is_fixed()
+    assert s.verdict() == "fixed structure (AIS explained it at least once)"
+
+
+def test_a_fixed_site_ais_explained_never_reads_as_traffic() -> None:
+    """The verdict is what a reader counts. If `fixed` is true and the string
+    says `traffic`, one of them is lying and nothing downstream can tell."""
+    s = _berth().sites[0]
+    assert s.is_fixed()
+    assert "traffic" not in s.verdict()
+    assert "AIS explained it at least once" in s.verdict()
+
+
+def test_the_old_rule_is_still_runnable_and_still_says_traffic() -> None:
+    """An amendment that cannot reproduce what it amended is not an
+    amendment, it is a rewrite. `--require-never-matched` restores the
+    pre-2026-09-30 candidate list exactly."""
+    ix = _berth()
+    rule = {"require_never_matched": True}
+    assert not ix.fixed(**rule)
+    assert ix.sites[0].verdict(**rule) == "traffic (AIS explained it at least once)"
+
+
+def test_an_anchorage_is_still_protected_by_min_dates() -> None:
+    """THE REASONING THE VETO CARRIED IS NOT GONE, it moved. An anchorage is
+    occupied by DIFFERENT vessels, which do not moor in the same 300 m on
+    pass after pass; a site that is detected every single time is furniture
+    whatever AIS says. What still protects a genuine anchorage is MIN_DATES:
+    two passes do not make a structure, matched or not."""
+    ix = SiteIndex()
+    for i, d in enumerate(DATES[:2]):
+        ix.add(-76.30, 38.13, d, matched=(i == 0))
+    for d in DATES:
+        ix.mark_searched(d, lambda lon, lat: True)
+    s = ix.sites[0]
+    assert s.n_dates == 2
+    assert not s.is_fixed()
+    assert s.verdict() == "traffic (AIS explained it at least once)"
+
+
+def test_the_accepted_cost_is_named() -> None:
+    """A vessel that goes dark at the SAME berth on three or more passes is
+    now removed with the berth. That is the loss the veto prevented and it is
+    accepted, not denied -- this test exists so nobody rediscovers it as a
+    surprise."""
+    ix = SiteIndex()
+    for d in DATES[:3]:
+        ix.add(-76.30, 38.13, d)          # never matched: goes dark every time
+    for d in DATES[:3]:
+        ix.mark_searched(d, lambda lon, lat: True)
+    s = ix.sites[0]
+    assert s.is_fixed() and not s.ever_matched
+    assert s.verdict() == "fixed structure"
 
 
 def test_the_denominator_is_the_passes_that_searched_the_spot() -> None:

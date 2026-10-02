@@ -19,8 +19,12 @@ A site is a cluster of detections within RADIUS_M of each other across
 passes. It is called fixed when
 
     it was detected on at least MIN_DATES separate dates, AND
-    on at least MIN_FRACTION of the dates whose searched water covered it, AND
-    no detection there was ever matched to an AIS report.
+    on at least MIN_FRACTION of the dates whose searched water covered it.
+
+Until 2026-09-30 there was a third clause -- no detection there was ever
+matched to an AIS report -- and it is now off by default. It survives as
+`require_never_matched`, so the old rule is still runnable and the old
+result still reproducible. Why it changed is below.
 
 Each clause removes a different mistake:
 
@@ -39,11 +43,53 @@ Each clause removes a different mistake:
                    4x "concentration" 1-5 nm outside the contiguous zone
                    that was really 85 monopiles going in off Virginia Beach
                    between September and December 2024.
-  never matched    an anchorage is also "always occupied", but by DIFFERENT
+  never matched    (VETO REMOVED 2026-09-30 -- reasoning kept, see below)
+                   an anchorage is also "always occupied", but by DIFFERENT
                    vessels, and those report themselves. A site where AIS
                    ever explained a detection is traffic, not furniture --
                    and dropping it would mean dropping the one place where a
                    vessel that goes dark at anchor would show up.
+
+WHY THE never-matched VETO CAME OFF (2026-09-30)
+
+The argument above is sound about anchorages and wrong about berths. As a
+veto it exempted precisely the fixed structures most likely to have a
+reporting vessel alongside: piers, terminals, berths, and lease areas under
+construction. Cove Point LNG pier is the proof -- detected on 7 of 7 passes,
+hit_fraction 1.00, and classified "traffic" solely because AIS explained a
+detection there once, which is what a berth looks like when it is working.
+
+A structure does not stop being a structure because a ship tied up to it.
+MIN_DATES and MIN_FRACTION already carry the load the veto was doing: an
+anchorage occupied by different vessels on different passes is not detected
+in the SAME 300 m across dates unless something is moored there every time,
+and a site that IS detected every time is furniture whatever AIS says.
+
+What this costs, stated rather than hidden: a vessel that goes dark while
+moored at the same berth on three or more passes is now removed with the
+berth. That is the case the veto protected, and it is a real loss. It is
+accepted because the veto's price was 6 structures kept in the candidate
+list at 3+ dates and hit fractions above 0.5, and structures cluster at
+fixed points -- the same shape as the finding this project is looking for.
+Keeping them in does not merely inflate the count, it biases it.
+
+Measured on the 2024 study year before the change (147 labelled chips,
+post-pass-3 labels): 6 more sites called fixed, 43 of 1,150 candidates
+removed -- 35 beyond 10 nm, 8 between 2 and 10 nm, NONE within 2 nm. Of the
+labelled chips it removes two read as "fixed", one as "clutter", one as
+"ambiguous", and no chip read as a vessel.
+
+NOTE THE DIRECTION. Every removal falls in the outer two bands, so this
+change mechanically RAISES the within-2 nm share -- it pushes toward the
+finding. That is why it is committed, with this reasoning, before the
+corrected nulls are run and not after.
+
+NOT ADOPTED: also accepting >=2 dates at hit_fraction >=0.9. It would call
+34 more sites fixed and remove 91 candidates, including 2 within 2 nm that
+were both read as fixed structures -- so it agrees with the reader there.
+But 28 of those 34 sites rest on two passes only, which is exactly the
+coincidence MIN_DATES=3 exists to prevent. Recorded as a sensitivity, not a
+rule.
 
 WHAT THIS DELIBERATELY DOES NOT DO
 
@@ -66,6 +112,10 @@ from dataclasses import dataclass, field
 RADIUS_M = 300.0
 MIN_DATES = 3
 MIN_FRACTION = 0.5
+
+# 2026-09-30: was an unconditional True, written into is_fixed rather than
+# named. Amendment recorded in the module docstring and in DECISIONS.md.
+REQUIRE_NEVER_MATCHED = False
 
 M_PER_DEG_LAT = 111_195.0
 
@@ -133,19 +183,29 @@ class Site:
         return bool(self.matched_dates)
 
     def is_fixed(self, *, min_dates: int = MIN_DATES,
-                 min_fraction: float = MIN_FRACTION) -> bool:
+                 min_fraction: float = MIN_FRACTION,
+                 require_never_matched: bool = REQUIRE_NEVER_MATCHED) -> bool:
+        if require_never_matched and self.ever_matched:
+            return False
         return (self.n_dates >= min_dates
-                and self.hit_fraction >= min_fraction
-                and not self.ever_matched)
+                and self.hit_fraction >= min_fraction)
 
     def verdict(self, **kw) -> str:
-        if self.ever_matched:
-            return "traffic (AIS explained it at least once)"
         if self.is_fixed(**kw):
-            if (self.n_searched_since_first < self.n_searched
-                    and self.hit_fraction_all_passes < 0.5):
+            appeared = (self.n_searched_since_first < self.n_searched
+                        and self.hit_fraction_all_passes < 0.5)
+            if self.ever_matched:
+                # Kept distinct from a never-matched structure: this is the
+                # class the removed veto used to exempt, and a reader must be
+                # able to count them without re-deriving anything.
+                return ("fixed structure (appeared during the year, AIS "
+                        "explained it at least once)" if appeared else
+                        "fixed structure (AIS explained it at least once)")
+            if appeared:
                 return "fixed structure (appeared during the year)"
             return "fixed structure"
+        if self.ever_matched:
+            return "traffic (AIS explained it at least once)"
         if self.n_dates >= 2:
             return "repeat, not yet fixed"
         return "one pass only"
