@@ -1,0 +1,124 @@
+{
+ "what": "non-cooperative aviation share across the ADS-B obligation boundary, 14 CFR 91.225(d)",
+ "prereg": "docs/phase-f-prereg.md",
+ "independent_types": [
+  "mlat",
+  "mode_s"
+ ],
+ "tisb_types_excluded": [
+  "tisb_icao",
+  "tisb_trackfile",
+  "tisb_other"
+ ],
+ "tisb_exclusion_reason": "AMENDMENT 1: TIS-B presence rises with cooperative density faster than MLAT's, so it is correlated with the denominator",
+ "cooperative_types": [
+  "adsb_icao",
+  "adsb_other",
+  "adsr_icao",
+  "adsr_other"
+ ],
+ "cell_deg": 0.05,
+ "veil_nm": 30.0,
+ "split_ft": 10000,
+ "max_gap_s": 360.0,
+ "airports_eff_date": "2026/10/01",
+ "n_airports": 37,
+ "days": [
+  "20260925",
+  "20260926",
+  "20260927",
+  "20260928",
+  "20260929",
+  "20260930",
+  "20261001",
+  "20261002"
+ ],
+ "n_polls": 1659,
+ "fixes": {
+  "cooperative": 1219524,
+  "independent": 7756,
+  "tisb_not_pooled": 11760
+ },
+ "mask": {
+  "cells_with_cooperative": 2296,
+  "direct": 1640,
+  "inferred_by_continuity": 101,
+  "in_mask": 1741,
+  "blind_excluded": 555
+ },
+ "primary": {
+  "floor": 200,
+  "by_group": {
+   "<10k": {
+    "inside": 0.002412,
+    "outside": 0.002063,
+    "step": -0.000348,
+    "pooled_inside": 0.002004,
+    "pooled_outside": 0.001976
+   },
+   ">=10k": {
+    "inside": 0.001569,
+    "outside": 0.001019,
+    "step": -0.00055,
+    "pooled_inside": 0.001546,
+    "pooled_outside": 0.001048
+   }
+  },
+  "n_units": {
+   "<10k": {
+    "inside": 410,
+    "outside": 35
+   },
+   ">=10k": {
+    "inside": 76,
+    "outside": 70
+   }
+  },
+  "did": 0.000201,
+  "treatment_step": -0.000348,
+  "control_step": -0.00055
+ },
+ "sensitivity_day_collapsed": {
+  "floor": 200,
+  "by_group": {
+   "<10k": {
+    "inside": 0.010832,
+    "outside": 0.010446,
+    "step": -0.000386,
+    "pooled_inside": 0.006657,
+    "pooled_outside": 0.008203
+   },
+   ">=10k": {
+    "inside": 0.003599,
+    "outside": 0.003727,
+    "step": 0.000129,
+    "pooled_inside": 0.003254,
+    "pooled_outside": 0.003141
+   }
+  },
+  "n_units": {
+   "<10k": {
+    "inside": 488,
+    "outside": 217
+   },
+   ">=10k": {
+    "inside": 372,
+    "outside": 396
+   }
+  },
+  "did": -0.000514,
+  "treatment_step": -0.000386,
+  "control_step": 0.000129
+ },
+ "nulls": {
+  "observed": 0.000201,
+  "trials": 2000,
+  "shift_trials": 400,
+  "seed": 20261002,
+  "scattered_k": 1608,
+  "scattered_p": 0.8040979510244878,
+  "shift_k": 359,
+  "shift_p": 0.8977556109725686
+ },
+ "verdict": "REFUTED: positive, but a displaced boundary reproduces it (359 of 400 shifts, p = 0.8978)"
+}

@@ -71,6 +71,15 @@ data/**
 !data/events/review-session-*.json
 !data/events/labels-review-*.jsonl
 
+#   air-bands.json            the aviation result. Regenerates in seconds --
+#                             but ONLY from data/raw/aviation-adsbfi/, which
+#                             is 109 MB, untracked, and still growing. A clone
+#                             cannot rebuild it, which is the same reason
+#                             boundary-bands.json is here. It is also a result
+#                             AT A WINDOW: re-running tomorrow answers a
+#                             different question, because there is more data.
+!data/events/air-bands.json
+
 # The airspace geometry the aviation result is about.
 #
 # data/reference is otherwise ignored because it is fetchable, and NOAA's
