@@ -52,7 +52,13 @@ data/**
 #                             into agreement with the second.
 #
 # Deliberately NOT here: candidate-pvessel.json and data/events/corrected/
-# (3.2 MB). Both rebuild from the four above in seconds.
+# (3.2 MB). Both rebuild from the four above in seconds -- WITH ONE
+# EXCEPTION, added 2026-10-02. corrected/boundary-bands-point.json does NOT
+# rebuild in seconds: it is the same 2,000 scattered + 400 shift trials as
+# boundary-bands.json, on the clutter-corrected set, and it is the answer
+# this project owed from 26 September to 2 October. The reason given four
+# lines above for tracking boundary-bands.json applies to it verbatim, so
+# the comment here described something other than what the rule did.
 !data/events/labels.jsonl
 !data/events/label-sample.json
 !data/events/boundary-bands.json
@@ -64,6 +70,16 @@ data/**
 # in the repository.
 !data/events/review-session-*.json
 !data/events/labels-review-*.jsonl
+
+# The corrected nulls. See the EXCEPTION note above: a multi-hour run, not a
+# seconds-long rebuild.
+# Three lines, in this order, and the order is the whole of it: git will not
+# descend into an excluded directory, so the directory is re-included first;
+# that alone would admit all ten files in it, so everything inside is
+# re-excluded; and then the one file is named.
+!data/events/corrected/
+data/events/corrected/*
+!data/events/corrected/boundary-bands-point.json
 
 # And the per-scene record, for the same reason one step further out: without
 # it nothing can be VERIFIED. `scripts/reproduce.py` re-runs the pipeline and
