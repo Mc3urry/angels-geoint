@@ -89,3 +89,64 @@ def test_something_that_is_not_json_is_a_failure(tmp_path) -> None:
     ok, msg = describe_sla(p)
     assert not ok
     assert "not JSON" in msg
+
+
+# -- the fetch envelope ------------------------------------------------------
+#
+# Added 2026-10-02. Two days of HTTP 500 from BOEM were recorded here as "the
+# publisher is down". The publisher was not down: a bare returnCountOnly
+# query answers {"count":5746} instantly. The request was asking for all
+# 5,746 national polylines with geometry in one GeoJSON call, and the server
+# answered 500 rather than a clean exceededTransferLimit. Clipped to this
+# study area the same query returns 427.
+
+from scripts.fetch_limits import (SLA_BBOX, SLA_ENVELOPE, SLA_MARGIN_DEG,
+                                  SLA_SOURCES, stamp_envelope)
+from angels.config import AOI_SEA
+
+
+def test_the_envelope_is_the_aoi_plus_the_margin_limit_sets_uses() -> None:
+    """Hardcoding the numbers would let the clip drift away from the AOI it
+    is supposed to cover. `limit_sets` trims with a 2 degree margin; the
+    fetch must not be narrower than what the analysis will look at."""
+    lo0, la0, lo1, la1 = AOI_SEA
+    assert SLA_BBOX == (lo0 - SLA_MARGIN_DEG, la0 - SLA_MARGIN_DEG,
+                        lo1 + SLA_MARGIN_DEG, la1 + SLA_MARGIN_DEG)
+    assert SLA_MARGIN_DEG == 2.0
+
+
+def test_the_sla_query_is_clipped_and_carries_no_outsr() -> None:
+    """The two things that made it a 500: the whole national layer, and an
+    outSR that GeoJSON does not need."""
+    url = next(u for name, u, _ in SLA_SOURCES if name == "boem-sla-geojson")
+    assert "esriGeometryEnvelope" in url
+    assert SLA_ENVELOPE in url
+    assert "esriSpatialRelIntersects" in url
+    assert "outSR" not in url
+    assert "outFields=*" not in url
+
+
+def test_a_clipped_file_says_so_in_its_own_properties(tmp_path) -> None:
+    """A limit file clipped to one study area and reused for another would
+    put the line's edge wherever the clip stopped. Nothing downstream reads
+    this; a person does, which is the point."""
+    p = tmp_path / "submerged_lands_act_3nm.geojson"
+    p.write_text(json.dumps({
+        "type": "FeatureCollection",
+        "features": [line("Submerged Lands Act Boundary")]}), encoding="utf-8")
+    stamp_envelope(p)
+    props = json.loads(p.read_text(encoding="utf-8"))["properties"]
+    assert props["_fetch_envelope_lonlat"] == list(SLA_BBOX)
+    assert props["_fetch_aoi"] == list(AOI_SEA)
+    assert "NOT the national extent" in props["_fetch_note"]
+
+
+def test_stamping_does_not_disturb_the_features(tmp_path) -> None:
+    p = tmp_path / "submerged_lands_act_3nm.geojson"
+    before = {"type": "FeatureCollection",
+              "features": [line(), line("Submerged Lands Act Boundary")]}
+    p.write_text(json.dumps(before), encoding="utf-8")
+    stamp_envelope(p)
+    after = json.loads(p.read_text(encoding="utf-8"))
+    assert after["features"] == before["features"]
+    assert describe_sla(p)[0]

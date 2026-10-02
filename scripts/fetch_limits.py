@@ -71,7 +71,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
     if _e.name != "_bootstrap":
         raise
 
-from angels.config import REFERENCE
+from angels.config import AOI_SEA, REFERENCE
 
 DEST = REFERENCE / "limits"
 
@@ -103,12 +103,62 @@ SOURCES = [
 # marinecadastre.gov/downloads/data/mc/SubmergedLandsActBoundary.zip -- were
 # guessed from the pattern of the NOAA sources above and never existed; they
 # are recorded in the docstring rather than silently replaced.
+# The fetch envelope: the study area plus the same 2 degree margin
+# `boundary_analysis.limit_sets` trims to at read time. Built from config so
+# it cannot drift away from the AOI it is supposed to cover.
+SLA_MARGIN_DEG = 2.0
+_lo0, _la0, _lo1, _la1 = AOI_SEA
+SLA_BBOX = (round(_lo0 - SLA_MARGIN_DEG, 4), round(_la0 - SLA_MARGIN_DEG, 4),
+            round(_lo1 + SLA_MARGIN_DEG, 4), round(_la1 + SLA_MARGIN_DEG, 4))
+SLA_ENVELOPE = "%2C".join(str(v) for v in SLA_BBOX)
+SLA_ENVELOPE_PLAIN = ",".join(str(v) for v in SLA_BBOX)
+
+
+def stamp_envelope(path: Path) -> None:
+    """Write the fetch clip into the file, so the artefact declares it.
+
+    A limit file clipped to one study area and then reused for another would
+    put the line's edge wherever the clip stopped. Nothing downstream reads
+    this field; a person does.
+    """
+    import json
+
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    doc.setdefault("properties", {}).update({
+        "_fetch_envelope_lonlat": list(SLA_BBOX),
+        "_fetch_margin_deg": SLA_MARGIN_DEG,
+        "_fetch_aoi": list(AOI_SEA),
+        "_fetch_note": ("clipped at fetch to the study area plus margin; "
+                        "NOT the national extent. Re-fetch if AOI_SEA moves."),
+    })
+    path.write_text(json.dumps(doc), encoding="utf-8")
+
+
 SLA_SOURCES = [
     # BOEM is the publisher of record. Polyline, the line itself.
+    #
+    # CLIPPED AT FETCH, and that is a decision, not an accident -- 2026-10-02.
+    # The layer holds 5,746 features nationally. Asking for all of them with
+    # geometry in one GeoJSON call makes the server answer **HTTP 500**, not a
+    # clean exceededTransferLimit, which is why two days of 500s were read
+    # here as "BOEM is down". It was not down: a bare returnCountOnly query
+    # answers {"count":5746} instantly. The same query clipped to this
+    # project's AOI returns 427 features, comfortably inside maxRecordCount,
+    # and every one of them carries BDRY_NAME_TEXT "Submerged Lands Act
+    # Boundary" -- no lateral state boundaries mixed in.
+    #
+    # The cost of clipping at fetch is that the file is only good for THIS
+    # study area, so the envelope is written into the file's own properties
+    # by `stamp_envelope` below rather than left for a later reader to guess.
+    # outSR is deliberately absent: GeoJSON from ArcGIS is WGS84 by
+    # specification, and passing it is what some servers choke on.
     ("boem-sla-geojson",
      "https://gis.boem.gov/server/rest/services/BOEM_BSEE/MMC_Layers/"
      "FeatureServer/8/query"
-     "?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+     "?where=1%3D1&outFields=BDRY_NAME_TEXT&returnGeometry=true"
+     "&geometryType=esriGeometryEnvelope&inSR=4326"
+     "&spatialRel=esriSpatialRelIntersects"
+     f"&geometry={SLA_ENVELOPE}&f=geojson",
      "submerged_lands_act_3nm.geojson"),
     # THERE IS DELIBERATELY NO POLYGON FALLBACK. See the note below.
 ]
@@ -207,15 +257,32 @@ MANUAL = """
 
       https://gis.boem.gov/server/rest/services/BOEM_BSEE/MMC_Layers/FeatureServer/8
 
-  use the Query form with where=1=1, outFields=*, outSR=4326, format
-  geoJSON, and save the result into the same folder as
+  DO NOT ask for the whole layer. where=1=1 with outFields=* and geometry
+  returns 5,746 national features and the server answers HTTP 500 -- which
+  reads like an outage and is not one. Clip it. In the Query form set
+
+      Where                 1=1
+      Input Geometry        {envelope}
+      Geometry Type         esriGeometryEnvelope
+      Input Spatial Ref     4326
+      Spatial Relationship  esriSpatialRelIntersects
+      Out Fields            BDRY_NAME_TEXT
+      Return Geometry       true
+      Format                geoJSON
+
+  leaving Output Spatial Reference EMPTY -- GeoJSON from ArcGIS is WGS84 by
+  specification and passing outSR is what some servers choke on. That
+  returns 427 features for this study area. Save it as
 
       submerged_lands_act_3nm.geojson
 
   Check before you trust it: the layer is a boundary layer, so read the
-  distinct BDRY_NAME_TEXT values and confirm they are the seaward line and
-  not the lateral state boundaries. If the response carries
-  exceededTransferLimit, it is truncated and has to be paged.
+  distinct BDRY_NAME_TEXT values and confirm every one says "Submerged Lands
+  Act Boundary" and not a lateral state boundary. If the response carries
+  exceededTransferLimit, it is truncated and has to be paged. And note in
+  the file that it is clipped -- `stamp_envelope` does this automatically on
+  the scripted path, and a hand download has to do it by hand or the next
+  reader cannot tell a clipped line from a line that stops there.
 """
 
 
@@ -327,7 +394,7 @@ def main() -> int:
         break
 
     if not got_mlb:
-        print(MANUAL.format(dest=DEST))
+        print(MANUAL.format(dest=DEST, envelope=SLA_ENVELOPE_PLAIN))
         return 1
 
     print("\n  now the 3 nm state seaward limit (Submerged Lands Act)")
@@ -346,6 +413,9 @@ def main() -> int:
             if not good:
                 (DEST / filename).unlink(missing_ok=True)
                 continue
+            stamp_envelope(DEST / filename)
+            print(f"    clipped to {SLA_BBOX} (AOI plus "
+                  f"{SLA_MARGIN_DEG:g} deg), recorded in the file")
         break
     else:
         print("\n  The 3 nm line could not be fetched. The analysis will "
