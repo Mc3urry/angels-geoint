@@ -125,21 +125,106 @@ def test_an_unknown_line_file_is_loaded_but_kept_out_of_any_limit(
 
 def test_a_line_file_named_like_the_sla_does_become_the_sla(tmp_path,
                                                             monkeypatch) -> None:
-    """The guard must not refuse the real thing."""
+    """The geometry guard must not refuse the real thing.
+
+    Rewritten 2026-10-02. It used to also assert that the 3 nm line landed
+    in the pool, which was the design for about four hours. The pool is now
+    REGISTERED_ANY and the 3 nm line is deliberately outside it -- see
+    test_the_3nm_line_does_not_enter_the_pool. What this test is FOR is that
+    a correct file is read at all, so that is all it asserts.
+    """
     gj(tmp_path, "submerged_lands_act_3nm.geojson", [meridian()])
     monkeypatch.setattr(ba, "LIMITS", tmp_path)
     sets = ba.limit_sets()
     assert ba.SLA_NAME in sets
     # a three-vertex meridian is two segments
-    assert len(sets[ba.ANY_NAME].segments) == 2
+    assert len(sets[ba.SLA_NAME].segments) == 2
 
 
-def test_any_limit_is_the_union_of_the_legal_lines(tmp_path,
-                                                   monkeypatch) -> None:
+def test_any_limit_is_the_union_of_whatever_is_REGISTERED(tmp_path,
+                                                          monkeypatch) -> None:
+    """The pool is REGISTERED_ANY and nothing else.
+
+    Rewritten 2026-10-02. The old version asserted the pool contained the
+    3 nm line, because at the time it did. Testing the mechanism rather than
+    one particular membership: REGISTERED_ANY is monkeypatched here, so the
+    test still passes when the registered set is amended -- and still fails
+    if the pool goes back to being everything in the folder.
+
+    Two lines are present. One is in the registered set, one is not. Only
+    the registered one may reach the pool.
+    """
     gj(tmp_path, "submerged_lands_act_3nm.geojson", [meridian(-75.0)])
     gj(tmp_path, "scratch_notes.geojson", [meridian(-74.0), meridian(-73.0)])
     monkeypatch.setattr(ba, "LIMITS", tmp_path)
+    monkeypatch.setattr(ba, "REGISTERED_ANY", ("scratch_notes",))
+
     sets = ba.limit_sets()
+    assert len(sets[ba.SLA_NAME].segments) == 2          # read, on its own
+    assert len(sets["scratch_notes"].segments) == 4      # read, and pooled
+    assert len(sets[ba.ANY_NAME].segments) == 4          # ONLY the registered
+    assert ba.any_limit_composition(sets) == ["scratch_notes"]
+
+
+# -- the pooled test's composition -------------------------------------------
+#
+# 2026-10-02. "any limit" is the primary pooled outcome. It was registered,
+# run, and its p-value read, with the 12, 24 and 200 nm lines; the 3 nm state
+# line arrived afterwards. Twice a directory listing has been able to
+# redefine this test -- once with 483 polygons, once with a legitimate new
+# line that moved stored distances by up to 22.9 nm. So the membership is
+# declared in code, and these tests are what stop it drifting again.
+
+
+def sla(tmp_path):
+    return gj(tmp_path, "submerged_lands_act_3nm.geojson", [meridian(-75.5)],
+              {"BDRY_NAME_TEXT": "Submerged Lands Act Boundary"})
+
+
+def test_the_3nm_line_is_tested_on_its_own(tmp_path, monkeypatch) -> None:
+    sla(tmp_path)
+    monkeypatch.setattr(ba, "LIMITS", tmp_path)
+    sets = ba.limit_sets()
+    assert ba.SLA_NAME in sets
     assert len(sets[ba.SLA_NAME].segments) == 2
-    assert len(sets["scratch_notes"].segments) == 4
-    assert len(sets[ba.ANY_NAME].segments) == 2
+
+
+def test_the_3nm_line_does_not_enter_the_pool(tmp_path, monkeypatch,
+                                              capsys) -> None:
+    """THE REGRESSION. A legitimate, correctly-named, line-geometry 3 nm file
+    must still stay out of a pooled test whose result has been read."""
+    sla(tmp_path)
+    monkeypatch.setattr(ba, "LIMITS", tmp_path)
+    sets = ba.limit_sets()
+    assert len(sets[ba.ANY_NAME].segments) == 0
+    out = capsys.readouterr().out
+    assert "EXCLUDED" in out
+    assert "p-value has been read" in out
+
+
+def test_the_registered_pool_is_the_three_lines_it_was_run_with() -> None:
+    assert ba.REGISTERED_ANY == (ba.TS_NAME, ba.CZ_NAME, ba.EEZ_NAME)
+    assert ba.SLA_NAME not in ba.REGISTERED_ANY
+    assert ba.SLA_NAME in ba.KNOWN_LIMITS
+
+
+def test_the_composition_is_reported_not_inferred(tmp_path,
+                                                  monkeypatch) -> None:
+    """A reader must never have to list a directory to know what was pooled."""
+    sla(tmp_path)
+    gj(tmp_path, "territorial_sea_12nm.geojson", [meridian(-74.0)])
+    monkeypatch.setattr(ba, "LIMITS", tmp_path)
+    sets = ba.limit_sets()
+    # the 12 nm file here is named by stem, not flagged, so it is not TS_NAME;
+    # the point is that whatever IS pooled gets named in the artefact field
+    comp = ba.any_limit_composition(sets)
+    assert ba.SLA_NAME not in comp
+    assert all(n in ba.REGISTERED_ANY for n in comp)
+
+
+def test_a_polygon_still_cannot_sneak_in_as_the_3nm_line(tmp_path,
+                                                         monkeypatch) -> None:
+    """Both guards at once: areal geometry refused, and nothing pooled."""
+    gj(tmp_path, "submerged_lands_state_polygons.geojson", [ring(), ring()])
+    monkeypatch.setattr(ba, "LIMITS", tmp_path)
+    assert ba.limit_sets() == {}

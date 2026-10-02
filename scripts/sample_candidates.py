@@ -215,6 +215,26 @@ def main() -> int:
         "gate": gate,
         "reception_kept": list(keep),
         "bands_nm": {"near": NEAR, "mid": MID},
+        # WHICH LINES THE DISTANCE IS A DISTANCE TO. Added 2026-10-02.
+        #
+        # Every record carries nm_to_limit and a stratum derived from it, and
+        # until now nothing recorded what the limit set WAS. The 2026-09-25
+        # draw banded 147 chips against the 12, 24 and 200 nm lines; when the
+        # 3 nm line arrived on 2 October a stored distance and a recomputed
+        # one differed by up to 22.9 nm, and the only reason that was
+        # noticeable is that a test happened to compare them. A stored value
+        # whose meaning depends on an input nobody recorded is the same defect
+        # this project has caught twenty-three times in other places.
+        #
+        # The existing label-sample.json is NOT backfilled: it is a
+        # pre-registration artefact and editing one is not how it is amended.
+        # Its composition is recoverable -- REGISTERED_ANY in
+        # boundary_analysis.py is frozen to exactly the set it used.
+        "limit_composition": sorted(
+            n for n in sets if n != ANY_NAME),
+        "limit_segments": {n: len(sets[n].segments)
+                           for n in sorted(sets)},
+        "distance_measured_to": ANY_NAME,
         "what": ("a stratified sample of gated candidates for human reading. "
                  "Verdicts go to labels.jsonl; this file is the draw, and it "
                  "is reproducible from its seed."),

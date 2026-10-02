@@ -138,6 +138,27 @@ EEZ_NAME = "200 nm EEZ"
 ANY_NAME = "any limit"
 KNOWN_LIMITS = (SLA_NAME, TS_NAME, CZ_NAME, EEZ_NAME)
 
+# THE POOLED TEST'S COMPOSITION IS FROZEN HERE, 2026-10-02.
+#
+# `ANY_NAME` is the primary pooled outcome. It was pre-registered, run, and
+# its p-value read, with these three lines -- the 3 nm state line was not
+# available then. The 3 nm line arrived on 2 October, and adding it to the
+# pool would change the meaning of a number that has already been seen. No
+# matter how good the reason, that is the one move a reviewer can call
+# choosing the composition to fit the answer, so it is not made: the 3 nm
+# line is loaded, tested and reported AS ITS OWN LIMIT, which is what the
+# research question asks for anyway.
+#
+# Twice now a directory listing has been able to redefine this test -- once
+# with 483 polygons, once with a legitimate new line. So the composition is
+# declared in code and written into the artefact, never inferred from which
+# files happen to be in data/reference/limits.
+#
+# To change it: amend this tuple in its own commit, BEFORE the run, with the
+# reasoning in DECISIONS.md. An amendment to a pre-registration is a commit,
+# not an edit.
+REGISTERED_ANY = (TS_NAME, CZ_NAME, EEZ_NAME)
+
 # Distance-to-nearest-limit bands, in nautical miles. The first is the one
 # the question is about; the rest are the comparison it needs. Fixed here,
 # before the data is looked at.
@@ -289,14 +310,29 @@ def limit_sets(bbox=None, margin_deg: float = 2.0) -> dict[str, LineSet]:
         # limit still looked right.
         every: list = []
         for name, runs in groups.items():
-            if name in KNOWN_LIMITS:
+            if name in REGISTERED_ANY:
                 every.extend(runs)
+            elif name in KNOWN_LIMITS:
+                print(f"    {name}: tested on its own, and EXCLUDED from "
+                      f"'{ANY_NAME}' -- the pooled test's composition was "
+                      f"frozen before this line was available, and its "
+                      f"p-value has been read ({len(runs)} runs)")
             else:
                 print(f"    {name}: loaded under its own name but EXCLUDED "
                       f"from '{ANY_NAME}' -- not one of the four legal "
                       f"limits ({len(runs)} runs)")
         out[ANY_NAME] = LineSet(every, ANY_NAME)
     return out
+
+
+def any_limit_composition(sets: dict) -> list[str]:
+    """Which named limits actually went into the pooled test.
+
+    Written into the artefact so a reader never infers it from a directory
+    listing, and so a re-run can be told the pool changed instead of quietly
+    comparing two different tests.
+    """
+    return sorted(n for n in sets if n in REGISTERED_ANY)
 
 
 def _geom_kinds(path: Path) -> set[str]:
@@ -790,8 +826,18 @@ def main() -> int:
         # nothing in the file said they should have.
         "near_nm": args.near_nm,
         "shift_trials": args.shift_trials,
-        "note": ("The 3 nm state seaward line is not in NOAA's Maritime "
-                 "Limits product; these are the 12, 24 and 200 nm lines."),
+        # The pooled test's membership, recorded rather than inferable. See
+        # REGISTERED_ANY: the 3 nm line is tested on its own and deliberately
+        # not folded into a pool whose result was already read.
+        "any_limit_composition": any_limit_composition(sets),
+        "any_limit_registered": list(REGISTERED_ANY),
+        "limits_present": sorted(n for n in sets if n != ANY_NAME),
+        "note": ("'any limit' pools the 12, 24 and 200 nm lines, the "
+                 "composition it was pre-registered and first run with. The "
+                 "3 nm state seaward line (Submerged Lands Act, BOEM) is "
+                 "reported as its own limit where present, and is NOT in the "
+                 "pool: its data arrived after the pooled p-value had been "
+                 "read. See REGISTERED_ANY in boundary_analysis.py."),
         "limits": results,
     }, indent=1), encoding="utf-8")
     # The banded dump is a by-product of the default run. A variant run must
