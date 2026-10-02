@@ -3,6 +3,11 @@
 **Written 2026-10-02, BEFORE any masked rate, any null, or any statistic is
 computed.** Committed first; the analysis that follows cites this commit.
 
+> **AMENDED 2026-10-02 — see AMENDMENT 1 at the foot of this file.** The
+> independent channel is now MLAT and Mode S only; TIS-B is reported
+> separately and never pooled. The original definition below is left as
+> written.
+
 An analysis plan produced after the numbers is not an analysis plan. This
 project has held that line for the maritime domain — `review-session.json`
 was committed before the first chip was looked at — and holds it here.
@@ -202,3 +207,58 @@ resolves to a named owner at a home airport.
 *Window at the time of writing: 8 days, 1,635 polls, 1,545,237 position rows,
 `data/raw/aviation-adsbfi/`. The window will be longer when the analysis
 runs; the plan does not change because of that.*
+
+
+---
+
+# AMENDMENT 1 — 2026-10-02: TIS-B is not an independent observer
+
+**Changed.** The outcome above defines `ind` as `mlat`, `mode_s`,
+`tisb_icao`, `tisb_trackfile` and `tisb_other` pooled. **The primary measure
+is now `mlat` and `mode_s` only.** TIS-B is still computed and reported, in
+its own column, and is never pooled into the independent channel.
+
+**Why — the mechanism.** TIS-B is uplinked from ground radar *for the benefit
+of ADS-B-equipped aircraft in a service volume*. If its presence depends on a
+nearby cooperative client, TIS-B detections are correlated with the
+cooperative denominator they are divided by, and the ratio is partly a
+measure of itself.
+
+**Why — the test.** Cells binned by cooperative fix density:
+
+    coop fixes in cell   cells   with mlat   with tisb
+                  1-99     886       33.1%       28.4%
+               100-499   1,129       59.6%       51.0%
+             500-1,999     245       68.6%       72.2%
+           2,000-9,999      28       78.6%       89.3%
+
+TIS-B is the less likely of the two in sparse cells and the more likely by
+ten points in dense ones. A sensor that watches the sky does not behave that
+way; a service provisioned toward traffic does. MLAT has no such dependency —
+it is solved from arrival-time geometry across four or more receivers and is
+not provisioned toward anything.
+
+**Which way it cuts, which is the part that matters.** Against the
+hypothesis. The pooled series carried the large values and all of the
+apparent structure, including 0.0490 at 10 to 20 nm outside the boundary.
+MLAT alone is smooth, 2.4x across the whole span, and shows **no step at the
+boundary at all** — 0.0112 inside against 0.0100 outside. This amendment
+makes a positive result less likely, not more.
+
+**Timing.** Made before the difference in differences was computed, on a
+mechanism argument and a correlation test, never on an outcome.
+
+---
+
+# NOT AMENDED — 2026-10-02: the unit floor, and why it stays
+
+The unit above is (cell, altitude band, day) with at least 200 cooperative
+fixes. Measured: that keeps **607 of 34,312 units, holding 18.0% of the
+data**. Collapsing the day dimension keeps 78.6%. The floor was specified
+against a unit that had not been sized, and that was a mistake.
+
+**It is not changed.** Binned shares have already been seen, so any change to
+the unit is outcome-adjacent in a way the TIS-B amendment is not. Both are
+run instead: **the pre-registered unit as primary, the day-collapsed unit as
+a declared sensitivity.** If they disagree, that is reported — not resolved
+in favour of whichever looks better.
