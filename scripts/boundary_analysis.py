@@ -360,6 +360,45 @@ def _geom_kinds(path: Path) -> set[str]:
     return kinds
 
 
+def shift_verdict(p_shift: float, p_shift_c: float,
+                  alpha: float = 0.05) -> str:
+    """The sentence that says which of the two populations survived.
+
+    FOUR COMBINATIONS, and until 2026-10-02 this reported three.
+
+    `if p_shift > alpha` came first and swallowed two cases: neither
+    surviving, and the CONTROL surviving while the candidates did not. Both
+    printed "nothing here survives", which is true of the candidates and
+    silent about the control. The 3 nm state seaward line is the case that
+    exposed it -- candidates at shift p 0.83, control at 0.0100 -- and the
+    omitted fact is the most informative one on the line, because a control
+    that survives on the same bands and the same searched-water denominator
+    is what distinguishes a measured absence from an absence of power.
+
+    Extracted from the printing so the four branches can be tested; a
+    sentence that describes the wrong combination is the defect class this
+    project keeps finding, and it is not testable while it lives inside a
+    print.
+    """
+    cand, ctl = p_shift <= alpha, p_shift_c <= alpha
+    if cand and ctl:
+        return ("    Both survive the shift -- compare the two obs/exp "
+                "columns; only a DIFFERENCE is about reporting.")
+    if cand:
+        return ("    Candidates survive the shift and AIS-seen ships do "
+                "not. That is the shape a\n    real reporting effect "
+                "would have.")
+    if ctl:
+        return ("    The CONTROL survives the shift and the candidates do "
+                "not: reporting ships\n    concentrate on this line and "
+                "unexplained returns do not. That is the opposite\n    of a "
+                "hiding signal -- and it shows the test CAN measure a real "
+                "effect\n    here, so the candidates' null is a measured "
+                "absence, not a lack of power.")
+    return ("    Nothing here survives moving the pattern around: the "
+            "clustering explains it.")
+
+
 def _truthy(v) -> bool:
     """DBF numeric flags arrive as '1.00000000' or '0.00000000'."""
     try:
@@ -758,16 +797,7 @@ def main() -> int:
               f"{p_iid:.4f}   SHIFTED p = {p_shift:.4f}")
         print(f"    AIS-seen ships  chi2 {stat_c:8.1f}   scattered p = "
               f"{p_iid_c:.4f}   SHIFTED p = {p_shift_c:.4f}")
-        if p_shift > 0.05:
-            print("    Nothing here survives moving the pattern around: the "
-                  "clustering explains it.")
-        elif p_shift_c <= 0.05:
-            print("    Both survive the shift -- compare the two obs/exp "
-                  "columns; only a DIFFERENCE is about reporting.")
-        else:
-            print("    Candidates survive the shift and AIS-seen ships do "
-                  "not. That is the shape a\n    real reporting effect "
-                  "would have.")
+        print(shift_verdict(p_shift, p_shift_c))
 
         store.update({
             "searched_km2_by_band": {b: round(area_total.get(b, 0.0), 1)

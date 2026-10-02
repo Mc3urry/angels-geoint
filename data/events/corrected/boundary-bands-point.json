@@ -19,7 +19,23 @@
  "stride": 1,
  "near_nm": null,
  "shift_trials": 400,
- "note": "The 3 nm state seaward line is not in NOAA's Maritime Limits product; these are the 12, 24 and 200 nm lines.",
+ "any_limit_composition": [
+  "12 nm territorial sea",
+  "200 nm EEZ",
+  "24 nm contiguous zone"
+ ],
+ "any_limit_registered": [
+  "12 nm territorial sea",
+  "24 nm contiguous zone",
+  "200 nm EEZ"
+ ],
+ "limits_present": [
+  "12 nm territorial sea",
+  "200 nm EEZ",
+  "24 nm contiguous zone",
+  "3 nm state seaward limit"
+ ],
+ "note": "'any limit' pools the 12, 24 and 200 nm lines, the composition it was pre-registered and first run with. The 3 nm state seaward line (Submerged Lands Act, BOEM) is reported as its own limit where present, and is NOT in the pool: its data arrived after the pooled p-value had been read. See REGISTERED_ANY in boundary_analysis.py.",
  "limits": {
   "any limit": {
    "searched_km2_by_band": {
@@ -2263,6 +2279,355 @@
       "-10 to -5 nm": 4863.4,
       "-25 to -10 nm": 14793.4,
       "landward > 25 nm": 11897.4
+     }
+    }
+   }
+  },
+  "3 nm state seaward limit": {
+   "searched_km2_by_band": {
+    "0-1 nm": 17141.3,
+    "1-2 nm": 16844.7,
+    "2-5 nm": 34113.2,
+    "5-10 nm": 52926.9,
+    "10-25 nm": 155071.9,
+    "> 25 nm": 590455.6
+   },
+   "candidates_by_band": {
+    "0-1 nm": 15,
+    "1-2 nm": 33,
+    "2-5 nm": 48,
+    "5-10 nm": 68,
+    "10-25 nm": 154,
+    "> 25 nm": 354
+   },
+   "expected_by_band": {
+    "0-1 nm": 13.93,
+    "1-2 nm": 13.7,
+    "2-5 nm": 27.83,
+    "5-10 nm": 43.8,
+    "10-25 nm": 126.67,
+    "> 25 nm": 446.07
+   },
+   "ais_seen_by_band": {
+    "0-1 nm": 17,
+    "1-2 nm": 20,
+    "2-5 nm": 37,
+    "5-10 nm": 61,
+    "10-25 nm": 135,
+    "> 25 nm": 199
+   },
+   "ais_seen_expected": {
+    "0-1 nm": 9.31,
+    "1-2 nm": 9.13,
+    "2-5 nm": 18.58,
+    "5-10 nm": 28.94,
+    "10-25 nm": 84.64,
+    "> 25 nm": 318.41
+   },
+   "testable": true,
+   "untestable_because": null,
+   "chi2": 80.16,
+   "p_scattered": 0.0004997501249375312,
+   "p_shift": 0.7231920199501247,
+   "shift_trials_used": 400,
+   "chi2_control": 147.85,
+   "p_control_scattered": 0.0004997501249375312,
+   "p_control_shift": 0.012468827930174564,
+   "by_pass": {
+    "2024-04-10": {
+     "candidates": {
+      "0-1 nm": 3,
+      "10-25 nm": 51,
+      "> 25 nm": 99,
+      "2-5 nm": 6,
+      "1-2 nm": 5,
+      "5-10 nm": 15
+     },
+     "ais_seen": {
+      "> 25 nm": 23,
+      "10-25 nm": 21,
+      "1-2 nm": 3,
+      "2-5 nm": 4,
+      "5-10 nm": 8,
+      "0-1 nm": 1
+     },
+     "searched_km2": {
+      "10-25 nm": 21278.5,
+      "> 25 nm": 59794.6,
+      "5-10 nm": 7632.1,
+      "2-5 nm": 4658.4,
+      "1-2 nm": 2279.5,
+      "0-1 nm": 2313.9
+     }
+    },
+    "2024-05-04": {
+     "candidates": {
+      "10-25 nm": 3,
+      "> 25 nm": 7,
+      "5-10 nm": 1
+     },
+     "ais_seen": {
+      "> 25 nm": 13,
+      "10-25 nm": 10,
+      "2-5 nm": 3,
+      "5-10 nm": 5,
+      "1-2 nm": 2,
+      "0-1 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 44892.8,
+      "10-25 nm": 9318.9,
+      "5-10 nm": 3194.6,
+      "2-5 nm": 1912.1,
+      "0-1 nm": 829.2,
+      "1-2 nm": 823.0
+     }
+    },
+    "2024-05-28": {
+     "candidates": {
+      "5-10 nm": 9,
+      "2-5 nm": 3,
+      "10-25 nm": 11,
+      "0-1 nm": 2,
+      "1-2 nm": 4,
+      "> 25 nm": 39
+     },
+     "ais_seen": {
+      "> 25 nm": 9,
+      "10-25 nm": 10,
+      "2-5 nm": 2,
+      "0-1 nm": 5,
+      "5-10 nm": 9,
+      "1-2 nm": 5
+     },
+     "searched_km2": {
+      "10-25 nm": 10955.7,
+      "0-1 nm": 1348.4,
+      "> 25 nm": 39016.6,
+      "5-10 nm": 3942.0,
+      "2-5 nm": 2637.5,
+      "1-2 nm": 1260.7
+     }
+    },
+    "2024-06-21": {
+     "candidates": {
+      "2-5 nm": 2,
+      "10-25 nm": 7,
+      "> 25 nm": 10,
+      "0-1 nm": 1,
+      "5-10 nm": 2,
+      "1-2 nm": 1
+     },
+     "ais_seen": {
+      "> 25 nm": 14,
+      "10-25 nm": 10,
+      "5-10 nm": 9,
+      "0-1 nm": 1,
+      "2-5 nm": 3
+     },
+     "searched_km2": {
+      "> 25 nm": 50879.1,
+      "2-5 nm": 2230.0,
+      "10-25 nm": 9919.7,
+      "5-10 nm": 3201.6,
+      "0-1 nm": 1247.9,
+      "1-2 nm": 1181.4
+     }
+    },
+    "2024-07-15": {
+     "candidates": {
+      "10-25 nm": 15,
+      "1-2 nm": 7,
+      "2-5 nm": 3,
+      "5-10 nm": 9,
+      "0-1 nm": 2,
+      "> 25 nm": 13
+     },
+     "ais_seen": {
+      "> 25 nm": 20,
+      "1-2 nm": 7,
+      "2-5 nm": 6,
+      "10-25 nm": 21,
+      "5-10 nm": 6,
+      "0-1 nm": 3
+     },
+     "searched_km2": {
+      "> 25 nm": 58966.8,
+      "10-25 nm": 17458.9,
+      "5-10 nm": 5913.3,
+      "2-5 nm": 3926.8,
+      "0-1 nm": 1956.3,
+      "1-2 nm": 1896.6
+     }
+    },
+    "2024-08-08": {
+     "candidates": {
+      "10-25 nm": 4,
+      "> 25 nm": 4,
+      "2-5 nm": 4,
+      "5-10 nm": 3,
+      "1-2 nm": 1
+     },
+     "ais_seen": {
+      "> 25 nm": 22,
+      "5-10 nm": 3,
+      "2-5 nm": 1,
+      "0-1 nm": 1,
+      "10-25 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 45264.8,
+      "10-25 nm": 9428.9,
+      "5-10 nm": 3199.0,
+      "2-5 nm": 2114.8,
+      "1-2 nm": 1074.6,
+      "0-1 nm": 1122.0
+     }
+    },
+    "2024-09-01": {
+     "candidates": {
+      "10-25 nm": 10,
+      "> 25 nm": 27,
+      "1-2 nm": 5,
+      "2-5 nm": 7,
+      "5-10 nm": 7,
+      "0-1 nm": 1
+     },
+     "ais_seen": {
+      "> 25 nm": 20,
+      "10-25 nm": 5,
+      "5-10 nm": 4,
+      "2-5 nm": 8,
+      "0-1 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 48429.0,
+      "10-25 nm": 10649.1,
+      "5-10 nm": 3387.3,
+      "2-5 nm": 2266.4,
+      "1-2 nm": 1132.2,
+      "0-1 nm": 1159.8
+     }
+    },
+    "2024-09-25": {
+     "candidates": {
+      "2-5 nm": 2,
+      "> 25 nm": 32,
+      "1-2 nm": 1
+     },
+     "ais_seen": {
+      "10-25 nm": 15,
+      "> 25 nm": 26,
+      "5-10 nm": 2,
+      "2-5 nm": 2,
+      "0-1 nm": 1
+     },
+     "searched_km2": {
+      "10-25 nm": 14135.5,
+      "5-10 nm": 4830.5,
+      "2-5 nm": 2783.7,
+      "> 25 nm": 49430.4,
+      "1-2 nm": 1312.5,
+      "0-1 nm": 1308.7
+     }
+    },
+    "2024-10-19": {
+     "candidates": {
+      "10-25 nm": 18,
+      "2-5 nm": 10,
+      "5-10 nm": 5,
+      "> 25 nm": 58,
+      "1-2 nm": 2
+     },
+     "ais_seen": {
+      "> 25 nm": 14,
+      "10-25 nm": 8,
+      "5-10 nm": 6,
+      "2-5 nm": 2,
+      "0-1 nm": 1,
+      "1-2 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 44660.0,
+      "10-25 nm": 9649.6,
+      "5-10 nm": 2936.8,
+      "2-5 nm": 1833.5,
+      "1-2 nm": 907.0,
+      "0-1 nm": 909.1
+     }
+    },
+    "2024-11-12": {
+     "candidates": {
+      "10-25 nm": 5,
+      "> 25 nm": 7,
+      "0-1 nm": 1,
+      "1-2 nm": 1,
+      "2-5 nm": 1
+     },
+     "ais_seen": {
+      "> 25 nm": 11,
+      "10-25 nm": 5,
+      "5-10 nm": 2,
+      "2-5 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 44568.1,
+      "10-25 nm": 11212.2,
+      "5-10 nm": 3909.8,
+      "2-5 nm": 2600.0,
+      "1-2 nm": 1311.3,
+      "0-1 nm": 1321.5
+     }
+    },
+    "2024-12-06": {
+     "candidates": {
+      "2-5 nm": 3,
+      "1-2 nm": 2,
+      "10-25 nm": 2,
+      "0-1 nm": 2,
+      "> 25 nm": 15,
+      "5-10 nm": 2
+     },
+     "ais_seen": {
+      "> 25 nm": 13,
+      "10-25 nm": 7,
+      "2-5 nm": 1,
+      "5-10 nm": 3,
+      "0-1 nm": 2,
+      "1-2 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 46611.0,
+      "10-25 nm": 11769.3,
+      "5-10 nm": 3595.7,
+      "2-5 nm": 2607.4,
+      "1-2 nm": 1405.4,
+      "0-1 nm": 1384.6
+     }
+    },
+    "2024-12-30": {
+     "candidates": {
+      "2-5 nm": 7,
+      "> 25 nm": 43,
+      "10-25 nm": 28,
+      "1-2 nm": 4,
+      "0-1 nm": 3,
+      "5-10 nm": 15
+     },
+     "ais_seen": {
+      "> 25 nm": 14,
+      "10-25 nm": 22,
+      "5-10 nm": 4,
+      "2-5 nm": 4,
+      "1-2 nm": 1
+     },
+     "searched_km2": {
+      "> 25 nm": 57942.4,
+      "10-25 nm": 19295.5,
+      "2-5 nm": 4542.6,
+      "5-10 nm": 7184.3,
+      "1-2 nm": 2260.5,
+      "0-1 nm": 2239.8
      }
     }
    }
