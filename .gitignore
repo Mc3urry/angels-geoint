@@ -71,6 +71,24 @@ data/**
 !data/events/review-session-*.json
 !data/events/labels-review-*.jsonl
 
+# The airspace geometry the aviation result is about.
+#
+# data/reference is otherwise ignored because it is fetchable, and NOAA's
+# maritime limits are a stable versioned product. FAA NASR is NOT: it is
+# reissued on a 28-day cycle. This file is a snapshot carrying its own
+# EFF_DATE, and a re-fetch next month moves the 30 nm veil union silently
+# underneath a published result -- the same reason boundary-bands.json is
+# tracked. The pre-registration says the coordinates are recorded in the
+# artefact; recorded means committed.
+# Re-include the path down to it, re-exclude each level's contents, then name
+# the one file -- otherwise this admits the 3 MB SLA geojson and the NOAA
+# shapefile too. Same three-step pattern as corrected/ above.
+!data/reference/
+data/reference/*
+!data/reference/airspace/
+data/reference/airspace/*
+!data/reference/airspace/appendix-d-airports.json
+
 # The corrected nulls. See the EXCEPTION note above: a multi-hour run, not a
 # seconds-long rebuild.
 # Three lines, in this order, and the order is the whole of it: git will not
