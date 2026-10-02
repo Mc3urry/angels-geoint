@@ -14,9 +14,43 @@ miles from the coastline on a map": they are measured from the official
 baseline, which follows the low-water line except across bays and river
 mouths, where closing lines cut straight across. In the Chesapeake and
 Delaware that difference is tens of kilometres -- exactly the area this
-study is about. So the lines come from NOAA's Office of Coast Survey, which
-publishes the ones the United States actually asserts, rather than being
-buffered out of a coastline by this project.
+study is about. So the lines come from the agencies that publish the ones
+the United States actually asserts, rather than being buffered out of a
+coastline by this project.
+
+CORRECTION, 2026-09-30
+
+This docstring used to say all four lines come from NOAA's Office of Coast
+Survey. Three do. The 3 nm line does not, and NOAA says so itself: the US
+Maritime Limits and Boundaries FAQ states that people looking for a 3 nm
+line "are actually looking for the Submerged Lands Act federal/state
+boundary provided by BOEM". So the two automated SLA fetches in this script
+were not broken and did not need better error handling -- they were pointed
+at services that have never existed. Both guessed at an ArcGIS host by
+pattern and returned HTTP 400/404 for the honest reason that there is
+nothing there.
+
+The real service is BOEM's, verified live on 2026-09-30:
+
+    gis.boem.gov/server/rest/services/BOEM_BSEE/MMC_Layers/FeatureServer/8
+    "Submerged Lands Act Boundary", esriGeometryPolyline, NAD83 (4269)
+
+so the 3 nm line is an automated fetch after all, not the manual download
+this file has claimed since 25 September.
+
+TWO THINGS THE FETCH MUST REPORT, NOT ASSUME
+
+BOEM's layer is a boundary layer, not a 3-nm-line layer: `BDRY_NAME_TEXT`
+distinguishes the segments, and nothing downstream identifies a line by
+anything but its FILENAME. A file called submerged_lands_act_3nm.geojson
+whose contents are partly something else is exactly the failure this project
+keeps finding, so the fetch prints the distinct boundary names it actually
+received and the feature count, and refuses a response that is an ArcGIS
+error object or has no features.
+
+ArcGIS also truncates silently at maxRecordCount and says so only in
+`exceededTransferLimit`. That flag is checked and reported, because a
+partial line read as a whole line moves every band assignment.
 
 IF EVERY SOURCE FAILS
 
@@ -64,17 +98,60 @@ SOURCES = [
      "marinecadastre_limits.zip"),
 ]
 
+# Verified live 2026-09-30. The two entries that used to be here --
+# services2.arcgis.com/.../SubmergedLandsActBoundary and
+# marinecadastre.gov/downloads/data/mc/SubmergedLandsActBoundary.zip -- were
+# guessed from the pattern of the NOAA sources above and never existed; they
+# are recorded in the docstring rather than silently replaced.
 SLA_SOURCES = [
-    ("sla-3nm-geojson",
-     "https://services2.arcgis.com/C8EMgrsFcRFL6LrL/ArcGIS/rest/services/"
-     "SubmergedLandsActBoundary/FeatureServer/0/query"
-     "?where=1%3D1&outFields=*&outSR=4326&f=geojson",
+    # BOEM is the publisher of record. Polyline, the line itself.
+    ("boem-sla-geojson",
+     "https://gis.boem.gov/server/rest/services/BOEM_BSEE/MMC_Layers/"
+     "FeatureServer/8/query"
+     "?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
      "submerged_lands_act_3nm.geojson"),
-    ("sla-3nm-zip",
-     "https://marinecadastre.gov/downloads/data/mc/"
-     "SubmergedLandsActBoundary.zip",
-     "submerged_lands_act_3nm.zip"),
+    # Fallback: NOAA's state-submerged-lands POLYGONS. The seaward edge of
+    # the polygon is the same line for the Atlantic states in this AOI, but
+    # it is a different geometry type and has to be treated as such, so it
+    # gets a filename that does not claim to be the line.
+    ("noaa-state-submerged-lands-polygons",
+     "https://coast.noaa.gov/arcgismc/rest/services/Hosted/"
+     "USStateSubmergedLands/FeatureServer/0/query"
+     "?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
+     "submerged_lands_state_polygons.geojson"),
 ]
+
+
+def describe_sla(path: Path) -> tuple[bool, str]:
+    """Say what actually arrived. A 200 with an error object in it is still
+    an error, and a truncated line is not the line."""
+    import json
+
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:                          # noqa: BLE001
+        return False, f"not JSON: {type(exc).__name__}"
+
+    if "error" in doc:
+        e = doc["error"]
+        return False, f"ArcGIS error {e.get('code')}: {e.get('message')}"
+
+    feats = doc.get("features") or []
+    if not feats:
+        return False, "0 features -- valid GeoJSON of nothing"
+
+    names = sorted({str(f.get("properties", {}).get("BDRY_NAME_TEXT"))
+                    for f in feats})
+    kinds = sorted({(f.get("geometry") or {}).get("type") for f in feats})
+    msg = (f"{len(feats)} features, geometry {'/'.join(map(str, kinds))}, "
+           f"BDRY_NAME_TEXT: {', '.join(names[:6])}"
+           + (f" (+{len(names) - 6} more)" if len(names) > 6 else ""))
+    if doc.get("exceededTransferLimit") or doc.get("properties", {}).get(
+            "exceededTransferLimit"):
+        return False, ("TRUNCATED by maxRecordCount -- " + msg
+                       + ". Re-fetch with paging; a partial line read as a "
+                         "whole line moves every band assignment.")
+    return True, msg
 
 MANUAL = """
   MANUAL DOWNLOAD
@@ -91,9 +168,21 @@ MANUAL = """
   put each limit in its own file named for it (for example
   territorial_sea_12nm.geojson).
 
-  THE 3 NM LINE IS A SECOND DOWNLOAD. Search "Submerged Lands Act Boundary"
-  on marinecadastre.gov and unzip it into the same folder, with a filename
-  containing "submerged" or "3nm" so the analysis can name it.
+  THE 3 NM LINE IS A SECOND DOWNLOAD, AND NOT FROM NOAA. It is the
+  Submerged Lands Act boundary, published by BOEM; NOAA's own FAQ says so.
+  Open
+
+      https://gis.boem.gov/server/rest/services/BOEM_BSEE/MMC_Layers/FeatureServer/8
+
+  use the Query form with where=1=1, outFields=*, outSR=4326, format
+  geoJSON, and save the result into the same folder as
+
+      submerged_lands_act_3nm.geojson
+
+  Check before you trust it: the layer is a boundary layer, so read the
+  distinct BDRY_NAME_TEXT values and confirm they are the seaward line and
+  not the lateral state boundaries. If the response carries
+  exceededTransferLimit, it is truncated and has to be paged.
 """
 
 
@@ -213,8 +302,18 @@ def main() -> int:
         print(f"\n  {name}")
         ok, msg = download(url, DEST / filename)
         print(f"\r    {'OK  ' if ok else 'FAIL'}  {msg}" + " " * 20)
-        if ok and unpack(DEST / filename):
-            break
+        if not ok:
+            continue
+        files = unpack(DEST / filename)
+        if not files:
+            continue
+        if filename.endswith(".geojson"):
+            good, what = describe_sla(DEST / filename)
+            print(f"    {'OK  ' if good else 'FAIL'}  {what}")
+            if not good:
+                (DEST / filename).unlink(missing_ok=True)
+                continue
+        break
     else:
         print("\n  The 3 nm line could not be fetched. The analysis will "
               "run without it")
