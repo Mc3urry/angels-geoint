@@ -318,35 +318,77 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-Sixteen faults found here share one shape: a routine reporting an outcome its
-own execution did not entitle it to report, with nothing in the output to say
-so. None was an arithmetic error — every quantity computed correctly, every
-time. What failed was what the programs said about what they had done.
+**Twenty-seven faults** found here share one shape: a routine reporting an
+outcome its own execution did not entitle it to report, with nothing in the
+output to say so. Almost none was an arithmetic error — the quantities
+computed correctly. What failed was what the programs said about what they
+had done.
 
-One of them produced a published false finding, which was retracted rather
-than deleted. The catalogue, the six techniques that actually caught them, and
-the seven rules adopted in response are in
+One produced a published false finding, which was retracted rather than
+deleted. One was a probe that answered "0 aircraft" every time it ran because
+it read the wrong JSON key, and the *conclusion* it produced stood in the
+plan for a week after the bug itself was fixed and written up — fixing an
+instrument does not retract the readings it took. One was a `defaultdict` that
+reported 122 aircraft while holding nothing, because key creation and value
+insertion are separate steps. One was a dict comprehension that dropped a
+dimension and flipped a result from refuted to not refuted, in the direction
+of the hypothesis, on a control group of four.
+
+The catalogue, the techniques that actually caught them, and the rules
+adopted in response are in
 [`docs/reporting-defects.md`](docs/reporting-defects.md). It is the most
-reusable thing here, and the reason the headline result survived three
-revisions of its own input.
+reusable thing here, and the reason both headline results survived their own
+inputs changing underneath them.
 
-## The domains are not equally equipped
+## The air domain, and why its null is worth more
 
 Sea has both halves: AIS self-reports, Sentinel-1 observes without consent.
 Land has only the cooperative half built. **Air was recorded for a week as
 structurally incapable of the comparison** — until the probe that established
 that was found to have been reading the wrong JSON key and answering
-"0 aircraft" every time it ran.
-
-Eight days of adsb.fi now show **19,604 of 1,545,237 position rows (1.27%)
-carrying a position the aircraft did not report** — MLAT solved from receiver
-timing geometry, TIS-B uplinked from ground radar. The air domain does have an
-independent channel. What it does not yet have is a measurement of that
-channel's own coverage, which is the aviation analogue of searched water and
-the thing that has to exist before any aviation absence means anything.
-
-The finding, its retraction and the measurement are in
+"0 aircraft" every time it ran. The retraction and the measurement that
+overturned it are in
 [`docs/aviation-asymmetry.md`](docs/aviation-asymmetry.md).
+
+The maritime null has an escape hatch: **nothing obliges a vessel to report
+differently at 12 or 24 nm**, so that test may simply have had no governance
+to detect. Aviation closes it. Under **14 CFR 91.225(d)** ADS-B Out is
+required within 30 nm of an appendix D airport from the surface to 10,000 ft
+MSL, and at and above 10,000 ft everywhere in the 48 states. So below
+10,000 ft the obligation *switches off* at that boundary, and above it the
+obligation applies on both sides — a treatment and a control over the same
+receivers, the same distance gradient and the same days.
+
+| | inside | outside | step |
+|---|---:|---:|---:|
+| below 10,000 ft — obligation changes | 0.00241 | 0.00206 | −0.00035 |
+| at/above 10,000 ft — control | 0.00157 | 0.00102 | −0.00055 |
+| **difference in differences** | | | **+0.00020** |
+
+**Refuted.** A displaced boundary reproduces it — shift null **359 of 400,
+p = 0.8978** — and both steps are negative anyway, so the positive difference
+comes only from the control falling harder. Nothing concentrates outside the
+veil. The day-collapsed sensitivity gives −0.00051.
+
+The scattered null **also** failed to reject (1,608 of 2,000, p = 0.8041),
+which was not predicted. Unlike the maritime band counts, this statistic is a
+difference of differences, so scattering drives both steps toward zero and
+the null is centred there — the observed value is smaller than random
+assignment produces 80% of the time. A stronger statement of nullity than the
+shift null alone.
+
+Three things that keep this provisional, stated rather than buried: the
+independent channel is **MLAT and Mode S only** — TIS-B is excluded because
+its presence rises with cooperative density faster than MLAT's, so it
+correlates with the denominator ([AMENDMENT 1](docs/phase-f-prereg.md)); the
+coverage mask excludes **555 of 2,296 cells** with no evidence MLAT can see
+them, which is the aviation unheard water; and the window is **eight days and
+7,756 independent fixes**, which is thin. The collectors keep running.
+
+The analysis plan was committed before any statistic existed, with its prior
+exposure declared, in
+[`docs/phase-f-prereg.md`](docs/phase-f-prereg.md). Reproduce with
+`python scripts/air_discrepancy.py`.
 
 ## Scope
 
