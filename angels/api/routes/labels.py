@@ -87,6 +87,22 @@ SESSION = EVENTS / "review-session.json"
 # is a rate of easy cases.
 VERDICTS = ("vessel", "fixed", "clutter", "ambiguous")
 
+# A VERDICT WITHOUT A NOTE CANNOT BE ADJUDICATED. Added 2026-10-02.
+#
+# Round 1 of the blind second read produced 14 disagreements out of 40 and
+# **zero of the 40 carried a note**, so not one of them could be settled: two
+# readers disagreeing with no stated reason is a number, not an argument. The
+# round that measured kappa 0.467 therefore cannot say what the 0.533 was.
+#
+# Enforced here rather than in the browser, because a rule that lives only in
+# the client is a suggestion -- any other caller, including a replay script or
+# a second reader on a different page, writes whatever it likes.
+#
+# `ambiguous` is the verdict most in need of one and the easiest to click
+# through, so it gets the longer floor.
+NOTE_MIN = 8
+NOTE_MIN_AMBIGUOUS = 15
+
 # Interleave the strata. Reading all the near-line candidates in a row, then
 # all the offshore ones, puts fatigue and stratum on the same axis -- and
 # fatigue would then look like a difference between bands.
@@ -253,14 +269,38 @@ class Verdict(BaseModel):
     lat: float | None = None
 
 
+def note_required(verdict: str, note: str | None) -> str | None:
+    """Why this verdict may not be written, or None if it may.
+
+    A separate function because the message is the whole point: "note
+    required" sends a reader back to the chip with nothing to do differently.
+    """
+    n = (note or "").strip()
+    floor = NOTE_MIN_AMBIGUOUS if verdict == "ambiguous" else NOTE_MIN
+    if not n:
+        return (f"'{verdict}' needs a note. Round 1 of the blind read "
+                f"produced 14 disagreements out of 40 and none of the 40 "
+                f"carried a note, so not one could be adjudicated. Say what "
+                f"you saw: shape, brightness, surroundings.")
+    if len(n) < floor:
+        return (f"'{verdict}' needs at least {floor} characters of note and "
+                f"got {len(n)}. Describe the thing, not the decision -- "
+                f"'compact bright point, dark water around it' can be argued "
+                f"with later; 'looks right' cannot.")
+    return None
+
+
 @router.post("")
 def label(v: Verdict) -> dict:
     if v.verdict not in VERDICTS:
         raise HTTPException(400, f"verdict must be one of {VERDICTS}")
+    why = note_required(v.verdict, v.note)
+    if why:
+        raise HTTPException(400, why)
     rec = {
         "key": v.key,
         "verdict": v.verdict,
-        "note": (v.note or "").strip() or None,
+        "note": (v.note or "").strip(),
         "lon": v.lon, "lat": v.lat,
         "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }

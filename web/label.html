@@ -39,6 +39,14 @@
   textarea { width:100%; min-height:54px; font:11.5px var(--mono);
     border:1px solid var(--rule); border-radius:3px; padding:7px; resize:vertical; }
   .hint { font:10px/1.5 var(--mono); color:var(--ink-3); }
+  /* A refusal has to be impossible to click past. Red, in the reading
+     column, under the box the reader must go back to. */
+  .warn { display:none; margin-top:7px; padding:8px 10px; border-radius:3px;
+    font:11px/1.5 var(--mono); color:#7c1d1d; background:#fdecec;
+    border:1px solid #f0b4b4; }
+  @media (prefers-color-scheme:dark) {
+    .warn { color:#ffd7d7; background:#2a1414; border-color:#6b2a2a; }
+  }
   .done { padding:24px; font:13px var(--mono); color:var(--ink-2); }
   .blind { font:10px/1.5 system-ui,sans-serif; color:var(--ink-3);
     border-top:1px solid var(--rule); padding-top:10px; }
@@ -67,10 +75,14 @@
       <button class="v-ambiguous" data-v="ambiguous"><kbd>4</kbd> ambiguous</button>
     </div>
 
-    <textarea id="note" placeholder="note (optional) — Enter when done, then 1–4"></textarea>
+    <textarea id="note" placeholder="what you SEE — shape, brightness, what is around it. Enter when done, then 1–4"></textarea>
+    <div id="warn" class="warn"></div>
     <div class="hint">Red ring = the candidate, 300 m across. A hull is a
       compact bright head; a wind streak is diffuse; a wake has no bright head.
-      <br><br>Keys 1–4. <b>u</b> undoes the last verdict.</div>
+      <br><br>Keys 1–4. <b>u</b> undoes the last verdict.
+      <br><br><b>A note is required.</b> Round 1 of the blind read produced
+      14 disagreements out of 40 and none of the 40 carried a note, so not
+      one could be settled. Describe the thing, not the decision.</div>
 
     <div class="blind">You are not shown how far this sits from a maritime
       limit, which stratum it came from, or the chipper's own guess. The
@@ -114,24 +126,51 @@ function show() {
     fact("AIS here", it.reception) +
     fact("vessels in cell", it.ais_cell_vessels);
   $("note").value = "";
+  warn("");
   $("count").textContent =
     `${labelled} of ${total} read · ${total - labelled} left`;
   $("bar").style.width = `${total ? (100 * labelled / total).toFixed(1) : 0}%`;
 }
 
+// THE RESPONSE IS CHECKED. Until 2026-10-02 this did `await fetch(...)` and
+// then advanced unconditionally, so any rejection -- a 400, a 500, a closed
+// session -- moved the reader to the next chip with the counter incremented
+// and nothing written. A labelling surface that reports success whatever the
+// server said is this project's defect class pointed straight at the one
+// artefact that cannot be recomputed: human judgement.
 async function send(verdict) {
   const it = items[at];
   if (!it) return;
   const body = { key: it.key, verdict, note: $("note").value,
                  lon: it.lon, lat: it.lat };
-  await fetch(`${API}/labels`, {
-    method: "POST", headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(`${API}/labels`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    return warn(`Not saved — the API is unreachable (${e.message}). Nothing
+                 was recorded for this chip.`);
+  }
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try { msg = (await res.json()).detail || msg; } catch (e) { /* as-is */ }
+    return warn(msg);
+  }
+  warn("");
   last = { ...body };
   labelled += 1; at += 1;
   show();
 }
+
+function warn(msg) {
+  const w = $("warn");
+  w.textContent = msg;
+  w.style.display = msg ? "block" : "none";
+  if (msg) $("note").focus();
+}
+
 
 // Undo re-queues the last one at the front rather than deleting a line from
 // the log. The log is append-only on purpose: a verdict that was changed is

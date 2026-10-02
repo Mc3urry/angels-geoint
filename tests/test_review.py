@@ -14,7 +14,14 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.review_agreement import kappa, last_per_key
+from scripts.review_agreement import kappa, last_per_key# The API refuses a verdict with no note (2026-10-02): round 1 of the blind
+# read produced 14 disagreements out of 40 and none carried one, so none
+# could be adjudicated. These tests are about session routing, so they
+# satisfy the precondition rather than being exempted from it.
+NOTE = "compact bright return, dark water around it"
+
+
+
 
 
 @pytest.fixture
@@ -46,7 +53,7 @@ def test_a_verdict_never_reaches_the_first_readers_file(api):
     """The property everything else rests on."""
     client, ev = api
     before = (ev / "labels.jsonl").read_bytes()
-    r = client.post("/labels", json={"key": "s/c0.png", "verdict": "clutter"})
+    r = client.post("/labels", json={"key": "s/c0.png", "verdict": "clutter", "note": NOTE})
     assert r.status_code == 200, r.text
     assert r.json()["written_to"] == "labels-review-second.jsonl"
     assert (ev / "labels.jsonl").read_bytes() == before, \
@@ -69,14 +76,14 @@ def test_the_queue_does_not_carry_the_first_verdict(api):
 
 def test_a_chip_outside_the_session_is_refused(api):
     client, _ = api
-    r = client.post("/labels", json={"key": "s/c5.png", "verdict": "vessel"})
+    r = client.post("/labels", json={"key": "s/c5.png", "verdict": "vessel", "note": NOTE})
     assert r.status_code == 400
 
 
 def test_strata_are_withheld_until_the_session_is_done(api):
     """Progress keyed on the distance band is the hypothesis, mid-read."""
     client, _ = api
-    client.post("/labels", json={"key": "s/c0.png", "verdict": "vessel"})
+    client.post("/labels", json={"key": "s/c0.png", "verdict": "vessel", "note": NOTE})
     p = client.get("/labels/progress").json()
     assert p["by_stratum"] is None
     # The key names the withholding; the value says until when. Asserting on
@@ -93,7 +100,7 @@ def test_strata_return_once_the_session_is_complete(api):
     reaching the person making the judgements."""
     client, _ = api
     for k in ("s/c0.png", "s/c1.png", "s/c2.png"):
-        client.post("/labels", json={"key": k, "verdict": "vessel"})
+        client.post("/labels", json={"key": k, "verdict": "vessel", "note": NOTE})
     p = client.get("/labels/progress").json()
     assert p["by_stratum"] is not None
     assert "by_stratum_withheld" not in p
@@ -101,7 +108,7 @@ def test_strata_return_once_the_session_is_complete(api):
 
 def test_the_queue_skips_what_the_reviewer_read_not_what_the_first_read(api):
     client, _ = api
-    client.post("/labels", json={"key": "s/c1.png", "verdict": "clutter"})
+    client.post("/labels", json={"key": "s/c1.png", "verdict": "clutter", "note": NOTE})
     q = client.get("/labels/queue").json()
     assert {i["key"] for i in q["items"]} == {"s/c0.png", "s/c2.png"}
 
