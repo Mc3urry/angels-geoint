@@ -110,16 +110,34 @@ SLA_SOURCES = [
      "FeatureServer/8/query"
      "?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
      "submerged_lands_act_3nm.geojson"),
-    # Fallback: NOAA's state-submerged-lands POLYGONS. The seaward edge of
-    # the polygon is the same line for the Atlantic states in this AOI, but
-    # it is a different geometry type and has to be treated as such, so it
-    # gets a filename that does not claim to be the line.
-    ("noaa-state-submerged-lands-polygons",
-     "https://coast.noaa.gov/arcgismc/rest/services/Hosted/"
-     "USStateSubmergedLands/FeatureServer/0/query"
-     "?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&f=geojson",
-     "submerged_lands_state_polygons.geojson"),
+    # THERE IS DELIBERATELY NO POLYGON FALLBACK. See the note below.
 ]
+
+# WHY NOAA's USStateSubmergedLands IS NOT A FALLBACK (2026-10-02)
+#
+# It was one, for about four hours, and it did real damage. BOEM answered
+# HTTP 500, the fallback fetched 153 MB of 483 state-submerged-lands
+# POLYGONS, and every downstream check passed it:
+#
+#   - describe_sla said OK. It checked that the JSON parsed, that there was
+#     no error object, that features existed and that nothing was truncated.
+#     It printed "BDRY_NAME_TEXT: None" -- the field does not exist on these
+#     features -- and still said OK.
+#   - the file was named submerged_lands_state_polygons.geojson precisely so
+#     it would not claim to be the line. But boundary_analysis.limit_sets
+#     labels any file whose stem contains "submerged", "3nm" or "sla" as the
+#     3 nm limit, and read_lines turns polygon rings into runs.
+#   - so 483 polygons tiling the whole US coast -- lateral boundaries,
+#     state-to-state divisions, every ring segment -- became "the 3 nm state
+#     seaward limit", and were folded into "any limit".
+#
+# The result: 548 detections moved into the within-2 nm band, 730 left the
+# beyond-10 nm band, and the headline observed/expected ratio went from
+# 0.396 to 5.938. The sign flipped and it flipped TOWARD the hypothesis.
+#
+# A polygon dataset cannot substitute for a line dataset in this pipeline,
+# so it is not offered as one. If BOEM is down, the 3 nm line is missing,
+# the analysis says it is missing, and that is the correct outcome.
 
 
 def describe_sla(path: Path) -> tuple[bool, str]:
@@ -142,10 +160,25 @@ def describe_sla(path: Path) -> tuple[bool, str]:
 
     names = sorted({str(f.get("properties", {}).get("BDRY_NAME_TEXT"))
                     for f in feats})
-    kinds = sorted({(f.get("geometry") or {}).get("type") for f in feats})
-    msg = (f"{len(feats)} features, geometry {'/'.join(map(str, kinds))}, "
+    kinds = sorted({str((f.get("geometry") or {}).get("type")) for f in feats})
+    msg = (f"{len(feats)} features, geometry {'/'.join(kinds)}, "
            f"BDRY_NAME_TEXT: {', '.join(names[:6])}"
            + (f" (+{len(names) - 6} more)" if len(names) > 6 else ""))
+
+    # A LEGAL LIMIT IS A LINE. Added 2026-10-02 after this function returned
+    # OK for 483 polygons; see the note on SLA_SOURCES above.
+    areal = [k for k in kinds if "Polygon" in k]
+    if areal:
+        return False, (f"{'/'.join(areal)}, not a line -- {msg}. Polygon "
+                       f"rings read as a limit put an edge beside every "
+                       f"point in the study area.")
+
+    # The identifying field is what tells the seaward line from the lateral
+    # state boundaries. Absent means this is not the layer it was asked for,
+    # whatever the filename says.
+    if names == ["None"]:
+        return False, (f"no BDRY_NAME_TEXT on any feature -- {msg}. Nothing "
+                       f"downstream can tell which boundary this is.")
     if doc.get("exceededTransferLimit") or doc.get("properties", {}).get(
             "exceededTransferLimit"):
         return False, ("TRUNCATED by maxRecordCount -- " + msg

@@ -136,6 +136,7 @@ TS_NAME = "12 nm territorial sea"
 CZ_NAME = "24 nm contiguous zone"
 EEZ_NAME = "200 nm EEZ"
 ANY_NAME = "any limit"
+KNOWN_LIMITS = (SLA_NAME, TS_NAME, CZ_NAME, EEZ_NAME)
 
 # Distance-to-nearest-limit bands, in nautical miles. The first is the one
 # the question is about; the rest are the comparison it needs. Fixed here,
@@ -232,6 +233,7 @@ def limit_sets(bbox=None, margin_deg: float = 2.0) -> dict[str, LineSet]:
                    for x, y in run)
 
     groups: dict[str, list] = defaultdict(list)
+    refused: dict[str, str] = {}
     for path in files:
         try:
             records = (read_shapefile_records(path)
@@ -240,6 +242,9 @@ def limit_sets(bbox=None, margin_deg: float = 2.0) -> dict[str, LineSet]:
         except Exception as exc:                      # noqa: BLE001
             print(f"    {path.name}: skipped -- {exc}")
             continue
+
+        kinds = _geom_kinds(path)
+        areal = sorted(k for k in kinds if "Polygon" in k)
 
         for attrs, runs in records:
             runs = [r for r in runs if inside(r)]
@@ -254,19 +259,69 @@ def limit_sets(bbox=None, margin_deg: float = 2.0) -> dict[str, LineSet]:
             if not names:
                 low = path.stem.lower()
                 if "submerged" in low or "3nm" in low or "sla" in low:
+                    # The filename says SLA. Only an actual LINE may claim
+                    # that name -- 2026-10-02, after 483 polygons did.
+                    if areal:
+                        refused[path.name] = (
+                            f"{'/'.join(areal)} named like the 3 nm line, "
+                            f"{len(runs)} rings in the study area")
+                        continue
                     names = [SLA_NAME]
+                elif areal:
+                    refused[path.name] = (
+                        f"{'/'.join(areal)}, {len(runs)} rings")
+                    continue
                 else:
                     names = [path.stem if not attrs else "other limit"]
             for n in names:
                 groups[n].extend(runs)
 
+    for fname, why in sorted(refused.items()):
+        print(f"    {fname}: REFUSED as a limit line -- {why}. A legal limit "
+              f"is a line; polygon rings put an edge beside every point in "
+              f"the study area.")
+
     out = {name: LineSet(runs, name) for name, runs in groups.items()}
     if out:
+        # "any limit" IS THE UNION OF THE FOUR LEGAL LINES, not of whatever
+        # is in the folder. Before 2026-10-02 it was the latter, so one
+        # stray file could move every band assignment while every named
+        # limit still looked right.
         every: list = []
-        for runs in groups.values():
-            every.extend(runs)
+        for name, runs in groups.items():
+            if name in KNOWN_LIMITS:
+                every.extend(runs)
+            else:
+                print(f"    {name}: loaded under its own name but EXCLUDED "
+                      f"from '{ANY_NAME}' -- not one of the four legal "
+                      f"limits ({len(runs)} runs)")
         out[ANY_NAME] = LineSet(every, ANY_NAME)
     return out
+
+
+def _geom_kinds(path: Path) -> set[str]:
+    """The geometry types a GeoJSON actually holds.
+
+    Added 2026-10-02. `read_lines` turns polygon rings into runs, by design,
+    because some limit products ship closed rings. The cost of that design is
+    that an AREAL dataset dropped in this folder becomes a dense line set
+    covering the whole study area, and distance-to-limit stops meaning
+    anything. The geometry type is the only thing that separates the two, so
+    it is read rather than assumed.
+    """
+    if path.suffix.lower() not in (".geojson", ".json"):
+        return set()
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:                                 # noqa: BLE001
+        return {"unreadable"}
+    kinds = {str((f.get("geometry") or {}).get("type"))
+             for f in (doc.get("features") or [])}
+    if not kinds:
+        t = (doc.get("geometry") or {}).get("type")
+        if t:
+            kinds = {str(t)}
+    return kinds
 
 
 def _truthy(v) -> bool:
