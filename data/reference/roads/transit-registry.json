@@ -1,7 +1,7 @@
 {
  "_what": "GTFS-Realtime vehicle positions, the independent layer (G2): which feeds this project polls, and which it does not, with the reason for every exclusion",
  "_endpoint": "https://files.mobilitydatabase.org/feeds_v2.csv",
- "_fetched_at_utc": "2026-10-05T16:06:50+00:00",
+ "_fetched_at_utc": "2026-10-05T16:33:09+00:00",
  "_bytes": 2639920,
  "_sha256": "0d9e9e3e15fae7aada4bdf30b3234261baad56fd0cba9042ec45166076bffe91",
  "_selection_rules": {
@@ -15,12 +15,14 @@
  "_note": "The rules above are constants in scripts/fetch_road_registries.py. Changing which feeds are polled is a commit, not a configuration change -- see mechanism O in docs/reporting-defects.md.",
  "rows_read": 6479,
  "n_selected": 189,
- "n_excluded": 6290,
+ "n_credentialed": 2,
+ "n_excluded": 6288,
+ "_credentialed_note": "Feeds this project holds a key for, kept in a list of their own so that n_selected keeps meaning pollable by anyone with no account. env_var names the variable; no value is stored here or anywhere else.",
  "excluded_by_rule": {
   "not realtime": 4550,
   "no vehicle positions": 1289,
   "outside the study area": 358,
-  "needs a key": 78,
+  "needs a key": 76,
   "not current": 13,
   "url and catalogue disagree": 2
  },
@@ -1347,6 +1349,30 @@
    "subdivision": "Kentucky",
    "municipality": "Lexington",
    "url": "https://mystop.lextran.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition"
+  }
+ ],
+ "credentialed": [
+  {
+   "id": "mdb-1850",
+   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
+   "subdivision": "District of Columbia",
+   "municipality": "Washington",
+   "url": "https://api.wmata.com/gtfs/bus-gtfsrt-vehiclepositions.pb",
+   "env_var": "WMATA_API_KEY",
+   "header": "api_key",
+   "authentication_type": "1",
+   "why": "WMATA is most of the vehicle-hours inside the study area, and without it the independent layer there is county circulators"
+  },
+  {
+   "id": "mdb-1853",
+   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
+   "subdivision": "District of Columbia",
+   "municipality": "Washington",
+   "url": "https://api.wmata.com/gtfs/rail-gtfsrt-vehiclepositions.pb",
+   "env_var": "WMATA_API_KEY",
+   "header": "api_key",
+   "authentication_type": "1",
+   "why": "the second of WMATA's two keyed vehicle-position feeds"
   }
  ],
  "excluded": [
@@ -23959,16 +23985,6 @@
    "why": "entity_type is 'tu' and does not include 'vp'; trip updates and alerts are not positions"
   },
   {
-   "id": "mdb-1850",
-   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
-   "subdivision": "District of Columbia",
-   "municipality": "Washington",
-   "url": "https://api.wmata.com/gtfs/bus-gtfsrt-vehiclepositions.pb",
-   "rule": "needs a key",
-   "why": "authentication_type is '1'; named rather than dropped so the gap is visible",
-   "authentication_info": "https://developer.wmata.com/signup/"
-  },
-  {
    "id": "mdb-1851",
    "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
    "subdivision": "District of Columbia",
@@ -23985,16 +24001,6 @@
    "url": "https://api.wmata.com/gtfs/rail-gtfsrt-tripupdates.pb",
    "rule": "no vehicle positions",
    "why": "entity_type is 'tu' and does not include 'vp'; trip updates and alerts are not positions"
-  },
-  {
-   "id": "mdb-1853",
-   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
-   "subdivision": "District of Columbia",
-   "municipality": "Washington",
-   "url": "https://api.wmata.com/gtfs/rail-gtfsrt-vehiclepositions.pb",
-   "rule": "needs a key",
-   "why": "authentication_type is '1'; named rather than dropped so the gap is visible",
-   "authentication_info": "https://developer.wmata.com/signup/"
   },
   {
    "id": "mdb-1854",
