@@ -1,7 +1,7 @@
 {
  "_what": "WZDx work zone feeds, the declared layer (G1): which feeds this project polls, and which it does not, with the reason for every exclusion",
  "_endpoint": "https://data.transportation.gov/api/views/69qe-yiui/rows.csv?accessType=DOWNLOAD",
- "_fetched_at_utc": "2026-10-05T16:06:50+00:00",
+ "_fetched_at_utc": "2026-10-05T16:42:41+00:00",
  "_bytes": 7953,
  "_sha256": "5f37604415c56705e9dd197f3908a82fbd731f2702dd7c3a7916723fd91ddb06",
  "_selection_rules": {
@@ -13,12 +13,19 @@
  "_note": "The rules above are constants in scripts/fetch_road_registries.py. Changing which feeds are polled is a commit, not a configuration change -- see mechanism O in docs/reporting-defects.md.",
  "rows_read": 43,
  "n_selected": 25,
+ "n_credentialed": 0,
  "n_excluded": 18,
+ "_credentialed_note": "Feeds this project holds a key for, kept in a list of their own so that n_selected keeps meaning pollable by anyone with no account. env_var names the variable; no value is stored here or anywhere else.",
  "excluded_by_rule": {
   "url and registry disagree": 2,
   "needs a key": 13,
   "unknown spec version": 2,
   "inactive": 1
+ },
+ "bounding_boxes": {
+  "usable": 0,
+  "invalid": 0,
+  "absent": 25
  },
  "selected": [
   {
@@ -197,6 +204,7 @@
    "url": "https://data.austintexas.gov/download/d9mm-cjw9"
   }
  ],
+ "credentialed": [],
  "excluded": [
   {
    "feedName": "odot",

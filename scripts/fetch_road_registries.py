@@ -164,6 +164,70 @@ CREDENTIALED_TRANSIT = (
 )
 
 
+# The catalogue's bounding box, which G2 needs and the first version of this
+# file did not keep.
+#
+# G2 cannot poll all 189 selected feeds: 189 times 2,880 polls a day is more
+# than half a million requests, and the boundary test does not want all of
+# them anyway. It wants agencies whose service area touches a state line,
+# because that is where the publication regime changes. That selection is
+# geometric, so the geometry has to be in the artefact or the selection is
+# not reviewable.
+#
+# All four columns arrive as TEXT, like everything else in this catalogue.
+# They are cast explicitly and a test asserts the cast, because a numeric
+# filter over a string column is how the aviation analysis once reported
+# 100 per cent of independent targets at 0 feet.
+BBOX_COLS = (
+    ("min_lat", "location.bounding_box.minimum_latitude", -90.0, 90.0),
+    ("max_lat", "location.bounding_box.maximum_latitude", -90.0, 90.0),
+    ("min_lon", "location.bounding_box.minimum_longitude", -180.0, 180.0),
+    ("max_lon", "location.bounding_box.maximum_longitude", -180.0, 180.0),
+)
+
+
+def bounding_box(r: dict) -> dict | None:
+    """The feed's service-area box, or a record of why there is not one.
+
+    Three outcomes, because there are three facts and collapsing any two
+    reports one as the other:
+
+        None                        no bounding box columns are populated
+        {"valid": False, "why": …}  present and unusable
+        {four floats, extracted_on} usable
+
+    `extracted_on` travels with it. A box extracted in 2019 and one extracted
+    last month are different evidence about where an agency runs today, and a
+    stored measurement records the inputs that define it.
+    """
+    raw = {name: (r.get(col) or "").strip() for name, col, _lo, _hi in BBOX_COLS}
+    if not any(raw.values()):
+        return None
+    if not all(raw.values()):
+        missing = sorted(k for k, v in raw.items() if not v)
+        return {"valid": False, "why": f"only part of the box is populated; "
+                                       f"missing {missing}"}
+    out: dict = {}
+    for name, _col, lo, hi in BBOX_COLS:
+        try:
+            v = float(raw[name])
+        except ValueError:
+            return {"valid": False,
+                    "why": f"{name} is {raw[name]!r}, which is not a number"}
+        if not (lo <= v <= hi):
+            return {"valid": False,
+                    "why": f"{name} is {v}, outside [{lo}, {hi}]"}
+        out[name] = v
+    if out["min_lat"] > out["max_lat"] or out["min_lon"] > out["max_lon"]:
+        return {"valid": False,
+                "why": "the minimum corner is north or east of the maximum, "
+                       "so the box is inside out"}
+    out["extracted_on"] = (r.get("location.bounding_box.extracted_on")
+                           or "").strip()
+    out["valid"] = True
+    return out
+
+
 class RegistryRefused(RuntimeError):
     """The body is not a registry. Raised rather than parsed into zero rows."""
 
@@ -334,6 +398,7 @@ def transit_selection(rows: list[dict], credentialed=CREDENTIALED_TRANSIT,
             "subdivision": (r.get("location.subdivision_name") or "").strip(),
             "municipality": (r.get("location.municipality") or "").strip(),
             "url": safe_url(raw_url),
+            "bbox": bounding_box(r),
         }
         data_type = (r.get("data_type") or "").strip().lower()
         entity = (r.get("entity_type") or "").strip().lower()
@@ -439,6 +504,20 @@ def artefact(kind: str, url: str, raw: bytes, rows: list[dict],
     by_rule: dict[str, int] = {}
     for e in excluded:
         by_rule[e["rule"]] = by_rule.get(e["rule"], 0) + 1
+    # The denominator for G2's geographic narrowing. A feed with no usable
+    # box cannot be placed near a state line, so it cannot be chosen that
+    # way -- and the count has to be visible before the narrowing is done,
+    # not discovered afterwards as a shortfall.
+    pollable = list(selected) + list(credentialed or [])
+    boxes = {"usable": 0, "invalid": 0, "absent": 0}
+    for s in pollable:
+        b = s.get("bbox")
+        if b is None:
+            boxes["absent"] += 1
+        elif b.get("valid"):
+            boxes["usable"] += 1
+        else:
+            boxes["invalid"] += 1
     return {
         "_what": f"{kind}: which feeds this project polls, and which it does "
                  f"not, with the reason for every exclusion",
@@ -461,6 +540,7 @@ def artefact(kind: str, url: str, raw: bytes, rows: list[dict],
                               "env_var names the variable; no value is "
                               "stored here or anywhere else.",
         "excluded_by_rule": by_rule,
+        "bounding_boxes": boxes,
         "selected": selected,
         "credentialed": credentialed or [],
         "excluded": excluded,

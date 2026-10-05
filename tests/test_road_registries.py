@@ -27,6 +27,7 @@ import pytest
 
 from scripts.fetch_road_registries import (KNOWN_WZDX_VERSIONS,
                                            RegistryRefused, artefact,
+                                           bounding_box,
                                            check_arithmetic,
                                            check_no_credentials,
                                            parse_registry_csv, safe_url,
@@ -445,3 +446,107 @@ def test_the_arithmetic_check_counts_all_three() -> None:
     art["n_credentialed"] = 0
     with pytest.raises(RegistryRefused, match="lost between"):
         check_arithmetic(art)
+
+
+# -- the bounding box, which G2's feed list depends on ----------------------
+#
+# 189 selected feeds times 2,880 polls a day is more than half a million
+# requests, which is not a thing a laptop does. The boundary test does not
+# want all of them: it wants agencies whose service area touches a state
+# line. That selection is geometric, so the geometry has to be in the
+# artefact or the selection is not reviewable.
+
+def bbox_row(**over) -> dict:
+    base = {"location.bounding_box.minimum_latitude": "38.80",
+            "location.bounding_box.maximum_latitude": "39.10",
+            "location.bounding_box.minimum_longitude": "-77.20",
+            "location.bounding_box.maximum_longitude": "-76.90",
+            "location.bounding_box.extracted_on": "2026-09-01T00:00:00Z"}
+    base.update(over)
+    return base
+
+
+def test_a_box_arrives_as_text_and_is_cast() -> None:
+    """Every column in this catalogue is a string. A numeric filter over a
+    string column is how the aviation analysis once reported 100 per cent of
+    independent targets at 0 feet."""
+    b = bounding_box(bbox_row())
+    assert b["valid"] is True
+    for k in ("min_lat", "max_lat", "min_lon", "max_lon"):
+        assert isinstance(b[k], float), k
+    assert b["min_lat"] == 38.80 and b["max_lon"] == -76.90
+
+
+def test_the_extraction_date_travels_with_the_box() -> None:
+    """Rule 12. A box extracted in 2019 and one extracted last month are
+    different evidence about where an agency runs today."""
+    assert bounding_box(bbox_row())["extracted_on"] == "2026-09-01T00:00:00Z"
+
+
+def test_no_box_at_all_is_none_and_not_a_zero_box() -> None:
+    """A feed with no geometry must not become a feed at the origin, which
+    is in the Gulf of Guinea and would be inside nobody's state line."""
+    assert bounding_box({}) is None
+    assert bounding_box({k: "" for k in bbox_row()}) is None
+
+
+@pytest.mark.parametrize("over,fragment", [
+    ({"location.bounding_box.minimum_latitude": ""}, "only part"),
+    ({"location.bounding_box.minimum_latitude": "n/a"}, "not a number"),
+    ({"location.bounding_box.minimum_latitude": "-91"}, "outside"),
+    ({"location.bounding_box.maximum_longitude": "181"}, "outside"),
+    ({"location.bounding_box.minimum_latitude": "39.5"}, "inside out"),
+    ({"location.bounding_box.minimum_longitude": "-70.0"}, "inside out"),
+])
+def test_an_unusable_box_says_why_rather_than_vanishing(over, fragment) -> None:
+    """Present-and-unusable is a third fact, distinct from absent and from
+    usable. Collapsing it into either one reports it as the other."""
+    b = bounding_box(bbox_row(**over))
+    assert b is not None and b["valid"] is False
+    assert fragment in b["why"]
+
+
+def test_the_three_box_outcomes_are_distinguishable() -> None:
+    assert bounding_box({}) is None
+    assert bounding_box(bbox_row())["valid"] is True
+    assert bounding_box(bbox_row(
+        **{"location.bounding_box.minimum_latitude": "x"}))["valid"] is False
+
+
+def test_selected_feeds_carry_their_box() -> None:
+    sel, _c, _e = transit_selection([transit_row(**bbox_row())],
+                                    credentialed=(), env={})
+    assert sel[0]["bbox"]["valid"] is True
+
+
+def test_the_artefact_counts_boxes_before_anything_narrows_by_them() -> None:
+    """The denominator for G2's geographic narrowing, visible up front
+    rather than discovered afterwards as a shortfall."""
+    rows = [transit_row(id="a", **bbox_row()),
+            transit_row(id="b"),
+            transit_row(id="c", **bbox_row(
+                **{"location.bounding_box.minimum_latitude": "99"}))]
+    sel, cred, exc = transit_selection(rows, credentialed=(), env={})
+    art = artefact("k", "u", b"r", rows, sel, exc, when=NOW, rules={},
+                   credentialed=cred)
+    assert art["bounding_boxes"] == {"usable": 1, "absent": 1, "invalid": 1}
+    assert sum(art["bounding_boxes"].values()) == art["n_selected"] + \
+        art["n_credentialed"]
+
+
+def test_real_recorded_rows_have_real_boxes() -> None:
+    """Parsing against the recording rather than against my idea of it. The
+    Mobility clip holds no US rows, so selection cannot be tested here --
+    but every row in it carries the same four columns, which is exactly the
+    part worth testing against what the server actually sent."""
+    import csv as _csv
+    text = (FIX / "mobility-registry.body").read_bytes().decode(
+        "utf-8-sig", errors="replace")
+    text = text[:text.rfind("\n") + 1]
+    rows = list(_csv.DictReader(io.StringIO(text)))
+    boxes = [bounding_box(r) for r in rows]
+    usable = [b for b in boxes if b and b.get("valid")]
+    assert len(usable) > 50, "the recording should hold plenty of real boxes"
+    for b in usable:
+        assert -90 <= b["min_lat"] <= b["max_lat"] <= 90
+        assert -180 <= b["min_lon"] <= b["max_lon"] <= 180
