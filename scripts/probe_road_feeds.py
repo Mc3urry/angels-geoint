@@ -86,6 +86,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import socket
@@ -223,6 +224,11 @@ EXCLUDED: tuple[dict[str, str], ...] = (
 # real data. See the correction note in summarise_json.
 ERROR_KEYS = ("error", "errors", "errorcode", "code", "message", "fault")
 
+# WZDx v4 calls it `feed_info`. v3 called it `road_event_feed_info`. Tried in
+# that order, and the key that answered is recorded rather than assumed: a
+# feed that still uses the v3 name is telling you something about itself.
+FEED_INFO_KEYS = ("feed_info", "road_event_feed_info")
+
 
 def type_name(v: object) -> str:
     """The type of a value, plus the shape of a container.
@@ -266,12 +272,28 @@ def record_shape(rec: object) -> dict[str, str]:
 
 
 def looks_like_error_object(obj: object) -> bool:
-    """A body that is an error even though the status said 200."""
+    """A body that is an error even though the status said 200.
+
+    CORRECTED AGAIN 2026-10-05, by a test written against a recorded body.
+
+    On 2026-10-05 this check was moved to run after the body's shape was
+    known, which stopped two valid ArcGIS responses being flagged as errors.
+    **It did not fix this function.** The `exceededTransferLimit` early
+    return was left in place, so the predicate still answered True for a
+    paginated FeatureCollection -- the wrong answer had merely been made
+    unreachable through one caller.
+
+    That is not the same thing as being right, and it was found the moment a
+    test called the predicate directly instead of going through `summarise`.
+    Every synthetic check written that afternoon went through `summarise` and
+    so agreed with it.
+
+    A fix that hides a wrong answer leaves the next caller to find it. The
+    clause is gone; truncation has its own handling and is not an error.
+    """
     if not isinstance(obj, dict):
         return False
     low = {str(k).lower() for k in obj.keys()}
-    if "exceededtransferlimit" in low and obj.get("exceededTransferLimit"):
-        return True
     # An error object is small and says so. A data object that merely has a
     # 'message' field among many is not one.
     return bool(low & set(ERROR_KEYS)) and len(obj) <= 4
@@ -317,8 +339,33 @@ def summarise_json(body: bytes, truncated: bool,
                     for f in feats[:200]})
                 props = (feats[0] or {}).get("properties")
                 out["first_feature_properties"] = record_shape(props)
-                out["feed_info"] = record_shape(obj.get("road_event_feed_info")) \
-                    if isinstance(obj.get("road_event_feed_info"), dict) else None
+
+                # CORRECTED 2026-10-05. This looked only for
+                # `road_event_feed_info`, which is what WZDx v3 calls the
+                # object. v4 renamed it to `feed_info`, every feed in the
+                # registry is v4 or later, and MDOT's is v4.1 -- so the
+                # lookup found nothing, recorded `"feed_info": null`, and
+                # printed nothing at all. A reader of that report would
+                # conclude the feed does not declare its version. It
+                # declares 4.1, in a key this code was not asking for.
+                #
+                # That is sighting 26 with a different field name: a probe
+                # that looks in the wrong place and reports a confident
+                # nothing. The difference is only that this one reported its
+                # nothing as a silent null rather than as a printed zero.
+                #
+                # Both names are now tried, in v4-first order, and WHICH one
+                # answered is recorded -- because a value whose source is
+                # unstated is the next defect along.
+                out["feed_info"] = None
+                out["feed_info_key"] = None
+                out["declared_version"] = None
+                for fk in FEED_INFO_KEYS:
+                    if isinstance(obj.get(fk), dict):
+                        out["feed_info_key"] = fk
+                        out["feed_info"] = record_shape(obj[fk])
+                        out["declared_version"] = obj[fk].get("version")
+                        break
         else:
             lists = {k: v for k, v in obj.items() if isinstance(v, list)}
             if lists:
@@ -547,8 +594,29 @@ def summarise(body: bytes, content_type: str, truncated: bool,
     return out
 
 
+# How much of a body to keep as a test fixture. The Mobility Database CSV is
+# 2.6 MB and nothing is learned from committing all of it; 256 kB holds the
+# header and several thousand rows. A clipped fixture is RECORDED as clipped
+# in the manifest, because a fixture whose length is unstated is a stored
+# measurement without the input that defines it, and a test asserting a row
+# count against a clipped file would be measuring the clip.
+FIXTURE_BYTES = 256 * 1024
+
+# A URL that looks like it carries a credential is never saved to a fixture,
+# whatever the caller asked for. None of the endpoints in this file need a
+# key -- that is why they are in this file -- but the flag is general and the
+# cost of being wrong once is a secret in a public repository.
+CREDENTIAL_HINTS = ("token", "key=", "apikey", "api_key", "secret",
+                    "password", "signature", "sig=")
+
+
+def looks_credentialed(url: str) -> bool:
+    low = url.lower()
+    return any(h in low for h in CREDENTIAL_HINTS)
+
+
 def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
-          accept: str = "*/*") -> dict:
+          accept: str = "*/*", keep_body: bool = False) -> dict:
     """One GET. Records the status and infers no cause from it.
 
     `accept` is explicit and recorded in the result, because an endpoint
@@ -578,6 +646,12 @@ def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
                                      truncated,
                                      caller_capped(url)),
             }
+            if keep_body:
+                # Underscored and popped by the caller before the report is
+                # written. A raw body in a JSON report would be a 2 MB
+                # artefact pretending to be a summary.
+                rec["_body"] = body
+                rec["_content_type"] = resp.headers.get("Content-Type", "")
     except urllib.error.HTTPError as exc:
         detail = b""
         try:
@@ -600,6 +674,62 @@ def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
     rec["url"] = url
     rec["accept_sent"] = accept
     return rec
+
+
+def save_fixture(out_dir: Path, name: str, rec: dict,
+                 limit: int = FIXTURE_BYTES) -> dict | None:
+    """Write what the server actually sent, so a test can be a recording.
+
+    WHY THIS EXISTS, IN ONE SENTENCE FROM THE DEFECTS NOTE
+
+    Sighting 28 -- a guard that called two valid ArcGIS responses errors --
+    was caught by a human reading a flag that contradicted the data four
+    lines above it, and section 4 of `docs/reporting-defects.md` says plainly
+    that nothing automated could have caught it, because "the fixtures were
+    written from what the author expected servers to send, so the test suite
+    agreed with the bug."
+
+    The remedy is not more fixtures. It is fixtures that are **recordings**.
+    An ArcGIS FeatureCollection really does carry `exceededTransferLimit`
+    beside `type` and `features`; nobody writing a fixture by hand puts it
+    there, which is exactly why the bug survived twenty-two tests.
+
+    Returns the manifest entry, or None when nothing was saved.
+    """
+    if not rec.get("ok") or "_body" not in rec:
+        return None
+    if looks_credentialed(rec["url"]):
+        return {"name": name, "saved": False,
+                "reason": "the URL looks like it carries a credential"}
+    body = rec["_body"]
+    clipped = len(body) > limit
+    kept = body[:limit]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{name}.body"
+    path.write_bytes(kept)
+    return {
+        "name": name,
+        "saved": True,
+        "file": path.name,
+        "url": rec["url"],
+        "accept_sent": rec.get("accept_sent", "*/*"),
+        "status": rec["status"],
+        "content_type": rec.get("_content_type", ""),
+        "fetched_at_utc": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"),
+        # Stated, not implied. A test that asserted a row count against a
+        # clipped body would be measuring the clip.
+        "bytes_read": rec["bytes_read"],
+        "bytes_saved": len(kept),
+        "clipped": clipped,
+        "clip_limit": limit,
+        "sha256_of_saved": hashlib.sha256(kept).hexdigest(),
+        "note": ("VERBATIM server response, clipped to the limit above. "
+                 "Not a hand-written fixture, which is the entire point."
+                 if clipped else
+                 "VERBATIM server response, complete. Not a hand-written "
+                 "fixture, which is the entire point."),
+    }
 
 
 def human(name: str, why: str, rec: dict) -> None:
@@ -635,13 +765,19 @@ def human(name: str, why: str, rec: dict) -> None:
             print(f"      {k:<34} {s['scalars'][k]!r}")
     if s.get("geometry_types"):
         print(f"    geometry: {', '.join(s['geometry_types'])}")
-    if s.get("feed_info"):
-        # The spec version the feed SAYS it is. G1 must compare this against
-        # the registry's claim and refuse a disagreement, rather than
-        # trusting a filename the way `limit_sets` once did.
-        print(f"    road_event_feed_info, declared by the feed itself:")
-        for k in sorted(s["feed_info"]):
-            print(f"      {k:<34} {s['feed_info'][k]}")
+    if s["kind"] == "geojson":
+        # Printed either way, including when nothing was found. Silence is
+        # how the v3/v4 key mix-up above went unnoticed: the field was null
+        # in the report and absent from the console, which reads as a feed
+        # that declares no version rather than as a lookup that missed.
+        if s.get("feed_info"):
+            print(f"    {s['feed_info_key']}, declared by the feed itself"
+                  f" -- version {s.get('declared_version')!r}:")
+            for k in sorted(s["feed_info"]):
+                print(f"      {k:<34} {s['feed_info'][k]}")
+        else:
+            print(f"    no feed_info and no road_event_feed_info: this body "
+                  f"does not declare a spec version")
     if s.get("columns"):
         print(f"    columns: {', '.join(s['columns'])}")
     for f in s.get("flags", []):
@@ -659,6 +795,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, default=None,
                     help="where to write the report (default "
                          "data/reference/roads/probe-<date>.json)")
+    ap.add_argument("--save-bodies", type=Path, default=None, metavar="DIR",
+                    help="also write each response VERBATIM into DIR, with a "
+                         "manifest, for use as test fixtures. Recordings, "
+                         "not hand-written expectations -- see sighting 28")
+    ap.add_argument("--fixture-bytes", type=int, default=FIXTURE_BYTES,
+                    help=f"clip each saved body at this many bytes "
+                         f"(default {FIXTURE_BYTES}); the clip is recorded")
     args = ap.parse_args(argv)
 
     if args.list:
@@ -691,12 +834,41 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     print(f"\n  Probing {len(chosen)} endpoint(s). No credentials are sent.")
+    fixtures: list[dict] = []
     for ep in chosen:
         rec = probe(ep["url"], cap=args.cap,
-                    accept=ep.get("accept", "*/*"))
+                    accept=ep.get("accept", "*/*"),
+                    keep_body=args.save_bodies is not None)
         rec["why"] = ep["why"]
+        if args.save_bodies is not None:
+            entry = save_fixture(args.save_bodies, ep["name"], rec,
+                                 limit=args.fixture_bytes)
+            if entry:
+                entry["why"] = ep["why"]
+                fixtures.append(entry)
+        # Popped unconditionally, before the record can reach the report.
+        rec.pop("_body", None)
+        rec.pop("_content_type", None)
         report["endpoints"][ep["name"]] = rec
         human(ep["name"], ep["why"], rec)
+
+    if args.save_bodies is not None:
+        man = args.save_bodies / "manifest.json"
+        args.save_bodies.mkdir(parents=True, exist_ok=True)
+        man.write_text(json.dumps({
+            "_what": "Verbatim responses kept as test fixtures. Recordings, "
+                     "not hand-written expectations. Sighting 28 survived "
+                     "twenty-two tests because the fixtures were written "
+                     "from what the author expected servers to send.",
+            "_probed_at_utc": stamp.isoformat(timespec="seconds"),
+            "_fixture_bytes": args.fixture_bytes,
+            "bodies": fixtures,
+        }, indent=2) + "\n", encoding="utf-8")
+        kept = sum(1 for f in fixtures if f.get("saved"))
+        clip = sum(1 for f in fixtures if f.get("clipped"))
+        print(f"\n  saved {kept} body/bodies to {args.save_bodies}"
+              f" ({clip} clipped, and recorded as clipped)")
+        print(f"  manifest: {man}")
 
     # Named to the second, not to the day. The first version of this script
     # named the report `probe-<date>.json`, and the very next run -- a
