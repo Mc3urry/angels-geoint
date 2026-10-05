@@ -3,11 +3,14 @@
 *A methods note. Written 2026-09-26 after the fifteenth recorded sighting; a
 sixteenth arrived the next morning and is section 3.J. Extended 2026-10-02 at
 twenty-seven, with mechanisms L to R — every one of them committed after this
-document existed and was being actively watched for.*
+document existed and was being actively watched for. Extended again the same
+evening to twenty-nine, with S and T, both of them committed inside the script
+written to catch this class, one of them an hour after a comment in that same
+file warned against it.*
 
-Over the course of this project, **twenty-seven** separate faults were found
+Over the course of this project, **twenty-nine** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, twenty-seven
+this pipeline computes, it computed correctly. What failed, twenty-nine
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -56,15 +59,25 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **twenty-seven**. A few logged
+The running count in the worklog reached **twenty-nine**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
-Mechanisms A to K came from the maritime domain. L to R were added as the
-project moved to aviation, and they are the more instructive half: by then
-the class was known, named, documented in this file, and being actively
-watched for. **Knowing the failure mode did not prevent it.** Three of the
-seven were committed by someone who had read this document that week.
+Mechanisms A to K came from the maritime domain. L to T were added as the
+project moved to aviation and then to roads, and they are the more
+instructive half: by then the class was known, named, documented in this
+file, and being actively watched for. **Knowing the failure mode did not
+prevent it.** Three of the seven L-to-R sightings were committed by someone
+who had read this document that week.
+
+S and T go further. Both were committed **inside a script whose entire
+purpose was to catch this class before it reached an analysis** — a probe
+that reports every field of every feed with the type of its value, written
+precisely because a string column had once been filtered as a number. The
+probe did its job and caught a real instance on its first run. It also
+contained two instances of its own, and one of them was committed an hour
+after a comment in the same file warned against that exact failure in
+general terms.
 
 ### A. "No" and "cannot tell" share a return value
 
@@ -324,6 +337,66 @@ dropped the day dimension: **565 units became 78**, the control group fell to
 four, and the result flipped from −0.00007 to +0.00443 — from refuted to not
 refuted, in the direction of the hypothesis. Values without a word.
 
+### S. A check that is wrong in the safe direction, which is not safe
+
+Mechanism N is a guard that fails to fire. This is its mirror: a guard that
+fires on a healthy input, which is not the harmless half of the pair.
+
+A probe flagged two ArcGIS responses as `ERROR OBJECT: the body is an error
+even though the transport succeeded`. **Both bodies were real data** — five
+features each, with real field names, printed four lines above the flag. An
+ArcGIS `FeatureCollection` carries `exceededTransferLimit` beside `type` and
+`features`: three keys, one of them in the error-key list, and the test was
+"any error-ish key AND at most four keys", running *before* the body's shape
+had been determined. It never had the chance to notice it was looking at a
+FeatureCollection.
+
+A second, smaller instance the same evening. The replacement flag,
+`SERVER-SIDE TRUNCATION`, fired correctly on a layer that was paginated — but
+the query itself had passed `resultRecordCount=5`. The truncation was
+*requested*, and was reported as though the service had imposed it.
+
+A flag is a report about a body, so `ERROR OBJECT` on a healthy body is this
+document's class exactly: a routine stating an outcome its own execution did
+not entitle it to state. What makes it worse than an ordinary false positive
+is the shared channel. **A false alarm spends the attention the next true
+alarm needs**, and the flags all print to the same place, so one that cries
+wolf degrades every other check in the file.
+
+The aggravating detail is in the source. A comment written in that same file,
+the same hour, says that flagging a body which is fine trains the reader to
+ignore the flags, which is how a real one gets missed. The warning was
+correct, was written by the person who then committed the thing it warned
+about, and did not help.
+
+The fix is an ordering and not a longer key list — a longer list is mechanism
+N's response, a guard specified by the symptom in front of it. A body that
+parsed as a recognised data shape is not an error object, whatever its keys
+are called, and only an unrecognised body is asked the question.
+
+### T. A fix believed to be in place while the code ran without it
+
+Mechanism L is a fix that lands and leaves the broken instrument's earlier
+readings standing. This is L inverted: the fix never landed, and the readings
+taken after it were treated as though it had.
+
+A probe wrote its report to `probe-<date>.json`. The hazard was identified,
+written up, fixed — name the file to the second, refuse to overwrite — and
+tested. The edit was sent to the machine, the connection dropped mid-write,
+and the next action assumed it had arrived. Three runs that afternoon wrote
+one filename. The file on disk held **one** endpoint of the thirteen probed;
+two runs' worth of results survived only in a chat transcript.
+
+Two faults, needing two different fixes, and separating them is the point.
+The script's default output path was unsafe — identified and fixed. And a
+write was reported complete, interrupted, and then relied upon — which is a
+stale *premise* rather than a stale conclusion. L leaves a belief about a
+result out of date; T leaves a belief about the code out of date, and
+everything the code does afterwards inherits it.
+
+Nothing of value was lost, because a transcript happened to exist. That is
+luck, and it is recorded as luck rather than as a mitigating design.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -379,6 +452,17 @@ needs an argument.
 reject and did not. The prediction being wrong is what exposed that the
 maritime intuition did not transfer to a difference-of-differences statistic.
 
+**A flag that contradicts the data printed beside it.** `ERROR OBJECT`
+appeared four lines below five parsed features with real field names. Nothing
+automated caught this and nothing could have: the fixtures were written from
+what the author expected servers to send, so the test suite agreed with the
+bug. Two adjacent lines of output that cannot both be true remain the only
+check that covers what the author did not imagine.
+
+**Verifying that a change is present before acting as though it is.** A line
+count and a string match against the file on the machine that will run it.
+Cheap, and it is the check that was skipped in mechanism T.
+
 ## 5. The rules adopted
 
 Each of these exists because something went wrong that it would have stopped.
@@ -426,6 +510,18 @@ Each of these exists because something went wrong that it would have stopped.
     against earlier arithmetic. Three chained predictions off one real
     measurement produced a confident wrong number.
 
+16. **A check that fires on a healthy input is a defect of the same class as
+    one that misses a fault.** A flag's currency is the reader's attention,
+    and a false alarm spends what the next true alarm will need; the flags
+    share one channel, so one that cries wolf degrades the rest. A guard runs
+    only after the shape of its input is known, and never on a condition the
+    caller created.
+17. **A fix is in place when the running code shows it, not when the edit is
+    sent.** Before any action that assumes a change landed, verify it on the
+    machine that will run it — a line count, a string match, a version
+    banner. A dropped connection reports nothing and is indistinguishable
+    from success.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -466,7 +562,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Twenty-seven** were found,
+The defence is not that no mistakes were made. **Twenty-nine** were found,
 one of them published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
@@ -474,13 +570,24 @@ the headline number in the direction that would have helped the hypothesis,
 and it still did not arrive.
 
 **And the second half of the catalogue is the stronger evidence, because it
-is worse.** Mechanisms L to R were all committed *after* this document
+is worse.** Mechanisms L to T were all committed *after* this document
 existed, by someone who had read it that week and could recite the class on
 request. One of them — 483 polygons accepted as a legal boundary line —
 produced a fifteen-fold rise in the headline ratio and reversed its gradient,
 in the direction of the hypothesis, and was caught by a comparability check
 that reported it as "not comparable" rather than as a corrupted input. It was
 hours from being published.
+
+S and T close the argument rather than weakening it. Both were committed
+inside a script written for no other purpose than to catch this class of
+defect before it could reach an analysis — and that script did catch a real
+one on its first run, a count field served as a string, found before any
+arithmetic touched it. It also carried two of its own. One of them was
+committed an hour after a comment in the same file warned, in general terms,
+against exactly that failure. **The strongest available statement is
+therefore not that the author learned to avoid the class.** It is that a
+probe written against the class finds instances in other people's data and in
+its own, and that the record of both is in the same file.
 
 That is the honest shape of the claim. Not *these mistakes were prevented* —
 they were not, and knowing the failure mode in detail did not prevent them —

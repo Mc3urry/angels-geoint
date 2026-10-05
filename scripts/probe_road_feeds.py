@@ -277,8 +277,14 @@ def looks_like_error_object(obj: object) -> bool:
     return bool(low & set(ERROR_KEYS)) and len(obj) <= 4
 
 
-def summarise_json(body: bytes, truncated: bool) -> dict:
-    """Shape of a JSON body. Pure: no network, no clock, no filesystem."""
+def summarise_json(body: bytes, truncated: bool,
+                   requested_limit: bool = False) -> dict:
+    """Shape of a JSON body. Pure: no network, no clock, no filesystem.
+
+    `requested_limit` says whether the URL asked the service for a limited
+    number of records. It is passed in rather than parsed here so this stays
+    a function of its arguments alone.
+    """
     out: dict = {"kind": "json", "flags": []}
     if truncated:
         out["flags"].append("TRUNCATED: body was capped, so JSON could not "
@@ -357,10 +363,30 @@ def summarise_json(body: bytes, truncated: bool) -> dict:
         # its own flag because treating it as an error would have hidden it
         # behind a false positive, and ignoring it would be the 483-polygon
         # mistake again: a partial answer used as a whole one.
+        # REFINED 2026-10-05, and the refinement is rule 16.
+        #
+        # The first version of this flag fired on both ArcGIS layers. It was
+        # telling the truth -- the layers are paginated -- but the query had
+        # passed `resultRecordCount=5`, so the truncation was REQUESTED. A
+        # flag that fires on a condition the caller created spends the
+        # reader's attention on nothing, and the flags share one channel, so
+        # it degrades every other check in this file. That is the same
+        # failure as the ERROR OBJECT false positive two sections up, in a
+        # smaller and more forgivable form, which is exactly why it gets
+        # fixed rather than tolerated.
+        #
+        # So a requested cap is RECORDED and an imposed one is FLAGGED.
         if obj.get("exceededTransferLimit"):
-            out["flags"].append("SERVER-SIDE TRUNCATION: the service set "
-                                "exceededTransferLimit, so this is a page "
-                                "of the layer and not the layer")
+            if requested_limit:
+                out["pagination"] = ("a page, because the query asked for "
+                                     "one: the URL passes a record limit, "
+                                     "so exceededTransferLimit here is not "
+                                     "a decision the service made")
+            else:
+                out["flags"].append("SERVER-SIDE TRUNCATION: the service set "
+                                    "exceededTransferLimit without being "
+                                    "asked to, so this is a page of the "
+                                    "layer and not the layer")
 
         # A tiny envelope of scalars gets its VALUES reported, not just its
         # types. This is the one exception to the types-only rule, and it is
@@ -470,7 +496,22 @@ _CT_OK: dict[str, tuple[str, ...]] = {
 }
 
 
-def summarise(body: bytes, content_type: str, truncated: bool) -> dict:
+# A record cap the CALLER asked for. Named per service rather than guessed:
+# ArcGIS uses resultRecordCount, Socrata uses $limit, and some ArcGIS
+# deployments honour maxRecords. Anything not on this list is treated as a
+# cap the caller did NOT ask for, which errs toward flagging -- the safe
+# direction for a question about completeness.
+_LIMIT_PARAMS = ("resultrecordcount", "$limit", "maxrecords", "limit=")
+
+
+def caller_capped(url: str) -> bool:
+    """Did this URL ask the service to return fewer records than it has?"""
+    low = url.lower()
+    return any(tok in low for tok in _LIMIT_PARAMS)
+
+
+def summarise(body: bytes, content_type: str, truncated: bool,
+              requested_limit: bool = False) -> dict:
     """Dispatch on what the body IS, not on what the URL suggested.
 
     A .geojson path that answers with HTML, or a JSON endpoint that answers
@@ -490,7 +531,7 @@ def summarise(body: bytes, content_type: str, truncated: bool) -> dict:
                          "page. Expect a sign-in, a terms gate or a CDN "
                          "error -- but do not infer which."]}
     elif head in (b"{", b"["):
-        out = summarise_json(body, truncated)
+        out = summarise_json(body, truncated, requested_limit)
     elif head == b"<":
         out = summarise_xml(body, truncated)
     elif b"," in body[:4096] or b"\t" in body[:4096]:
@@ -534,7 +575,8 @@ def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
                 "content_length_header": resp.headers.get("Content-Length"),
                 "summary": summarise(body,
                                      resp.headers.get("Content-Type", ""),
-                                     truncated),
+                                     truncated,
+                                     caller_capped(url)),
             }
     except urllib.error.HTTPError as exc:
         detail = b""
@@ -585,6 +627,8 @@ def human(name: str, why: str, rec: dict) -> None:
         print(f"    first record, every key with its type:")
         for k in sorted(fields):
             print(f"      {k:<34} {fields[k]}")
+    if s.get("pagination"):
+        print(f"    note: {s['pagination']}")
     if s.get("scalars"):
         print(f"    body is a small envelope, values shown:")
         for k in sorted(s["scalars"]):
