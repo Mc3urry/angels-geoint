@@ -10,11 +10,13 @@ file warned against it. Extended again 2026-10-05 to thirty, with U --
 found by an instrument built that afternoon, in a number this document had
 already helped publish. Extended again 2026-10-05 to thirty-three, with V
 and W, and a third instance of F -- all three found by a test suite built
-from recorded server responses rather than from expectations.*
+from recorded server responses rather than from expectations. Extended once
+more the same evening to thirty-four, with X, which is the only entry here
+that did harm outside this repository rather than threatening a number.*
 
-Over the course of this project, **thirty-three** separate faults were found
+Over the course of this project, **thirty-four** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, thirty-three
+this pipeline computes, it computed correctly. What failed, thirty-four
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -63,7 +65,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **thirty-three**. A few logged
+The running count in the worklog reached **thirty-four**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -516,6 +518,71 @@ The rule that follows is narrow on purpose: a summary is a pointer to a
 source, never a substitute for it, and any number or identifier that will be
 published is read from the source and committed as a fixture.
 
+### X. A guard pointed at the surface its author was thinking about
+
+Every other entry in this catalogue cost a number, a conclusion or an
+afternoon. This one put a third party's credential in a public repository.
+
+`scripts/probe_road_feeds.py` saves server responses as test fixtures. It was
+written with a credential guard, deliberately, and the guard was this:
+
+    CREDENTIAL_HINTS = ("token", "key=", "apikey", "api_key", "secret",
+                        "password", "signature", "sig=")
+
+    def looks_credentialed(url: str) -> bool: ...
+
+A **url** check. Every endpoint in that file is keyless -- that is why they
+are in that file -- so the guard passed everything, correctly, and the author
+stopped thinking about credentials.
+
+Maryland's CHART traffic-cameras page is a public web page that embeds a
+Google Maps browser key in its own markup. The url was clean. The key was in
+the payload, at line 292 of 79,692 bytes, and the script wrote the page
+verbatim into `tests/fixtures/road/chart-cameras.body`, which was committed
+and pushed to a public repository. GitHub secret scanning found it the next
+morning.
+
+**The guard did not fail. It was aimed somewhere else.** A url is where a
+credential appears when you are the one sending it; a body is where one
+appears when somebody else is. The author was guarding against leaking his
+own keys and the hazard was republishing another organisation's. Nothing in
+the code distinguished those two cases, because nothing in the author's head
+had.
+
+That is the shape worth naming. N is a guard beaten by the next instance of
+the class it was written for. S is a guard that fires on something healthy.
+X is a guard that works exactly as designed, over a surface that was never
+where the hazard was going to arrive -- and because it exists and passes, it
+removes the uneasiness that would otherwise have prompted a look.
+
+Three things changed, and the order matters.
+
+**The body is scanned**, with the pattern name reported and never the match;
+a function that returned the secret so the caller could log it would be this
+same mistake wearing a hat.
+
+**An HTML page is never saved as a fixture, whatever it contains.** A scanner
+finds the patterns it knows, which is not the same as finding credentials.
+Those pages were never worth keeping: their status, content type and length
+are everything this project learns from them, and the markup is somebody
+else's and carries their identifiers. Removing the class beats catching
+instances of it, and this is the part that actually closes the hole.
+
+**A test reads every committed fixture** and fails on credential-shaped
+content -- on the files, not on the rule that wrote them. A capture that
+slips past the writer's guard still cannot stay committed.
+
+Then the scan itself had to be aimed. The first version read the whole
+response and refused the file if anything matched anywhere, which refused the
+Mobility Database catalogue -- whose 2 MB holds a feed url with a token 1.8
+MB past the clip, in bytes the script was never going to write. The saved
+262 kB was clean, and was verified clean by reading it. So the scan covers
+**what gets published**, because that is what the guard is for, and the fact
+that the source carries a credential outside the saved region is recorded in
+the manifest rather than dropped. A wider scan is not a stronger guard; it is
+a guard pointed at the wrong bytes a second time, and its cost is a usable
+recording thrown away.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -673,6 +740,17 @@ Each of these exists because something went wrong that it would have stopped.
     source and committed as a fixture. A summary arrives already shaped like
     data, which is what makes it usable and what makes it dangerous.
 
+21. **A guard names the surface it covers, and the surface is chosen from
+    where the hazard arrives rather than from where the author is looking.**
+    A credential check on urls is a check on credentials this project sends.
+    Credentials this project might republish arrive in bodies. Both are
+    credential leaks and only one was guarded, for a year, by a function
+    whose name said it covered the subject rather than the surface.
+22. **Prefer removing a class to catching instances of it.** Scanning bodies
+    for secrets finds the patterns the scanner knows. Not storing other
+    people's web pages at all ends the question. Where both are available,
+    the second is the fix and the first is the backstop.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -713,7 +791,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Thirty-three** were found,
+The defence is not that no mistakes were made. **Thirty-four** were found,
 one of them published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
@@ -746,6 +824,42 @@ but *the machinery caught them, every time, and the record of catching them
 is public.* A second domain was built on the same machinery and returned the
 same answer. The argument for believing the result is the catalogue, not the
 absence of one.
+
+## 8. A note on the history of this repository
+
+**On 2026-10-05 this project rewrote its own git history**, and a document
+whose seventh rule is that retractions stay in place has to say so in the
+same place it says everything else.
+
+What was removed: five recorded web pages under `tests/fixtures/road/`, one
+of which, `chart-cameras.body`, carried the Google Maps browser key described
+in mechanism X. `git filter-repo` purged those paths from every commit and
+the result was force-pushed. **Four of seventy-two commits were rewritten**;
+the first changed was `bd10b916`, the commit GitHub's alert named, and the
+branch tip moved from `ea107f19` to `3e78afd6`. Every commit before
+`bd10b916` keeps the identity it had, so the maritime and aviation record and
+every SHA this document and the README cite are untouched.
+
+Why, when rule 7 says otherwise. Rule 7 is about **this project's own
+conclusions**: a finding that was published and turned out to be wrong stays
+visible, marked, with a pointer to what replaced it, because deleting it
+would flatter the record. The thing removed here is not a conclusion of this
+project. It is 79,692 bytes of a third party's web page containing a
+credential belonging to a public agency that never agreed to have it
+rehosted. Keeping it to preserve the integrity of a methods note would be
+spending somebody else's exposure on this document's tidiness.
+
+What it cost, stated rather than minimised. The artefact that proves
+mechanism X happened no longer exists in this repository; what remains is
+this description of it, which is testimony rather than evidence. Anyone
+checking the claim has GitHub's alert, the commit that fixed it, and nothing
+else. That is a real weakening of exactly the property section 7 relies on,
+it was chosen deliberately, and it is the only place in this catalogue where
+the record was made thinner on purpose.
+
+The key itself was already public: Maryland's own site serves that page, and
+that key, to every visitor. Removing it from here does not rotate it and
+cannot. The operator was told.
 
 *A note on the numbers in this document.* Every figure above was re-derived
 from the artefacts by a script, not copied from the worklog, and one of them

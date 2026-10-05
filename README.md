@@ -318,7 +318,7 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-**Thirty-three faults** found here share one shape: a routine reporting an
+**Thirty-four faults** found here share one shape: a routine reporting an
 outcome its own execution did not entitle it to report, with nothing in the
 output to say so. Almost none was an arithmetic error — the quantities
 computed correctly. What failed was what the programs said about what they
@@ -341,6 +341,16 @@ defect was the name, and it was published for three days understating the
 quantity it claimed to report by a factor of 11.7. It was found by building a
 second, independent record of the same quantity and putting the two side by
 side.
+
+And one was a credential guard that checked urls while the payload sat in a
+body. Every endpoint this project probes is keyless, so the guard passed
+everything, correctly, and a third party's public web page was saved verbatim
+as a test fixture with their Google Maps key at line 292. GitHub found it the
+next morning. It is the only fault in the catalogue that did harm outside
+this repository rather than threatening a number, and it is the reason
+section 8 of that document exists: fixing it meant rewriting four commits of
+git history, which a methods note arguing that retractions stay in place is
+obliged to declare rather than quietly perform.
 
 The catalogue, the techniques that actually caught them, and the rules
 adopted in response are in
