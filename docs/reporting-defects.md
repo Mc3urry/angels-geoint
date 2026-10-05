@@ -8,11 +8,13 @@ evening to twenty-nine, with S and T, both of them committed inside the script
 written to catch this class, one of them an hour after a comment in that same
 file warned against it. Extended again 2026-10-05 to thirty, with U --
 found by an instrument built that afternoon, in a number this document had
-already helped publish.*
+already helped publish. Extended again 2026-10-05 to thirty-three, with V
+and W, and a third instance of F -- all three found by a test suite built
+from recorded server responses rather than from expectations.*
 
-Over the course of this project, **thirty** separate faults were found
+Over the course of this project, **thirty-three** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, thirty
+this pipeline computes, it computed correctly. What failed, thirty-three
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -61,7 +63,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **thirty**. A few logged
+The running count in the worklog reached **thirty-three**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -170,6 +172,20 @@ This is the only sighting that produced a published false finding, and it is
 worth understanding why. The evidence for the false claim was three black
 chips — and three black chips are exactly what this defect manufactures. **The
 fault generated its own corroboration.**
+
+**A third instance, 2026-10-05.** A probe summarising a WZDx feed set
+`out["feed_info"] = record_shape(obj.get("road_event_feed_info"))` and `None`
+otherwise. `road_event_feed_info` is what WZDx **v3** calls that object; v4
+renamed it `feed_info`, every feed in the registry is v4 or later, and
+Maryland's is 4.1. So the lookup found nothing, stored `"feed_info": null`,
+and printed nothing at all -- and a reader of that report would conclude the
+feed does not declare its own version. It declares 4.1, under a key the code
+was not asking for. `null` meant "I looked under one name, which was the
+wrong one", and said "there is nothing here".
+
+Both names are now tried, v4 first, and which one answered is recorded. The
+console prints a line either way, including when neither is present, because
+the silence was the defect and not the absence.
 
 ### G. A report names its exclusions from a list written in advance
 
@@ -438,6 +454,68 @@ The estimator never used the field. It was descriptive, and wrong by an order
 of magnitude, which is the kind of error that costs no result and all of the
 credibility.
 
+### V. A fix that makes a wrong answer unreachable instead of correcting it
+
+Mechanism S was a guard that called two valid ArcGIS responses errors. The
+fix was an ordering: ask "is this an error object" only of a body that did
+not parse as a recognised data shape. That was the right fix and it worked.
+
+**It did not fix the function.** `looks_like_error_object` still opened with
+an early return on `exceededTransferLimit`, so the predicate still answered
+True for a paginated FeatureCollection. The wrong answer had been made
+unreachable through one caller, which is not the same as being right, and
+the next caller gets it.
+
+Every check written that afternoon went through `summarise`, so every check
+agreed. It surfaced the moment a test asked the predicate directly, against
+a recorded ArcGIS body -- and the test that found it was written to guard
+mechanism S, four hours after S was declared fixed.
+
+The shape generalises past this instance. A defect masked by its caller is
+strictly worse than one in the open: it passes its tests, it reads as
+resolved in the record, and the next use of the function re-opens it with no
+warning and no memory of why. **A fix is a correct answer, not an
+unreachable wrong one.**
+
+### W. A summary of a source, used where the source was available
+
+Four instances in one day, and they were not independent.
+
+**"22 keyless feeds."** The WZDx registry has 43 rows. A model's summary of
+the registry page said 21 feeds require keys, so 22 was published -- in the
+phase plan, the status note, the backlog and a commit message. The CSV says
+`needAPIKey` is "false" for **30** and "true" for 13. Nobody opened the file,
+which was one request away and is now a committed fixture.
+
+**"Maryland DOT (mdot)."** Read as an organisation called `mdot`, and
+matched on `issuingOrganization`. The registry has `issuingOrganization`
+"Maryland DOT" and `feedName` "mdot": two columns, presented as one
+parenthetical by a summariser, and matched on the wrong one. The test failed
+with zero rows.
+
+**"Byte-identical."** Two CHART responses to different `Accept` headers were
+reported as byte-identical, on the evidence that both were 39,772 bytes.
+They differ in 56 characters, inside a Cloudflare `email-protection` href
+whose XOR key rotates per response -- which is exactly why the lengths
+matched. The conclusion drawn, that these endpoints do not
+content-negotiate, was right. The evidence given for it was a proxy that
+happened to agree, which is more dangerous than being wrong outright because
+it reads as verified.
+
+**The CHART feed URLs themselves.** Three endpoints probed as data feeds,
+all answering HTML, and the URLs came from a summary of a page rather than
+from any documented feed list.
+
+The common root is not carelessness about sources. It is that **a summary
+arrives already shaped like data** -- a count, a name in parentheses, a
+length -- and a shaped thing invites use. The authoritative source was one
+command away every time, and in three of the four cases it was later fetched
+and contradicted the summary.
+
+The rule that follows is narrow on purpose: a summary is a pointer to a
+source, never a substitute for it, and any number or identifier that will be
+published is read from the source and committed as a fixture.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -503,6 +581,20 @@ check that covers what the author did not imagine.
 **Verifying that a change is present before acting as though it is.** A line
 count and a string match against the file on the machine that will run it.
 Cheap, and it is the check that was skipped in mechanism T.
+
+**Calling a predicate directly, not only through its caller.** Mechanism V
+hid behind `summarise` for four hours and every test went through
+`summarise`. A pure function that decides something gets asked the question
+on its own, against a real input.
+
+**Fixtures that are recordings.** `scripts/probe_road_feeds.py --save-bodies`
+writes each response verbatim with a manifest carrying its URL, status,
+content type, byte counts and SHA-256, and a test asserts every file still
+hashes to what the server sent -- because the most tempting repair in a
+fixture directory is changing a byte so a test passes. Nobody hand-writing an
+ArcGIS fixture includes `exceededTransferLimit`, which is the whole reason S
+survived twenty-two tests. On its first run against recordings the suite
+found V, the F instance and two of W.
 
 ## 5. The rules adopted
 
@@ -572,6 +664,15 @@ Each of these exists because something went wrong that it would have stopped.
     called `n_polls` holding a file count went three days in public is that
     nothing ever put the two counts next to each other.
 
+19. **A fix is a correct answer, not an unreachable wrong one.** When a
+    guard is repaired by changing where it runs, the guard itself is checked
+    too, and the predicate is tested directly rather than only through the
+    caller that was fixed.
+20. **A summary is a pointer to a source, never a substitute for it.** Any
+    number, field name or identifier that will be published is read from the
+    source and committed as a fixture. A summary arrives already shaped like
+    data, which is what makes it usable and what makes it dangerous.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -612,7 +713,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Thirty** were found,
+The defence is not that no mistakes were made. **Thirty-three** were found,
 one of them published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved

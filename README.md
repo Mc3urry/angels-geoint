@@ -318,7 +318,7 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-**Thirty faults** found here share one shape: a routine reporting an
+**Thirty-three faults** found here share one shape: a routine reporting an
 outcome its own execution did not entitle it to report, with nothing in the
 output to say so. Almost none was an arithmetic error — the quantities
 computed correctly. What failed was what the programs said about what they
