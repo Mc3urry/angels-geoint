@@ -1,0 +1,377 @@
+{
+ "_what": "WZDx work zone feeds, the declared layer (G1): which feeds this project polls, and which it does not, with the reason for every exclusion",
+ "_endpoint": "https://data.transportation.gov/api/views/69qe-yiui/rows.csv?accessType=DOWNLOAD",
+ "_fetched_at_utc": "2026-10-05T16:06:50+00:00",
+ "_bytes": 7953,
+ "_sha256": "5f37604415c56705e9dd197f3908a82fbd731f2702dd7c3a7916723fd91ddb06",
+ "_selection_rules": {
+  "active": "one of ['true', 't', 'yes', 'y', '1'], read as text and refused if outside the vocabulary",
+  "needAPIKey": "must be one of ['false', 'f', 'no', 'n', '0']",
+  "version": "must be one of ['4', '4.1', '4.2']",
+  "url": "must be present"
+ },
+ "_note": "The rules above are constants in scripts/fetch_road_registries.py. Changing which feeds are polled is a commit, not a configuration change -- see mechanism O in docs/reporting-defects.md.",
+ "rows_read": 43,
+ "n_selected": 25,
+ "n_excluded": 18,
+ "excluded_by_rule": {
+  "url and registry disagree": 2,
+  "needs a key": 13,
+  "unknown spec version": 2,
+  "inactive": 1
+ },
+ "selected": [
+  {
+   "feedName": "mcdot",
+   "issuingOrganization": "Maricopa County DOT",
+   "state": "arizona",
+   "version": "4.2",
+   "url": "https://wzdxapi.aztech.org/construction"
+  },
+  {
+   "feedName": "kansas",
+   "issuingOrganization": "Kansas DOT",
+   "state": "kansas",
+   "version": "4",
+   "url": "https://ks.carsprogram.org/carsapi_v1/api/wzdx"
+  },
+  {
+   "feedName": "nddot",
+   "issuingOrganization": "North Dakota DOT",
+   "state": "North Dakota",
+   "version": "4",
+   "url": "https://travelfiles.dot.nd.gov/geojson_nc/wzdx_geojson.json"
+  },
+  {
+   "feedName": "udot",
+   "issuingOrganization": "Utah DOT",
+   "state": "utah",
+   "version": "4",
+   "url": "https://udottraffic.utah.gov/wzdx/udot/v40/data"
+  },
+  {
+   "feedName": "ncdot",
+   "issuingOrganization": "North Carolina DOT",
+   "state": "north carolina",
+   "version": "4.2",
+   "url": "https://drivenc.gov/api/wzdx"
+  },
+  {
+   "feedName": "idot",
+   "issuingOrganization": "Iowa DOT",
+   "state": "iowa",
+   "version": "4",
+   "url": "https://iowa-atms.cloud-q-free.com/api/rest/dataprism/wzdx/wzdxfeed"
+  },
+  {
+   "feedName": "hidot",
+   "issuingOrganization": "Hawaii DOT",
+   "state": "hawaii",
+   "version": "4.1",
+   "url": "https://ai.blyncsy.io/wzdx/hidot/feed"
+  },
+  {
+   "feedName": "nysdot",
+   "issuingOrganization": "New York DOT",
+   "state": "new york",
+   "version": "4.1",
+   "url": "https://511ny.org/api/wzdx"
+  },
+  {
+   "feedName": "ladotd",
+   "issuingOrganization": "Louisiana DOTD",
+   "state": "louisiana",
+   "version": "4.1",
+   "url": "https://wzdx.e-dot.com/la_dot_d_feed_wzdx_v4.1.geojson"
+  },
+  {
+   "feedName": "mndot",
+   "issuingOrganization": "Minnesota DOT",
+   "state": "minnesota",
+   "version": "4",
+   "url": "https://mn.carsprogram.org/carsapi_v1/api/wzdx"
+  },
+  {
+   "feedName": "iddot",
+   "issuingOrganization": "Idaho DOT",
+   "state": "idaho",
+   "version": "4.1",
+   "url": "https://511.idaho.gov/api/wzdx"
+  },
+  {
+   "feedName": "necdot",
+   "issuingOrganization": "NHDOT/VTAOT/MEDOT",
+   "state": "New Hampshire, Vermont, Maine",
+   "version": "4.2",
+   "url": "https://api.dx.ne-compass.com/wzdx-latest/"
+  },
+  {
+   "feedName": "CivicLink_CrewCast",
+   "issuingOrganization": "CivicLink",
+   "state": "n/a",
+   "version": "4.2",
+   "url": "https://road-connect-community-bry7272.replit.app/api/wzdx/work-zones.geojson"
+  },
+  {
+   "feedName": "indot",
+   "issuingOrganization": "Indiana DOT",
+   "state": "indiana",
+   "version": "4.1",
+   "url": "https://in.carsprogram.org/carsapi_v1/api/wzdx"
+  },
+  {
+   "feedName": "dedot",
+   "issuingOrganization": "Delaware DOT",
+   "state": "delaware",
+   "version": "4.1",
+   "url": "https://wzdx.e-dot.com/del_dot_feed_wzdx_v4.1.geojson"
+  },
+  {
+   "feedName": "stcharlesco_v4",
+   "issuingOrganization": "St. Charles County",
+   "state": "missouri",
+   "version": "4",
+   "url": "https://scc.ridsi-dash.com:5000/wzdx.geojson"
+  },
+  {
+   "feedName": "mdot",
+   "issuingOrganization": "Maryland DOT",
+   "state": "maryland",
+   "version": "4.1",
+   "url": "https://filter.ritis.org/wzdx_v4.1/mdot.geojson"
+  },
+  {
+   "feedName": "modot",
+   "issuingOrganization": "Missouri DOT",
+   "state": "missouri",
+   "version": "4.1",
+   "url": "https://traveler.modot.org/timconfig/feed/desktop/mo_wzdx.json"
+  },
+  {
+   "feedName": "wsdot",
+   "issuingOrganization": "Washington State DOT",
+   "state": "washington",
+   "version": "4.2",
+   "url": "https://wzdx.wsdot.wa.gov/api/v4/WorkZoneFeed"
+  },
+  {
+   "feedName": "njdot",
+   "issuingOrganization": "New Jersey Institute of Technology",
+   "state": "new jersey",
+   "version": "4.1",
+   "url": "https://smartworkzones.njit.edu/nj/wzdx"
+  },
+  {
+   "feedName": "nmdot",
+   "issuingOrganization": "New Mexico DOT",
+   "state": "new mexico",
+   "version": "4.1",
+   "url": "https://ai.blyncsy.io/wzdx/nmdot/feed"
+  },
+  {
+   "feedName": "kytc",
+   "issuingOrganization": "Kentucky Transportation Cabinet",
+   "state": "kentucky",
+   "version": "4.1",
+   "url": "https://storage.googleapis.com/kytc-its-2020-openrecords/public/feeds/WZDx/kytc_wzdx_v4.1.geojson"
+  },
+  {
+   "feedName": "msdot",
+   "issuingOrganization": "Mississippi DOT",
+   "state": "mississippi",
+   "version": "4.2",
+   "url": "https://api.mdottraffic.com/prod/v3/data/wzdx"
+  },
+  {
+   "feedName": "wisdot",
+   "issuingOrganization": "Wisconsin DOT",
+   "state": "wisconsin",
+   "version": "4.1",
+   "url": "https://511wi.gov/api/wzdx"
+  },
+  {
+   "feedName": "austin",
+   "issuingOrganization": "City of Austin",
+   "state": "texas",
+   "version": "4.2",
+   "url": "https://data.austintexas.gov/download/d9mm-cjw9"
+  }
+ ],
+ "excluded": [
+  {
+   "feedName": "odot",
+   "issuingOrganization": "Oklahoma DOT",
+   "state": "oklahoma",
+   "version": "4",
+   "url": "https://oktraffic.org/api/Geojsons/workzones  [query redacted: it matched a credential pattern]",
+   "rule": "url and registry disagree",
+   "why": "needAPIKey is false and yet the url matches a credential pattern; the query is redacted above and the feed is not polled"
+  },
+  {
+   "feedName": "idot_cwz",
+   "issuingOrganization": "IDOT",
+   "state": "Illinois",
+   "version": "CWZ 1.0",
+   "url": "https://wzad-idot.illinois.gov/cwz/01.00  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://wzad-idot.illinois.gov/cwz/api-key/)"
+  },
+  {
+   "feedName": "quebec",
+   "issuingOrganization": "Quebec City",
+   "state": "n/a",
+   "version": "3.1",
+   "url": "https://quebec.gewi.com/wzdx/pull",
+   "rule": "unknown spec version",
+   "why": "WZDx 3.1 names the feed metadata object road_event_feed_info rather than feed_info; not read for this project"
+  },
+  {
+   "feedName": "massdot__cwz",
+   "issuingOrganization": "Massachusetts DOT",
+   "state": "massachusetts",
+   "version": "CWZ 1.0",
+   "url": "https://api.massdot-swzm.com/api/v1/cwz/work-zone-feed",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://api-app.massdot-swzm.com/)"
+  },
+  {
+   "feedName": "vdot",
+   "issuingOrganization": "Virginia DOT",
+   "state": "virginia",
+   "version": "4",
+   "url": "https://data.511-atis-ttrip-prod.iteriscloud.com/smarterRoads/workzone/workZoneJSON/current/workZone.json  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://smarterroads.vdot.virginia.gov/register)"
+  },
+  {
+   "feedName": "cdot",
+   "issuingOrganization": "Colorado DOT",
+   "state": "colorado",
+   "version": "4.2",
+   "url": "https://data.cotrip.org/api/v1/wzdx  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://maps.cotrip.org/help/section/for-developers.html)"
+  },
+  {
+   "feedName": "ordot",
+   "issuingOrganization": "Oregon DOT",
+   "state": "oregon",
+   "version": "4",
+   "url": "https://api.odot.state.or.us/WZDx/v4.0/Workzones",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://apiportal.odot.state.or.us/)"
+  },
+  {
+   "feedName": "mtc",
+   "issuingOrganization": "Metropolitan Transportation Commission San Francisco",
+   "state": "california",
+   "version": "4.1",
+   "url": "https://api.511.org/traffic/wzdx  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://511.org/open-data/token)"
+  },
+  {
+   "feedName": "pbs",
+   "issuingOrganization": "PurposeBuilt Systems, LLC",
+   "state": "n/a",
+   "version": "CWZ 1.0",
+   "url": "https://feeds.purposebuilt.systems/cwz",
+   "rule": "unknown spec version",
+   "why": "Connected Work Zones is a different specification"
+  },
+  {
+   "feedName": "mdot_4",
+   "issuingOrganization": "Michigan DOT",
+   "state": "michigan",
+   "version": "4",
+   "url": "https://mdotridedata.state.mi.us//api/v1/organization/michigan_department_of_transportation/dataset/work_zone_information/query?limit=200&_format=json",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://www.michigan.gov/mdot/travel/safety/efforts/its/its-data)"
+  },
+  {
+   "feedName": "ptc",
+   "issuingOrganization": "Pennsylvania Turnpike Commission",
+   "state": "pennsylvania",
+   "version": "4.1",
+   "url": "https://atms.paturnpike.com/api/WZDxWorkZoneFeed  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://datahub.transportation.gov/api/views/69qe-yiui/files/de6330ba-7e11-4335-9a3f-caf24015dc1a?download=true&filename=WZDx_API_Key_Instructions.docx)"
+  },
+  {
+   "feedName": "nps",
+   "issuingOrganization": "National Park Service",
+   "state": "nps",
+   "version": "4",
+   "url": "https://developer.nps.gov/api/v1/roadevents  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://www.nps.gov/subjects/developer/get-started.htm)"
+  },
+  {
+   "feedName": "michigandot",
+   "issuingOrganization": "Michigan Department of Transportation",
+   "state": "michigan",
+   "version": "",
+   "url": "",
+   "rule": "inactive",
+   "why": "the registry marks this feed inactive"
+  },
+  {
+   "feedName": "iltollway",
+   "issuingOrganization": "Illinois Tollway",
+   "state": "illinois",
+   "version": "4.2",
+   "url": "https://tims2go.tollway.state.il.us/wzdx/v4.2  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": ""
+  },
+  {
+   "feedName": "txdot_v4_2",
+   "issuingOrganization": "Texas DOT",
+   "state": "texas",
+   "version": "4.2",
+   "url": "https://api.drivetexas.org/api/conditions.wzdx.geojson  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://api.drivetexas.org/)"
+  },
+  {
+   "feedName": "ohio",
+   "issuingOrganization": "Ohio DOT",
+   "state": "ohio",
+   "version": "4.2",
+   "url": "https://publicapi.ohgo.com/api/work-zones/wzdx/4.2  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://publicapi.ohgo.com/accounts/registration)"
+  },
+  {
+   "feedName": "fldot",
+   "issuingOrganization": "Florida DOT",
+   "state": "florida",
+   "version": "4.2",
+   "url": "https://us-datacloud.one.network/fdot/feed.json  [query redacted: it matched a credential pattern]",
+   "rule": "url and registry disagree",
+   "why": "needAPIKey is false and yet the url matches a credential pattern; the query is redacted above and the feed is not polled"
+  },
+  {
+   "feedName": "cdot_cwz",
+   "issuingOrganization": "Colorado DOT",
+   "state": "colorado",
+   "version": "CWZ 1.0",
+   "url": "(https://data.cotrip.org/api/v1/cwz  [query redacted: it matched a credential pattern]",
+   "rule": "needs a key",
+   "why": "a credential is required and this project holds none; named here rather than dropped, so the gap in coverage is visible",
+   "apiKeyURL": "(https://manage-api.cotrip.org/subscriber/subscription)"
+  }
+ ]
+}

@@ -98,6 +98,23 @@ data/reference/*
 data/reference/airspace/*
 !data/reference/airspace/appendix-d-airports.json
 
+# The two road registries, for the same reason as the airports snapshot: the
+# selection they record is what a result is computed over, and a pool that
+# cannot be read later is mechanism O waiting to happen. The probe REPORTS in
+# the same directory stay ignored -- they are diagnostics, they are named to
+# the second, and there will be dozens.
+#
+# Three lines, in this order, and the order is the whole of it: git will not
+# descend into an excluded directory, so the directory is re-included first;
+# that alone would admit every probe report in it, so everything inside is
+# re-excluded; and then the two files are named. Third time this pattern has
+# been needed and the third time it has been written out in full, because the
+# two-line version silently admits nothing and reads as though it worked.
+!data/reference/roads/
+data/reference/roads/*
+!data/reference/roads/wzdx-registry.json
+!data/reference/roads/transit-registry.json
+
 # The corrected nulls. See the EXCEPTION note above: a multi-hour run, not a
 # seconds-long rebuild.
 # Three lines, in this order, and the order is the whole of it: git will not
