@@ -35,14 +35,13 @@ import csv
 import hashlib
 import io
 import json
-import re
 from pathlib import Path
 
 import pytest
 
-from scripts.probe_road_feeds import (FEED_INFO_KEYS, caller_capped,
-                                      looks_credentialed, looks_like_error_object,
-                                      summarise)
+from scripts.probe_road_feeds import (FEED_INFO_KEYS, body_credential,
+                                      caller_capped, looks_credentialed,
+                                      looks_like_error_object, summarise)
 
 FIX = Path(__file__).parent / "fixtures" / "road"
 
@@ -111,6 +110,75 @@ def test_no_fixture_was_saved_from_a_credentialed_url() -> None:
             assert not looks_credentialed(b["url"]), b["name"]
 
 
+def test_no_saved_fixture_contains_a_credential() -> None:
+    """THE REGRESSION GUARD FOR 2026-10-05.
+
+    GitHub secret scanning found a Google Maps browser key at line 292 of
+    `chart-cameras.body`, a 79,692-byte public web page this script had saved
+    verbatim because `looks_credentialed` said the URL was clean.
+
+    It was. The key was in the payload. The guard covered the surface its
+    author was thinking about, and the exposure came through the other one.
+
+    This test reads every committed fixture and asserts that none of them
+    matches any credential pattern -- the files, not the URLs, not the
+    manifest. It fails on content rather than on a rule, so a future capture
+    that slips past the writer's guard still cannot stay committed.
+    """
+    offenders = []
+    for path in sorted(FIX.glob("*.body")):
+        hit = body_credential(path.read_bytes())
+        if hit:
+            offenders.append(f"{path.name}: {hit}")
+    assert not offenders, (
+        "credential-shaped content in committed fixtures: "
+        + "; ".join(offenders))
+
+
+def test_the_scan_covers_the_bytes_that_get_published() -> None:
+    """The narrowing, asserted so it cannot be mistaken for a weakening.
+
+    The first version of the body scan read the whole response and refused
+    the file if anything matched anywhere. That threw away the Mobility
+    catalogue, whose 2 MB holds a feed url with a token 1.8 MB past the clip
+    -- in bytes this project was never going to write.
+
+    The guard protects what is published. So it scans what is written, the
+    written bytes are verified clean here by reading them, and the fact that
+    the SOURCE carries a credential outside the saved region is recorded in
+    the manifest rather than dropped, because a different clip boundary is a
+    different question.
+    """
+    beyond = [b for b in manifest()["bodies"]
+              if b.get("saved") and b.get("credential_beyond_clip")]
+    for b in beyond:
+        assert b["clipped"] is True, b["name"]
+        assert body_credential((FIX / b["file"]).read_bytes()) is None, (
+            f"{b['name']} was saved with a credential inside the clip")
+    # And the claim is not made where it cannot be true.
+    for b in manifest()["bodies"]:
+        if b.get("saved") and not b["clipped"]:
+            assert b.get("credential_beyond_clip") is None, b["name"]
+
+
+def test_html_bodies_are_recorded_but_never_saved() -> None:
+    """A page is not a fixture.
+
+    Scanning bodies catches the patterns it knows, which is not the same as
+    catching credentials. The CHART pages were never worth keeping: their
+    status, content type and length are what this project learns from them,
+    and those are in the manifest. The markup is somebody else's and carries
+    their identifiers.
+    """
+    html = [b for b in manifest()["bodies"]
+            if "html" in (b.get("content_type") or "")]
+    assert html, "no HTML entries at all; this fixture set changed shape"
+    for b in html:
+        assert b["saved"] is False, b["name"]
+        assert not (FIX / f"{b['name']}.body").exists(), b["name"]
+        assert b["status"] == 200 and b["bytes_read"] > 0, b["name"]
+
+
 # -- sighting 28 ------------------------------------------------------------
 
 def test_the_sighting_28_body_is_clean(request) -> None:
@@ -154,56 +222,60 @@ def test_a_requested_cap_is_recorded_and_not_flagged() -> None:
 
 # -- the CHART pages --------------------------------------------------------
 
-CF_EMAIL = re.compile(rb"/cdn-cgi/l/email-protection#[0-9a-f]+")
-
-
-def normalise_cloudflare(b: bytes) -> bytes:
-    """Blank Cloudflare's email-obfuscation token, which rotates per response.
-
-    Needed because of an error worth keeping: the two CHART speed responses
-    were reported as "byte-identical", on the evidence that both were 39,772
-    bytes. They are not byte-identical. They differ in 56 characters, all of
-    them inside a `/cdn-cgi/l/email-protection#` href whose XOR key changes
-    every response, which is why the lengths matched exactly.
-
-    The conclusion -- that these endpoints do not content-negotiate -- was
-    right. The evidence given for it was a proxy for the thing, and a proxy
-    that happened to agree. This function is the actual comparison.
-    """
-    return CF_EMAIL.sub(b"/cdn-cgi/l/email-protection#X", b)
-
-
 def test_chart_answers_html_for_a_feed_url() -> None:
+    """Recorded in the manifest rather than in 240 kB of their markup.
+
+    Three documented CHART feed URLs answer HTTP 200 with a web page. That
+    is the finding, and status plus content type plus length is all of it.
+    """
     for name in ("chart-speed", "chart-cameras", "chart-incidents"):
-        s = summarise_fixture(name)
-        assert s["kind"] == "html", name
-        assert len(s["flags"]) == 1, name
-        assert "HTML, NOT DATA" in s["flags"][0], name
-
-
-def test_html_is_named_html_and_not_malformed_xml() -> None:
-    """A page begins with `<`, so a naive sniff calls it XML and then reports
-    a parse error -- which reads as broken data rather than as the wrong kind
-    of thing entirely."""
-    s = summarise_fixture("chart-speed")
-    assert s["kind"] == "html"
-    assert not any("XML" in f for f in s["flags"])
+        e = entry(name)
+        assert e["status"] == 200, name
+        assert e["content_type"].startswith("text/html"), name
+        assert e["bytes_read"] > 30_000, name
+        assert e["saved"] is False, name
 
 
 def test_chart_does_not_content_negotiate() -> None:
-    """Same URL, `Accept: */*` against `Accept: application/json`. Identical
-    once Cloudflare's rotating token is blanked, so the server returns the
-    same page either way and content negotiation is not the explanation for
-    the HTML."""
+    """Same URL, two Accept headers, same number of bytes back.
+
+    The earlier claim here was "byte-identical", on the evidence of two equal
+    lengths. The bodies were not identical: they differed in 56 characters
+    inside a Cloudflare `email-protection` href whose key rotates per
+    response, which is exactly why the lengths matched. The conclusion was
+    right and the evidence was a proxy that happened to agree.
+
+    The bodies are no longer committed, so this asserts what the manifest
+    can carry: the two requests differ only in `Accept` and came back the
+    same size. The character-level comparison was done once, against the
+    recordings, before they were removed -- and is written up as mechanism W
+    rather than re-derived here from files that should not exist.
+    """
     for stem in ("chart-speed", "chart-incidents"):
-        a, b = body(stem), body(f"{stem}-json")
-        assert len(a) == len(b), stem
-        assert a != b, (
-            f"{stem}: the two bodies are byte-identical, so the Cloudflare "
-            f"token no longer rotates and this test's premise has changed")
-        assert normalise_cloudflare(a) == normalise_cloudflare(b), stem
-    assert entry("chart-speed")["accept_sent"] == "*/*"
-    assert entry("chart-speed-json")["accept_sent"] == "application/json"
+        a, b = entry(stem), entry(f"{stem}-json")
+        assert a["accept_sent"] == "*/*", stem
+        assert b["accept_sent"] == "application/json", stem
+        assert a["url"] == b["url"], stem
+        assert a["bytes_read"] == b["bytes_read"], stem
+        assert a["content_type"] == b["content_type"] == \
+            "text/html; charset=utf-8", stem
+
+
+def test_the_summariser_names_a_page_html_and_not_broken_xml() -> None:
+    """Synthetic, and correctly so. This tests a branch of `summarise`, not
+    a server's behaviour, and the line this file holds is that recordings
+    test what servers send while synthetic input tests logic.
+
+    A page begins with `<`, so a naive sniff calls it XML and then reports a
+    parse error, which reads as broken data rather than as the wrong kind of
+    thing entirely.
+    """
+    s = summarise(b"<!DOCTYPE html>\n<html><body>Sign in</body></html>",
+                  "text/html; charset=utf-8", False)
+    assert s["kind"] == "html"
+    assert len(s["flags"]) == 1
+    assert "HTML, NOT DATA" in s["flags"][0]
+    assert not any("XML" in f for f in s["flags"])
 
 
 # -- Socrata ----------------------------------------------------------------
@@ -382,9 +454,15 @@ def test_mdot_carries_two_geometry_types() -> None:
     same feed returned 65 features, LineString only. A fetcher written
     against the first observation would have met MultiPoint in production."""
     s = summarise_fixture("mdot-wzdx")
-    assert s["features"] == 206
     assert set(s["geometry_types"]) == {"LineString", "MultiPoint"}
+    assert s["features"] > 100
     assert s["flags"] == []
+    # The count is deliberately a floor rather than the exact figure. 65 on
+    # 2026-10-02 and 206 on 2026-10-05 are both true of a live feed, and a
+    # recapture would make an exact assertion fail for a reason that is not
+    # a defect. The TWO GEOMETRY TYPES are the finding and they are asserted
+    # exactly, because a fetcher written against LineString alone is what
+    # this test exists to prevent.
 
 
 def test_mdot_properties_are_nested_and_properly_typed() -> None:

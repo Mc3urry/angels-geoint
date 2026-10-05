@@ -89,6 +89,7 @@ import csv
 import hashlib
 import io
 import json
+import re
 import socket
 import sys
 import time
@@ -615,6 +616,45 @@ def looks_credentialed(url: str) -> bool:
     return any(h in low for h in CREDENTIAL_HINTS)
 
 
+# ADDED 2026-10-05, after GitHub secret scanning found a Google API key in a
+# committed fixture.
+#
+# `looks_credentialed` checks the URL. It was written, tested, and felt like
+# the credential guard -- and the exposure came through the other side. The
+# CHART cameras page is a public web page that embeds a Google Maps browser
+# key in its own markup, at line 292 of 79,692 bytes, and this script saved
+# the page verbatim because the URL was clean.
+#
+# The guard covered the surface I was thinking about. Nothing checked the
+# payload. A body is the larger surface and the one whose contents are not
+# this project's to publish.
+BODY_CREDENTIAL_PATTERNS = {
+    "google api key": re.compile(rb"AIza[0-9A-Za-z_\-]{35}"),
+    "google oauth client":
+        re.compile(rb"[0-9]+-[0-9a-z]{32}\.apps\.googleusercontent\.com"),
+    "aws access key": re.compile(rb"AKIA[0-9A-Z]{16}"),
+    "bearer token": re.compile(rb"(?i)bearer\s+[A-Za-z0-9._\-]{20,}"),
+    "key in an assignment": re.compile(
+        rb"(?i)(api[_-]?key|apikey|access[_-]?token|client[_-]?secret)"
+        rb"\s*[:=]\s*[\"'][A-Za-z0-9._\-]{16,}[\"']"),
+    "token in a url": re.compile(rb"(?i)[?&]token=[A-Za-z0-9._\-]{20,}"),
+    "private key block": re.compile(rb"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+}
+
+
+def body_credential(body: bytes) -> str | None:
+    """The name of the first credential-shaped string in a body, or None.
+
+    Reports the PATTERN NAME and never the match. A function that returned
+    the secret so the caller could log it would be its own version of this
+    mistake.
+    """
+    for name, rx in BODY_CREDENTIAL_PATTERNS.items():
+        if rx.search(body):
+            return name
+    return None
+
+
 def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
           accept: str = "*/*", keep_body: bool = False) -> dict:
     """One GET. Records the status and infers no cause from it.
@@ -701,9 +741,64 @@ def save_fixture(out_dir: Path, name: str, rec: dict,
     if looks_credentialed(rec["url"]):
         return {"name": name, "saved": False,
                 "reason": "the URL looks like it carries a credential"}
+    # An HTML page is never saved, whatever it contains.
+    #
+    # The narrow lesson from the leak is that the body needs scanning too.
+    # The wider one is that a scanner finds only the patterns it knows, and
+    # the CHART pages were never worth keeping in the first place: what this
+    # project learns from them is their status, their content type and their
+    # length, all of which live in the manifest. The page itself is 80 kB of
+    # somebody else's markup, carrying their analytics ids, their session
+    # tokens and, as it turned out, their Google Maps key.
+    #
+    # Removing the class is a better guard than catching instances of it.
+    kind = (rec.get("summary") or {}).get("kind")
+    if kind == "html":
+        return {"name": name, "saved": False,
+                "url": rec["url"], "status": rec["status"],
+                "bytes_read": rec["bytes_read"],
+                "content_type": rec.get("_content_type", ""),
+                "accept_sent": rec.get("accept_sent", "*/*"),
+                "reason": "an HTML page is not saved as a fixture. Its "
+                          "status, content type and length are recorded "
+                          "here and are everything this project learns from "
+                          "it; the markup is somebody else's and carries "
+                          "their identifiers"}
     body = rec["_body"]
     clipped = len(body) > limit
     kept = body[:limit]
+
+    # The body, which is the surface the URL check does not cover and the one
+    # that actually leaked.
+    #
+    # NARROWED 2026-10-05, an hour after it was written. The first version
+    # scanned the whole body read and refused the file if anything matched
+    # anywhere. That refused the Mobility catalogue, whose 2 MB holds a feed
+    # url with a token in it -- 1.8 MB past the clip, in bytes this script
+    # was never going to write. The committed 262 kB is clean, and was
+    # verified clean.
+    #
+    # The thing being protected is what gets PUBLISHED, so the scan is of
+    # what will be written. A wider scan is not a stronger guard here, it is
+    # a guard pointed at the wrong bytes, and the cost of pointing it wrong
+    # is a usable recording thrown away -- which is how a suite ends up back
+    # on hand-written fixtures.
+    #
+    # The wider fact is recorded rather than dropped: if the source carries
+    # a credential outside the saved region, the manifest says so, because a
+    # future clip at a different boundary would be a different question.
+    hit = body_credential(kept)
+    if hit:
+        return {"name": name, "saved": False,
+                "url": rec["url"],
+                "status": rec["status"],
+                "bytes_read": rec["bytes_read"],
+                "content_type": rec.get("_content_type", ""),
+                "reason": f"the body contains a {hit}. Not saved: this is "
+                          f"somebody else's credential, embedded in their "
+                          f"own page, and publishing it is not this "
+                          f"project's to do"}
+    beyond = body_credential(body) if clipped else None
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{name}.body"
     path.write_bytes(kept)
@@ -724,6 +819,11 @@ def save_fixture(out_dir: Path, name: str, rec: dict,
         "clipped": clipped,
         "clip_limit": limit,
         "sha256_of_saved": hashlib.sha256(kept).hexdigest(),
+        # Stated when true, absent when not. The saved bytes are clean --
+        # that is what the refusal above guarantees -- and the source is
+        # not, which anyone choosing a different clip boundary needs to
+        # know before they choose it.
+        "credential_beyond_clip": beyond,
         "note": ("VERBATIM server response, clipped to the limit above. "
                  "Not a hand-written fixture, which is the entire point."
                  if clipped else
@@ -865,9 +965,16 @@ def main(argv: list[str] | None = None) -> int:
             "bodies": fixtures,
         }, indent=2) + "\n", encoding="utf-8")
         kept = sum(1 for f in fixtures if f.get("saved"))
+        refused = sum(1 for f in fixtures if not f.get("saved"))
         clip = sum(1 for f in fixtures if f.get("clipped"))
-        print(f"\n  saved {kept} body/bodies to {args.save_bodies}"
-              f" ({clip} clipped, and recorded as clipped)")
+        beyond = sum(1 for f in fixtures if f.get("credential_beyond_clip"))
+        print(f"\n  saved {kept} body/bodies to {args.save_bodies}, "
+              f"refused {refused}")
+        if clip:
+            print(f"  {clip} clipped, and recorded as clipped")
+        if beyond:
+            print(f"  {beyond} source(s) carry a credential beyond the clip; "
+                  f"the saved bytes do not, and the manifest says so")
         print(f"  manifest: {man}")
 
     # Named to the second, not to the day. The first version of this script
