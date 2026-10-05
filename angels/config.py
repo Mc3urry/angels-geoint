@@ -305,6 +305,14 @@ GFW_API_TOKEN = os.getenv("GFW_API_TOKEN", "")
 CDSE_USERNAME = os.getenv("CDSE_USERNAME", "")
 CDSE_PASSWORD = os.getenv("CDSE_PASSWORD", "")
 
+# WMATA, for the road domain's independent layer over the study area. The
+# key goes in a request HEADER named api_key, never in a query string: a
+# credential in a url reaches the registry artefact, the probe manifest and
+# every log, and `safe_url` would then redact it, which excludes the feed and
+# makes the cause look like a data problem.
+WMATA_API_KEY = os.getenv("WMATA_API_KEY", "")
+WMATA_KEY_HEADER = "api_key"
+
 OPENSKY_TOKEN_URL = (
     "https://auth.opensky-network.org/auth/realms/opensky-network/"
     "protocol/openid-connect/token"

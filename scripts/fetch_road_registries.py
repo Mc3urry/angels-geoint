@@ -129,6 +129,40 @@ NO_AUTH_VALUES = ("", "0")
 # the request fails.
 BAD_STATUS = ("deprecated", "inactive", "development")
 
+# Feeds this project holds a credential for, named one at a time.
+#
+# These are NOT added to the keyless selection. `n_selected` keeps meaning
+# "pollable by anyone with no account", which is what makes the CONUS arm
+# reproducible by a reader; the credentialed feeds are a third list beside
+# it, so anyone can see exactly what the key bought and what the result would
+# look like without it.
+#
+# Named by catalogue id rather than matched on provider, because a pattern
+# like "WMATA" in a provider string is a pooled quantity defined by whatever
+# the catalogue happens to call things this month -- mechanism O. And because
+# an id is opaque, each entry carries the provider it is EXPECTED to be, and
+# the row is refused if the catalogue disagrees. Two records of one fact.
+#
+# Only a feed excluded for `needs a key` can be rescued this way. The rule
+# order puts the credential check after data type, entity type and country,
+# so a row in that bucket has already proven it is a United States realtime
+# vehicle-position feed. Every other exclusion still stands: a key does not
+# make a trip-updates feed into positions.
+#
+# WZDx has the same shape available -- 13 of its 43 rows need keys, Virginia
+# among them -- and gets the same treatment when a key for one exists. It is
+# not built ahead of that, because machinery with no caller is untested
+# machinery that reads as though it works.
+CREDENTIALED_TRANSIT = (
+    {"id": "mdb-1850", "expect_provider": "WMATA",
+     "env": "WMATA_API_KEY", "header": "api_key",
+     "why": "WMATA is most of the vehicle-hours inside the study area, and "
+            "without it the independent layer there is county circulators"},
+    {"id": "mdb-1853", "expect_provider": "WMATA",
+     "env": "WMATA_API_KEY", "header": "api_key",
+     "why": "the second of WMATA's two keyed vehicle-position feeds"},
+)
+
 
 class RegistryRefused(RuntimeError):
     """The body is not a registry. Raised rather than parsed into zero rows."""
@@ -273,15 +307,26 @@ def wzdx_selection(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     return selected, excluded
 
 
-def transit_selection(rows: list[dict]) -> tuple[list[dict], list[dict]]:
-    """(selected, excluded) for GTFS-Realtime vehicle positions.
+def transit_selection(rows: list[dict], credentialed=CREDENTIALED_TRANSIT,
+                      env=None) -> tuple[list[dict], list[dict], list[dict]]:
+    """(selected, credentialed, excluded) for GTFS-Realtime vehicle positions.
 
     The first matching rule wins and is recorded, so a row excluded for three
-    reasons is reported under one and the counts still add up.
+    reasons is reported under one and the counts still add up. All three
+    lists are disjoint and together they are every row.
+
+    `credentialed` names feeds this project has a key for; `env` supplies the
+    environment to look them up in, defaulting to the real one. The VALUE is
+    never read into anything -- only whether it is set.
     """
+    import os as _os
+    env = _os.environ if env is None else env
+    by_id = {c["id"]: c for c in credentialed}
     selected: list[dict] = []
+    credentialed_out: list[dict] = []
     excluded: list[dict] = []
     for r in rows:
+        rescued = None
         raw_url = (r.get("urls.direct_download") or "").strip()
         ident = {
             "id": (r.get("id") or "").strip(),
@@ -314,13 +359,42 @@ def transit_selection(rows: list[dict]) -> tuple[list[dict], list[dict]]:
                                  why=f"country_code is {country!r}"))
             continue
         if auth not in NO_AUTH_VALUES:
-            excluded.append(dict(
-                ident, rule="needs a key",
-                why=f"authentication_type is {auth!r}; named rather than "
-                    f"dropped so the gap is visible",
-                authentication_info=(r.get("urls.authentication_info")
-                                     or "").strip()))
-            continue
+            named = by_id.get(ident["id"])
+            if named and named["expect_provider"].lower() not in \
+                    ident["provider"].lower():
+                # The id we named is not the feed we thought. Refused rather
+                # than polled: a credential sent to the wrong operator is a
+                # worse outcome than a missing feed.
+                excluded.append(dict(
+                    ident, rule="named feed does not match",
+                    why=f"{ident['id']} is named in CREDENTIALED_TRANSIT as "
+                        f"{named['expect_provider']!r} and the catalogue "
+                        f"calls it {ident['provider']!r}"))
+                continue
+            if named and env.get(named["env"]):
+                # CORRECTED on the test that asserted a key buys exactly one
+                # thing, which it did not. This branch used to append to the
+                # credentialed list and `continue`, which skipped the status
+                # and url rules below -- so a feed the catalogue had marked
+                # deprecated was rescued by holding a key for it, and the
+                # rescue was recorded as though it had passed every check.
+                #
+                # A credential answers one question: may we fetch this. It
+                # does not answer whether the feed is current or has a url.
+                # So the row falls through the remaining rules and is sorted
+                # at the bottom.
+                rescued = named
+            else:
+                excluded.append(dict(
+                    ident, rule="needs a key",
+                    why=(f"authentication_type is {auth!r}, and "
+                         f"{named['env']} is named for this feed but is not "
+                         f"set" if named else
+                         f"authentication_type is {auth!r}; named rather "
+                         f"than dropped so the gap is visible"),
+                    authentication_info=(r.get("urls.authentication_info")
+                                         or "").strip()))
+                continue
         if status in BAD_STATUS:
             excluded.append(dict(ident, rule="not current",
                                  why=f"the catalogue marks this feed "
@@ -339,13 +413,23 @@ def transit_selection(rows: list[dict]) -> tuple[list[dict], list[dict]]:
                     "so this is expected to fire; the query is redacted "
                     "above and the feed is not polled"))
             continue
+        if rescued:
+            credentialed_out.append(dict(
+                ident,
+                # The variable's NAME, never its value.
+                env_var=rescued["env"],
+                header=rescued["header"],
+                authentication_type=auth,
+                why=rescued["why"]))
+            continue
         selected.append(ident)
-    return selected, excluded
+    return selected, credentialed_out, excluded
 
 
 def artefact(kind: str, url: str, raw: bytes, rows: list[dict],
              selected: list[dict], excluded: list[dict],
-             *, when: datetime, rules: dict) -> dict:
+             *, when: datetime, rules: dict,
+             credentialed: list[dict] | None = None) -> dict:
     """The record, with the inputs that define it in the same file.
 
     Rule 12. A stored measurement records what it is a measurement of: the
@@ -369,9 +453,16 @@ def artefact(kind: str, url: str, raw: bytes, rows: list[dict],
                  "mechanism O in docs/reporting-defects.md.",
         "rows_read": len(rows),
         "n_selected": len(selected),
+        "n_credentialed": len(credentialed or []),
         "n_excluded": len(excluded),
+        "_credentialed_note": "Feeds this project holds a key for, kept in a "
+                              "list of their own so that n_selected keeps "
+                              "meaning pollable by anyone with no account. "
+                              "env_var names the variable; no value is "
+                              "stored here or anywhere else.",
         "excluded_by_rule": by_rule,
         "selected": selected,
+        "credentialed": credentialed or [],
         "excluded": excluded,
     }
 
@@ -383,12 +474,14 @@ def check_arithmetic(art: dict) -> None:
     direction nobody can see, which is the shape of most of this project's
     worst afternoons.
     """
-    total = art["n_selected"] + art["n_excluded"]
+    total = art["n_selected"] + art.get("n_credentialed", 0) + art["n_excluded"]
     if total != art["rows_read"]:
         raise RegistryRefused(
-            f"{art['n_selected']} selected plus {art['n_excluded']} excluded "
-            f"is {total}, against {art['rows_read']} rows read. A row is "
-            f"being lost between the two lists")
+            f"{art['n_selected']} selected plus "
+            f"{art.get('n_credentialed', 0)} credentialed plus "
+            f"{art['n_excluded']} excluded is {total}, against "
+            f"{art['rows_read']} rows read. A row is being lost between the "
+            f"lists")
     if sum(art["excluded_by_rule"].values()) != art["n_excluded"]:
         raise RegistryRefused(
             "the per-rule exclusion counts do not sum to the number excluded")
@@ -496,9 +589,17 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"    fetched {len(raw):,} bytes"
                       f"{'  (TRUNCATED)' if trunc else ''}")
             rows = parse_registry_csv(raw, truncated=trunc)
-            selected, excluded = reg["select"](rows)
+            out = reg["select"](rows)
+            # WZDx returns two lists, transit three. Unpacked by length
+            # rather than by registry name, so adding a credentialed WZDx
+            # feed later changes one function and not this loop.
+            if len(out) == 3:
+                selected, credentialed, excluded = out
+            else:
+                (selected, excluded), credentialed = out, []
             art = artefact(reg["kind"], reg["url"], raw, rows, selected,
-                           excluded, when=when, rules=reg["rules"])
+                           excluded, when=when, rules=reg["rules"],
+                           credentialed=credentialed)
             check_arithmetic(art)
             check_no_credentials(art)
         except (RegistryRefused, urllib.error.URLError, OSError) as exc:
@@ -509,7 +610,11 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         print(f"    {art['rows_read']} rows, {art['n_selected']} selected, "
+              f"{art['n_credentialed']} credentialed, "
               f"{art['n_excluded']} excluded")
+        for c in art["credentialed"]:
+            print(f"      KEYED  {c['provider'][:46]:<46} "
+                  f"via {c['env_var']} in a {c['header']} header")
         for rule, n in sorted(art["excluded_by_rule"].items(),
                               key=lambda kv: -kv[1]):
             print(f"      {n:>4}  {rule}")

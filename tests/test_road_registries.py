@@ -149,7 +149,7 @@ def test_cwz_is_excluded_by_name_not_by_a_failed_float() -> None:
 # -- transit selection ------------------------------------------------------
 
 def test_a_clean_transit_row_is_selected() -> None:
-    sel, exc = transit_selection([transit_row()])
+    sel, _cred, exc = transit_selection([transit_row()])
     assert len(sel) == 1 and not exc
 
 
@@ -165,7 +165,7 @@ def test_a_clean_transit_row_is_selected() -> None:
     ({"urls.direct_download": ""}, "no url"),
 ])
 def test_each_transit_rule_fires_and_is_named(over, rule) -> None:
-    sel, exc = transit_selection([transit_row(**over)])
+    sel, _cred, exc = transit_selection([transit_row(**over)])
     assert not sel
     assert len(exc) == 1 and exc[0]["rule"] == rule
 
@@ -174,7 +174,7 @@ def test_a_blank_authentication_type_means_none() -> None:
     """The published CSV leaves the column blank for feeds needing nothing.
     Asserted here because treating blank as 'unknown, exclude' would drop
     most of the catalogue silently."""
-    sel, _ = transit_selection([transit_row(**{"urls.authentication_type": ""})])
+    sel, _c, _e = transit_selection([transit_row(**{"urls.authentication_type": ""})])
     assert len(sel) == 1
 
 
@@ -182,10 +182,10 @@ def test_entity_type_is_a_list_in_one_cell() -> None:
     """'vp,tu' and 'vp tu' are both real. A substring test would also match
     a hypothetical 'vpx', so the cell is split rather than searched."""
     for cell in ("vp", "vp,tu", "tu,vp", "vp tu sa"):
-        sel, _ = transit_selection([transit_row(entity_type=cell)])
+        sel, _c, _e = transit_selection([transit_row(entity_type=cell)])
         assert len(sel) == 1, cell
     for cell in ("tu", "sa", "tu,sa", ""):
-        sel, _ = transit_selection([transit_row(entity_type=cell)])
+        sel, _c, _e = transit_selection([transit_row(entity_type=cell)])
         assert not sel, cell
 
 
@@ -203,7 +203,7 @@ def test_a_credentialed_url_never_reaches_the_artefact() -> None:
     honesty.
     """
     dirty = "https://example.test/feed.json?token=abcdefghijklmnopqrstuvwx"
-    sel, exc = transit_selection([
+    sel, _cred, exc = transit_selection([
         transit_row(**{"urls.direct_download": dirty,
                        "urls.authentication_type": "1"})])
     assert not sel and len(exc) == 1
@@ -225,7 +225,7 @@ def test_a_feed_whose_url_and_catalogue_disagree_is_not_polled() -> None:
     reconcile. Whichever is wrong, polling it means sending somebody else's
     credential."""
     dirty = "https://example.test/feed.json?api_key=abcdefghijklmnopqrst"
-    sel, exc = transit_selection([
+    sel, _cred, exc = transit_selection([
         transit_row(**{"urls.direct_download": dirty,
                        "urls.authentication_type": "0"})])
     assert not sel
@@ -320,3 +320,128 @@ def test_the_real_registry_artefact_passes_both_checks() -> None:
                    when=NOW, rules={"version": list(KNOWN_WZDX_VERSIONS)})
     check_arithmetic(art)
     check_no_credentials(art)
+
+
+# -- feeds this project holds a key for -------------------------------------
+#
+# The whole design question here is what `n_selected` means. It means
+# "pollable by anyone with no account", which is what makes the continental
+# arm reproducible by a reader who has none. A key must not quietly change
+# that number, so credentialed feeds are a third list and the tests below are
+# mostly about keeping the three disjoint and the arithmetic honest.
+
+NAMED = ({"id": "mdb-1850", "expect_provider": "WMATA", "env": "WMATA_API_KEY",
+          "header": "api_key", "why": "most of the vehicle-hours in the AOI"},)
+
+
+def keyed_row(**over) -> dict:
+    return transit_row(**{"id": "mdb-1850",
+                          "provider": "Washington Metropolitan Area Transit "
+                                      "Authority (WMATA)",
+                          "urls.authentication_type": "1", **over})
+
+
+def test_a_named_feed_with_a_key_present_is_credentialed_not_selected() -> None:
+    sel, cred, exc = transit_selection(
+        [keyed_row()], credentialed=NAMED, env={"WMATA_API_KEY": "x" * 32})
+    assert not sel, "a keyed feed must never enter the keyless count"
+    assert not exc
+    assert len(cred) == 1
+    assert cred[0]["env_var"] == "WMATA_API_KEY"
+    assert cred[0]["header"] == "api_key"
+
+
+def test_the_key_value_never_reaches_the_record() -> None:
+    """Only the variable's name. A record carrying the value would be the
+    registry artefact publishing a credential, which is the thing three
+    separate guards in this project now exist to prevent."""
+    secret = "s3cret" * 6
+    _, cred, _ = transit_selection(
+        [keyed_row()], credentialed=NAMED, env={"WMATA_API_KEY": secret})
+    assert secret not in json.dumps(cred)
+    check_no_credentials({"credentialed": cred})
+
+
+def test_a_named_feed_with_no_key_set_stays_excluded() -> None:
+    """THE HONEST CASE.
+
+    Naming a feed in code does not make it pollable. With the variable
+    unset the feed stays excluded, and the reason says which variable is
+    missing rather than repeating the generic one -- so a reader of the
+    artefact can tell "we chose not to" from "we meant to and could not".
+    """
+    sel, cred, exc = transit_selection(
+        [keyed_row()], credentialed=NAMED, env={})
+    assert not sel and not cred
+    assert exc[0]["rule"] == "needs a key"
+    assert "WMATA_API_KEY" in exc[0]["why"] and "not set" in exc[0]["why"]
+
+
+def test_an_empty_key_counts_as_unset() -> None:
+    """`.env` with a bare `WMATA_API_KEY=` is the normal state of a fresh
+    checkout, and it must not look like a credential."""
+    _, cred, exc = transit_selection(
+        [keyed_row()], credentialed=NAMED, env={"WMATA_API_KEY": ""})
+    assert not cred and exc[0]["rule"] == "needs a key"
+
+
+def test_a_named_id_that_is_not_the_expected_operator_is_refused() -> None:
+    """The cross-check. An id is opaque, so each entry carries the provider
+    it is expected to be. A credential sent to the wrong operator is a worse
+    outcome than a missing feed."""
+    sel, cred, exc = transit_selection(
+        [keyed_row(provider="Some Other Transit Agency")],
+        credentialed=NAMED, env={"WMATA_API_KEY": "x" * 32})
+    assert not sel and not cred
+    assert exc[0]["rule"] == "named feed does not match"
+    assert "WMATA" in exc[0]["why"]
+
+
+def test_a_key_does_not_rescue_any_other_exclusion() -> None:
+    """A key buys exactly one thing. It does not make a trip-updates feed
+    into a vehicle-positions feed, or a Canadian one into a US one."""
+    env = {"WMATA_API_KEY": "x" * 32}
+    for over, rule in (({"entity_type": "tu"}, "no vehicle positions"),
+                       ({"data_type": "gtfs"}, "not realtime"),
+                       ({"location.country_code": "CA"},
+                        "outside the study area"),
+                       ({"status": "deprecated"}, "not current")):
+        sel, cred, exc = transit_selection(
+            [keyed_row(**over)], credentialed=NAMED, env=env)
+        assert not sel and not cred, (over, "a key rescued the wrong thing")
+        assert exc[0]["rule"] == rule
+
+
+def test_an_unnamed_keyed_feed_is_untouched() -> None:
+    """78 feeds need keys this project does not hold. They stay excluded
+    with the generic reason, so the gap in coverage is still visible."""
+    _, cred, exc = transit_selection(
+        [keyed_row(id="mdb-9999", provider="Somewhere Transit")],
+        credentialed=NAMED, env={"WMATA_API_KEY": "x" * 32})
+    assert not cred
+    assert exc[0]["rule"] == "needs a key"
+    assert "not set" not in exc[0]["why"]
+
+
+def test_the_three_lists_are_disjoint_and_complete() -> None:
+    rows = [transit_row(id="a"), keyed_row(), transit_row(id="c",
+            data_type="gtfs"), transit_row(id="d", entity_type="tu")]
+    sel, cred, exc = transit_selection(
+        rows, credentialed=NAMED, env={"WMATA_API_KEY": "x" * 32})
+    assert len(sel) + len(cred) + len(exc) == len(rows)
+    ids = [e["id"] for e in sel] + [e["id"] for e in cred] + \
+          [e["id"] for e in exc]
+    assert len(ids) == len(set(ids)), "a row appears in two lists"
+
+
+def test_the_arithmetic_check_counts_all_three() -> None:
+    rows = [transit_row(id="a"), keyed_row()]
+    sel, cred, exc = transit_selection(
+        rows, credentialed=NAMED, env={"WMATA_API_KEY": "x" * 32})
+    art = artefact("k", "u", b"r", rows, sel, exc, when=NOW, rules={},
+                   credentialed=cred)
+    check_arithmetic(art)
+    assert art["n_credentialed"] == 1
+    art["n_credentialed"] = 0
+    with pytest.raises(RegistryRefused, match="lost between"):
+        check_arithmetic(art)
