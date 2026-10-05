@@ -144,6 +144,18 @@ class Session:
         return self.started <= t <= (self.ended or self.last_seen)
 
 
+def day_file(root: Path, when: datetime) -> Path:
+    """The heartbeat file for a day.
+
+    Public because a caller needs to tell a missing FILE from a missing
+    RECORD. No file means we have no idea what the collector was doing. A
+    file with no record in an hour means we have a record of it not polling.
+    Those are different facts and `read_heartbeats` returns nothing for both,
+    so anything reasoning about coverage has to be able to look.
+    """
+    return _day_file(root, when)
+
+
 def read_heartbeats(root: Path, t_start: datetime, t_end: datetime,
                     *, collector: str | None = None) -> Iterator[dict[str, Any]]:
     """Every heartbeat record in the window, oldest first.

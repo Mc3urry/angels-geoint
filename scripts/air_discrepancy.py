@@ -53,6 +53,7 @@ import glob
 import json
 import math
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 try:
@@ -62,8 +63,25 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
         raise
 
 from angels.config import EVENTS, REFERENCE
+from angels.config import RAW as RAW_ROOT      # data/raw -- absolute
+from angels.core import uptime
 
 RAW = Path("data/raw/aviation-adsbfi")
+
+# The collector whose heartbeats describe THIS archive. Named, not derived
+# from the directory, because `aviation-adsbfi` on disk and
+# `aviation-independent` in the heartbeats are the same collector under two
+# spellings, and a function that guessed the mapping would be a pooled
+# quantity defined by a directory listing.
+COLLECTOR_NAME = "aviation-independent"
+
+# The collector polls every 30 s and flushes every 5 minutes, so one parquet
+# partition file should hold ten polls. Written down because the comparison
+# between these two counts is what caught a file count published as a poll
+# count, and a check that exists once in somebody's head is not a check.
+POLL_S = 30.0
+FLUSH_S = 300.0
+EXPECTED_POLLS_PER_FILE = FLUSH_S / POLL_S
 AIRPORTS = REFERENCE / "airspace" / "appendix-d-airports.json"
 
 CELL_DEG = 0.05
@@ -126,7 +144,16 @@ def signed_nm(lon: float, lat: float, airports) -> float:
 
 
 def read(since: str | None):
-    """(per-unit counts, mask evidence). One pass; nothing is re-derived."""
+    """(per-unit counts, mask evidence). One pass; nothing is re-derived.
+
+    The fifth return value is a count of PARQUET PARTITION FILES. It was
+    published as `n_polls` until 2026-10-05, which it never was: polling runs
+    at 30 s and flushes every 5 minutes, so a file holds ten polls. The
+    published figure of 1,659 stood against 19,329 polls actually attempted
+    over the same window -- understated by 11.7. The real counts come from
+    the heartbeats, via `time_coverage`, and this one is named for what it
+    holds.
+    """
     import pyarrow.parquet as pq
 
     files = sorted(glob.glob(str(RAW / "hour=*" / "aircraft_*.parquet")))
@@ -140,9 +167,11 @@ def read(since: str | None):
     direct: set = set()
     tracks = collections.defaultdict(list)
     days: set = set()
+    hours: set = set()
 
     for f in files:
         days.add(f.split("hour=")[1][:8])
+        hours.add(f.split("hour=")[1][:10])
         t = pq.read_table(f, columns=["type", "hex", "lat", "lon",
                                       "alt_baro", "fetched_at"])
         cols = [t.column(c).to_pylist() for c in
@@ -170,7 +199,204 @@ def read(since: str | None):
                 per[key][2] += 1
             elif k in COOPERATIVE:
                 per[key][0] += 1
-    return per, direct, tracks, sorted(days), len(files)
+    return per, direct, tracks, sorted(days), len(files), sorted(hours)
+
+
+def hours_in_span(hours_present) -> list[str]:
+    """Every UTC hour key from the first present hour to the last, inclusive.
+
+    The span is defined by what is on disk, not by a wall clock, so a run on
+    a partial archive describes the archive it read rather than the interval
+    somebody hoped it covered.
+    """
+    if not hours_present:
+        return []
+    first = datetime.strptime(min(hours_present), "%Y%m%d%H")
+    last = datetime.strptime(max(hours_present), "%Y%m%d%H")
+    out, t = [], first.replace(tzinfo=timezone.utc)
+    end = last.replace(tzinfo=timezone.utc)
+    while t <= end:
+        out.append(t.strftime("%Y%m%d%H"))
+        t += timedelta(hours=1)
+    return out
+
+
+def time_coverage(collector_root: Path, hours_present,
+                  collector: str = COLLECTOR_NAME) -> dict:
+    """What the collector was doing in every hour of the span.
+
+    WHY THIS IS HERE AT ALL
+
+    Until 2026-10-05 this analysis read whatever parquet happened to exist and
+    said nothing about the hours that did not. Eighteen hours of a 235-hour
+    span held no partition, and they left the result by accident of absence
+    rather than by declaration. The maritime artefact declares its searched
+    water; this one declared 555 blind cells and no blind hours, while the
+    data to do so had been on disk for a month in
+    `data/raw/collector/heartbeat-*.jsonl`.
+
+    FIVE OUTCOMES, BECAUSE THERE ARE FIVE FACTS
+
+        with_data                   a partition exists
+        looked_all_failed           no partition, polls attempted, none
+                                    returned. A MEASURED hole.
+        rows_in_adjacent_partition  no partition, polls returned. The archive
+                                    partitions by flush time, not poll time,
+                                    so polls near an hour boundary land next
+                                    door. Nothing lost.
+        not_looking                 no partition, a heartbeat file for that
+                                    day exists, and it holds no record in
+                                    that hour. Real downtime. The only true
+                                    exclusion.
+        unknown                     no heartbeat FILE for that day. We cannot
+                                    say, and saying "not looking" here would
+                                    be the error this whole module exists to
+                                    prevent.
+
+    Collapsing any two of those would report one as the other, which is the
+    defect class in `docs/reporting-defects.md` and the reason the count is
+    five rather than two.
+    """
+    span = hours_in_span(hours_present)
+    present = set(hours_present)
+    cov = {
+        "collector": collector,
+        "heartbeat_source": "data/raw/collector/heartbeat-<date>.jsonl "
+                            "via angels.core.uptime",
+        "span_first_hour_utc": span[0] if span else None,
+        "span_last_hour_utc": span[-1] if span else None,
+        "hours_in_span": len(span),
+        "hours_with_data": 0,
+        "hours_looked_all_failed": 0,
+        "hours_rows_in_adjacent_partition": 0,
+        "hours_not_looking": 0,
+        "hours_unknown_no_heartbeat_file": 0,
+        "not_looking_hours": [],
+        "looked_all_failed_hours": [],
+        "rows_in_adjacent_partition_hours": [],
+        "unknown_hours": [],
+        "polls_attempted": 0,
+        "polls_returned": 0,
+        "polls_failed": 0,
+        "failure_reasons": {},
+    }
+    if not span:
+        return cov
+
+    # One pass over the heartbeats for the whole span, bucketed by hour.
+    t0 = datetime.strptime(span[0], "%Y%m%d%H").replace(tzinfo=timezone.utc)
+    t1 = (datetime.strptime(span[-1], "%Y%m%d%H")
+          .replace(tzinfo=timezone.utc) + timedelta(hours=1)
+          - timedelta(seconds=1))
+    by_hour: dict = collections.defaultdict(lambda: {"ok": 0, "fail": 0})
+    reasons: collections.Counter = collections.Counter()
+    for rec in uptime.read_heartbeats(collector_root, t0, t1,
+                                      collector=collector):
+        if rec.get("event") != "poll":
+            continue
+        k = rec["_t"].strftime("%Y%m%d%H")
+        if rec.get("ok"):
+            by_hour[k]["ok"] += 1
+            cov["polls_returned"] += 1
+        else:
+            by_hour[k]["fail"] += 1
+            cov["polls_failed"] += 1
+            reasons[str(rec.get("error"))] += 1
+        cov["polls_attempted"] += 1
+    cov["failure_reasons"] = dict(reasons.most_common())
+
+    # Which days have a heartbeat file at all. A missing file is "unknown";
+    # a present file with no record in an hour is "not looking".
+    have_file: dict = {}
+    for h in span:
+        day = h[:8]
+        if day not in have_file:
+            when = datetime.strptime(day, "%Y%m%d").replace(tzinfo=timezone.utc)
+            have_file[day] = uptime.day_file(collector_root, when).exists()
+
+    for h in span:
+        if h in present:
+            cov["hours_with_data"] += 1
+            continue
+        beat = by_hour.get(h)
+        if beat and beat["ok"]:
+            cov["hours_rows_in_adjacent_partition"] += 1
+            cov["rows_in_adjacent_partition_hours"].append(h)
+        elif beat:
+            cov["hours_looked_all_failed"] += 1
+            cov["looked_all_failed_hours"].append(h)
+        elif have_file[h[:8]]:
+            cov["hours_not_looking"] += 1
+            cov["not_looking_hours"].append(h)
+        else:
+            cov["hours_unknown_no_heartbeat_file"] += 1
+            cov["unknown_hours"].append(h)
+    return cov
+
+
+def file_poll_agreement(n_files: int, cov: dict,
+                        tolerance: float = 0.5) -> str | None:
+    """Do the archive and the heartbeats agree about how much was collected?
+
+    Two independent records of the same quantity: files on disk, and polls in
+    the heartbeat log. They are related by a known constant, so they can be
+    compared, and comparing them is how a field called `n_polls` was found to
+    be holding `len(files)` -- 1,659 published against 19,329 polls actually
+    attempted, understated by 11.7, for three days.
+
+    Returns None when they agree and a sentence when they do not, because a
+    disagreement between two records of one quantity is a finding and not a
+    crash: either the archive lost files, or the collector changed its
+    interval, or a count is mislabelled again. Which one it is, is not for
+    this function to guess.
+    """
+    if not n_files or not cov.get("polls_returned"):
+        return None
+    ratio = cov["polls_returned"] / float(n_files)
+    lo = EXPECTED_POLLS_PER_FILE * (1.0 - tolerance)
+    hi = EXPECTED_POLLS_PER_FILE * (1.0 + tolerance)
+    if lo <= ratio <= hi:
+        return None
+    return (f"the archive and the heartbeats disagree about volume: "
+            f"{cov['polls_returned']:,} returned polls over {n_files:,} "
+            f"partition files is {ratio:.1f} polls per file, where "
+            f"{EXPECTED_POLLS_PER_FILE:.0f} is expected at a {POLL_S:.0f} s "
+            f"poll and a {FLUSH_S:.0f} s flush. One of the two records is "
+            f"wrong and this function does not guess which")
+
+
+def coverage_sentence(cov: dict) -> str:
+    """One sentence stating what the coverage was.
+
+    A named function rather than a branch inside a `print`, because a verdict
+    assembled inside a print statement is untestable and that is mechanism Q.
+    The four non-data outcomes give sixteen combinations and each produces a
+    different sentence; `tests/test_air_time_coverage.py` asserts that.
+    """
+    span = cov["hours_in_span"]
+    if not span:
+        return "no hours on disk, so there is no span to describe"
+    parts = []
+    n = cov["hours_not_looking"]
+    if n:
+        parts.append(f"{n} with no heartbeat at all, which is real downtime "
+                     f"and is listed by hour")
+    n = cov["hours_looked_all_failed"]
+    if n:
+        parts.append(f"{n} in which every poll was attempted and failed, "
+                     f"which is a measured hole and not an absence")
+    n = cov["hours_rows_in_adjacent_partition"]
+    if n:
+        parts.append(f"{n} whose polls returned into a neighbouring "
+                     f"partition, the archive being keyed on flush time")
+    n = cov["hours_unknown_no_heartbeat_file"]
+    if n:
+        parts.append(f"{n} with no heartbeat file for the day, which cannot "
+                     f"be called downtime and is not")
+    if not parts:
+        return f"all {span} hour(s) of the span carry data"
+    return (f"{cov['hours_with_data']} of {span} hour(s) carry data; "
+            + "; ".join(parts) + ".")
 
 
 def continuity(tracks) -> set:
@@ -300,8 +526,15 @@ def main() -> int:
         return 1
     airports, eff = load_airports(AIRPORTS)
 
-    per, direct, tracks, days, n_polls = read(args.since)
+    per, direct, tracks, days, n_files, hours = read(args.since)
     inferred = continuity(tracks) - direct
+
+    # The time denominator. Read from the heartbeats the collectors have been
+    # writing since 2 September, which this analysis did not consult until
+    # 2026-10-05 -- so eighteen hours of the published span left the result by
+    # accident of absence rather than by declaration.
+    cov = time_coverage(RAW_ROOT, hours)
+    cov["file_poll_agreement"] = file_poll_agreement(n_files, cov)
 
     coop_cells = collections.Counter()
     for (c, _b, _d), v in per.items():
@@ -330,8 +563,18 @@ def main() -> int:
     # the day dimension collapsed: a declared sensitivity, not an amendment
     sensitivity = difference_in_differences(flat_unit, day_sides, args.floor)
 
-    print(f"\n  {n_polls:,} polls over {len(days)} day(s), "
+    print(f"\n  {n_files:,} partition file(s) over {len(days)} day(s), "
           f"{days[0]} to {days[-1]}")
+    print(f"  coverage: {coverage_sentence(cov)}")
+    if cov["polls_attempted"]:
+        print(f"  heartbeats: {cov['polls_attempted']:,} polls attempted, "
+              f"{cov['polls_returned']:,} returned, "
+              f"{cov['polls_failed']:,} failed")
+    if cov.get("file_poll_agreement"):
+        print(f"  DISAGREEMENT: {cov['file_poll_agreement']}")
+    for win in cov["not_looking_hours"]:
+        print(f"    NOT LOOKING  {win}  excluded by declaration, not by "
+              f"having no file")
     print(f"  appendix D airports {len(airports)}, EFF_DATE {eff}, "
           f"veil radius {VEIL_NM:.0f} nm")
     print(f"\n  independent channel: {', '.join(INDEPENDENT)}   "
@@ -392,7 +635,22 @@ def main() -> int:
         "cell_deg": CELL_DEG, "veil_nm": VEIL_NM, "split_ft": SPLIT_FT,
         "max_gap_s": MAX_GAP_S,
         "airports_eff_date": eff, "n_airports": len(airports),
-        "days": days, "n_polls": n_polls,
+        "days": days,
+        "n_partition_files": n_files,
+        "time": cov,
+        "_corrections": {
+            "n_polls": "REMOVED 2026-10-05. Every version of this artefact "
+                       "before that date carried a field called `n_polls` "
+                       "holding len(files) -- parquet partition files, not "
+                       "polls. Polling runs at 30 s and flushes every 5 "
+                       "minutes, so a file holds ten polls; the published "
+                       "1,659 stood against 19,329 polls attempted over the "
+                       "same window, understating it by 11.7. The field is "
+                       "renamed to what it holds and the true counts are "
+                       "under `time`. The estimator never used it: it was "
+                       "descriptive, and wrong by an order of magnitude in "
+                       "public for three days.",
+        },
         "fixes": {"cooperative": coop_tot, "independent": ind_tot,
                   "tisb_not_pooled": tisb_tot},
         "mask": {"cells_with_cooperative": len(have),
