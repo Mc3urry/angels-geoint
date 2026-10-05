@@ -318,7 +318,7 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-**Twenty-seven faults** found here share one shape: a routine reporting an
+**Twenty-nine faults** found here share one shape: a routine reporting an
 outcome its own execution did not entitle it to report, with nothing in the
 output to say so. Almost none was an arithmetic error — the quantities
 computed correctly. What failed was what the programs said about what they
@@ -332,7 +332,10 @@ instrument does not retract the readings it took. One was a `defaultdict` that
 reported 122 aircraft while holding nothing, because key creation and value
 insertion are separate steps. One was a dict comprehension that dropped a
 dimension and flipped a result from refuted to not refuted, in the direction
-of the hypothesis, on a control group of four.
+of the hypothesis, on a control group of four. Two were committed inside the
+script written to catch this class — one of them an hour after a comment in
+that same file warned against it — which is the catalogue's own argument
+holding up under the most awkward possible test.
 
 The catalogue, the techniques that actually caught them, and the rules
 adopted in response are in
@@ -398,8 +401,23 @@ deliberate, and the reasoning is in [`docs/architecture.md`](docs/architecture.m
 
 It bites hardest in the air. An airliner or a state aircraft is an
 institution; a private light aircraft with its transponder off is a person
-with wings. If the aviation domain is built out, that distinction belongs in
-the code and not in this paragraph.
+with wings. That domain has since been built, and the distinction lives in
+the code and in a pre-registration rather than in this paragraph: Phase F is
+constrained to aggregates -- rates per cell per band -- and no aircraft is
+named in any artefact it produces. That constraint was registered before the
+result existed and has not been amended since.
+
+It bites differently on the road. The land domain includes **every vehicle,
+private cars among them, as counts.** A roadside sensor or a traffic-count
+layer publishes a number of vehicles and a speed for a station and an
+interval; there is no identity in that record, so the boundary holds by
+construction rather than by policy. Maryland's traffic layer carries a
+private-car count on 2,695 of its 8,773 segments and the all-vehicles total
+on the rest. What the road domain does not do is individuate: no plate
+reading, and no re-identification of a private vehicle across frames or
+cameras into a movement history. Institutional vehicles are treated
+differently on purpose -- a bus carries a route number and is meant to be
+identified.
 
 ## License
 

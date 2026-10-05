@@ -70,3 +70,32 @@ Four reasons, in the order that actually decides it:
 
 The inversion — detecting surveillance aircraft — stays inside this boundary.
 The unit of analysis is the aircraft and the area, never a resident.
+
+### The road case, added 2026-10-05
+
+This boundary was written while the land domain was scoped to transit and
+public fleets, on the reasoning that a container ship is an institution and a
+car is a person with a roof. **The conclusion was right and the premise was
+wrong**, and the correction is worth stating because it shows what the
+boundary is actually for.
+
+The reason to keep private vehicles out was never that they are vehicles —
+the first line of this section already admits vehicles and aggregate spatial
+patterns. It was that every way of observing them appeared to require
+identity: commercial telematics, or plate reading off a camera.
+
+Pulled feeds do not offer identity. A detector station or a traffic-count
+layer publishes a count and a speed for a place and an interval, and there is
+no field in that record that could name a vehicle, a driver or an owner. So
+the road domain takes private vehicles at exactly the level this section
+already permits: **counted, never individuated.** Nothing has to be
+anonymised, because nothing was identified.
+
+The line that matters, restated for the case where it could be crossed:
+individuating road vehicles would require computer vision on camera stills.
+If that is ever built it stays inside this boundary too — anonymous
+detections per frame, no plate reading, and **no re-identification across
+frames or cameras.** Re-identification is the step that converts a count into
+a movement history, and a movement history of a private vehicle is precisely
+what reasons 2 and 3 above exist to prevent. The distinction is not between
+seeing a car and not seeing one; it is between counting and following.
