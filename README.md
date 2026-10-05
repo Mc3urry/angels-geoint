@@ -318,7 +318,7 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-**Twenty-nine faults** found here share one shape: a routine reporting an
+**Thirty faults** found here share one shape: a routine reporting an
 outcome its own execution did not entitle it to report, with nothing in the
 output to say so. Almost none was an arithmetic error — the quantities
 computed correctly. What failed was what the programs said about what they
@@ -335,7 +335,12 @@ dimension and flipped a result from refuted to not refuted, in the direction
 of the hypothesis, on a control group of four. Two were committed inside the
 script written to catch this class — one of them an hour after a comment in
 that same file warned against it — which is the catalogue's own argument
-holding up under the most awkward possible test.
+holding up under the most awkward possible test. And one was a field called
+`n_polls` that held a count of files: nothing computed wrongly, the whole
+defect was the name, and it was published for three days understating the
+quantity it claimed to report by a factor of 11.7. It was found by building a
+second, independent record of the same quantity and putting the two side by
+side.
 
 The catalogue, the techniques that actually caught them, and the rules
 adopted in response are in

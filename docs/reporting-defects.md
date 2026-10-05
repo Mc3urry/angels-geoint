@@ -6,11 +6,13 @@ twenty-seven, with mechanisms L to R — every one of them committed after this
 document existed and was being actively watched for. Extended again the same
 evening to twenty-nine, with S and T, both of them committed inside the script
 written to catch this class, one of them an hour after a comment in that same
-file warned against it.*
+file warned against it. Extended again 2026-10-05 to thirty, with U --
+found by an instrument built that afternoon, in a number this document had
+already helped publish.*
 
-Over the course of this project, **twenty-nine** separate faults were found
+Over the course of this project, **thirty** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, twenty-nine
+this pipeline computes, it computed correctly. What failed, thirty
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -59,7 +61,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **twenty-nine**. A few logged
+The running count in the worklog reached **thirty**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -397,6 +399,45 @@ everything the code does afterwards inherits it.
 Nothing of value was lost, because a transcript happened to exist. That is
 luck, and it is recorded as luck rather than as a mitigating design.
 
+### U. A correct number under the wrong name
+
+The purest instance in this catalogue, and the last one found.
+
+`scripts/air_discrepancy.py` ended its read with `return ..., len(files)`.
+The caller named it `n_polls`, printed "1,659 polls over 8 days", and wrote
+`"n_polls": 1659` into `data/events/air-bands.json`, the published Phase F
+artefact.
+
+`len(files)` is a count of parquet partition files. The collector polls every
+30 s and flushes every 5 minutes, so a file holds ten polls. Against the
+heartbeat log for the same window: **19,329 polls attempted, 16,851
+returned, 1,683 files.** The published figure understated the quantity it
+claimed to report **by a factor of 11.7**, in public, for three days.
+
+Nothing computed wrongly. `len(files)` is exactly the number of files, and
+every arithmetic step was right. The entire defect is the name -- and the
+name is the only part a reader ever sees. This document opens by saying that
+almost none of these faults was an arithmetic error and that what failed was
+what a program said about what it had done; this is that sentence with
+nothing else attached.
+
+It survived a pre-registration, a published artefact, a README paragraph and
+twenty-two tests of the same script, because every one of those tests
+asserted what the pipeline *computed* and none asserted what a field *meant*.
+A mislabelled field passes every test that does not read its name.
+
+What caught it was building a second, independent record of the same
+quantity. The heartbeat log existed for an unrelated purpose -- declaring
+coverage -- and the moment two records of "how much was collected" sat side
+by side, one of them was obviously wrong. The comparison is now a function,
+`file_poll_agreement`, which compares files against polls through the known
+flush ratio and returns a sentence when they disagree, with a tolerance band
+so it does not fire on an ordinary run.
+
+The estimator never used the field. It was descriptive, and wrong by an order
+of magnitude, which is the kind of error that costs no result and all of the
+credibility.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -522,6 +563,15 @@ Each of these exists because something went wrong that it would have stopped.
     banner. A dropped connection reports nothing and is indistinguishable
     from success.
 
+18. **A field is named for what it holds.** Not for what the caller wanted,
+    not for what it is usually near. And **where two records of one quantity
+    exist, the code compares them** -- through whatever constant relates
+    them -- and says so when they disagree, with a tolerance band so the
+    check does not become a false alarm. Two independent records of the same
+    thing are the cheapest audit available, and the only reason a field
+    called `n_polls` holding a file count went three days in public is that
+    nothing ever put the two counts next to each other.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -562,7 +612,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Twenty-nine** were found,
+The defence is not that no mistakes were made. **Thirty** were found,
 one of them published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
