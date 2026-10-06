@@ -12,11 +12,13 @@ already helped publish. Extended again 2026-10-05 to thirty-three, with V
 and W, and a third instance of F -- all three found by a test suite built
 from recorded server responses rather than from expectations. Extended once
 more the same evening to thirty-four, with X, which is the only entry here
-that did harm outside this repository rather than threatening a number.*
+that did harm outside this repository rather than threatening a number.
+Extended again 2026-10-06 to thirty-six, with Y and Z -- neither found by a
+test. Both were sitting in the output of commands run for other reasons.*
 
-Over the course of this project, **thirty-four** separate faults were found
+Over the course of this project, **thirty-six** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, thirty-four
+this pipeline computes, it computed correctly. What failed, thirty-six
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -65,16 +67,25 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **thirty-four**. A few logged
+The running count in the worklog reached **thirty-six**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
-Mechanisms A to K came from the maritime domain. L to T were added as the
+Mechanisms A to K came from the maritime domain. L to Z were added as the
 project moved to aviation and then to roads, and they are the more
 instructive half: by then the class was known, named, documented in this
 file, and being actively watched for. **Knowing the failure mode did not
 prevent it.** Three of the seven L-to-R sightings were committed by someone
 who had read this document that week.
+
+Y and Z close the catalogue on a flatter note than X did, and the flatness is
+the point. Neither cost a number or a credential. One was a dependency that
+worked everywhere it was run and was written down nowhere; the other was a
+commit message that said the right thing in the wrong shape. Both were
+visible, in plain text, in output already on screen. By the thirty-sixth
+sighting the interesting question is no longer whether this class can be
+eliminated -- it cannot -- but how cheaply an instance can be caught, and the
+answer those two give is: by reading what the last command printed.
 
 S and T go further. Both were committed **inside a script whose entire
 purpose was to catch this class before it reached an analysis** — a probe
@@ -583,6 +594,83 @@ the manifest rather than dropped. A wider scan is not a stronger guard; it is
 a guard pointed at the wrong bytes a second time, and its cost is a usable
 recording thrown away.
 
+### Y. A parity check between two artefacts, and neither checked against what they describe
+
+`tests/test_tasks_targets.py` was written on 2026-09-25, the afternoon a bare
+`pip install -e ".[ml]"` reached ArcGIS Pro's Python 3.14t, failed to build
+duckdb and left the classifier blocked for a day. Its principle is sound and
+is stated in its own docstring: **no extra should ever need a hand-typed pip
+command.** It holds the extras declared in `pyproject.toml` and the targets
+offered by `tasks.ps1` in parity, so a new extra cannot be added without the
+guarded path to install it.
+
+On 2026-10-03 `gtfs-realtime-bindings` was installed and became load-bearing
+for every transit measurement that followed: the wire cost, the parsed cost,
+the 5.68x batched parquet figure, the header-timestamp corroboration. It was
+declared in neither file. **Parity was therefore exact**, and the test passed
+every run for three days -- 1,229 green on the morning the omission was
+found, by reading `git status`.
+
+The test asks *does every declared extra have a guarded install path?* The
+question that mattered was *does every dependency the code imports have a
+declaration?* Those differ by one word, and the difference is the whole
+defect. A parity check between two descriptions can only find a disagreement
+between them. It is blind by construction to anything absent from both -- and
+since one hand wrote both files in one sitting, absent-from-both is precisely
+the correlated failure the authoring process makes likely. The check is
+weakest exactly where it is least independent.
+
+X was a guard aimed at the wrong surface. **Y is a guard aimed at the right
+two surfaces and at nothing underneath them**: a mutual-consistency check
+doing duty as a completeness check, which is a thing no amount of running it
+will reveal.
+
+One further point, and it is uncomfortable. This was survivable only because
+`scripts/probe_transit_parse.py` imports `google.transit` lazily, inside a
+function, and prints `gtfs-realtime-bindings is not installed` rather than
+raising. A clean clone still collected and passed the suite. Had the import
+sat at module scope -- the ordinary place to put it -- the suite would have
+failed on first contact and the omission would have been caught the same day.
+**The defect survived because the code around it was careful.** That is a
+real cost of graceful degradation and not an argument against it, but it is
+worth writing down: a soft failure can hold a packaging fault open
+indefinitely, and nothing will complain.
+
+### Z. An instruction verified where it was composed, transformed where it ran
+
+The commit messages in this repository are the lab notebook -- that is a
+deliberate choice recorded in DECISIONS.md, and it is why they are long. They
+are produced by a hand-over convention: a PowerShell block is composed in one
+environment and run in another.
+
+On 2026-10-06 the block for `9d56abb` carried a multi-line string to
+`git commit -m`. In bash a quoted newline survives. **PowerShell collapses
+it.** The commit landed with a 1,400-character subject line and no body, and
+that row of `git log --oneline` is now unreadable.
+
+Every claim in that message was verified. What was not verified was the
+message *as the target shell would render it*, and the artefact that matters
+is never the one composed -- it is the one that lands. The author reasoned
+about quoting from a shell he was not running and does not have.
+
+The near miss is the instructive part. The same convention produced every
+earlier commit here, and `git log --oneline -12` shows eleven clean subjects
+above it. So the form was wrong in principle and right in practice eleven
+times running, which is worse than failing immediately: the convention had
+never had its failure mode exercised, so nothing had ever prompted a look at
+it. A guard is tested by its failures; a convention is no different, and one
+that has never failed has never been tested.
+
+The fix is one `-m` per paragraph. git joins them with blank lines, and
+PowerShell cannot collapse what already arrives as separate arguments.
+
+**`9d56abb` keeps its flattened subject.** Repairing it means a reset, a
+cherry-pick and this project's second force-push, days after the first was
+spent on a leaked credential -- and a force-push for typography, in a
+repository whose history was rewritten for a real reason, is a worse entry in
+the record than the long line it would remove. The line stays. This section
+is the reason, which is the trade the whole document argues for.
+
 ## 4. What actually caught them
 
 No single technique found more than a few. The useful list is short:
@@ -591,6 +679,15 @@ No single technique found more than a few. The useful list is short:
 is 99.8 % zero. A detection that bright cannot come from nothing. This broke
 the false finding, and the contradiction had been sitting in the same table as
 the claim.
+
+**Reading output that was already printed, for an unrelated reason.**
+`git status --short` named two modified files that had no business being
+modified, which is the whole of mechanism Y. `git log --oneline -12`, run to
+size a different question, showed one subject line eleven times too long,
+which is Z. Neither was being looked for, and both had been on screen for
+some time. This is the cheapest technique in the list and the one most often
+skipped, because output printed by a command run for another purpose does not
+feel like evidence.
 
 **Running it as a stranger would.** A fresh `git archive HEAD` checkout, and
 the author's own machine rather than the development VM. Three of four
@@ -751,6 +848,20 @@ Each of these exists because something went wrong that it would have stopped.
     people's web pages at all ends the question. Where both are available,
     the second is the fix and the first is the backstop.
 
+23. **A consistency check between two descriptions is not a completeness
+    check against the thing described.** Parity between a manifest and a task
+    runner finds disagreements between them and nothing that is absent from
+    both -- and when one author wrote both in one sitting, absent-from-both is
+    the correlated failure that authoring makes likely. So at least one check
+    runs against something the author did not write down: the code's own
+    imports, the directory's own contents, the response's own bytes.
+24. **An instruction handed to another environment is verified as that
+    environment will execute it**, not as it was composed. Where the shell,
+    the quoting or the encoding differs, the artefact that counts is the one
+    that lands. A convention that has produced the right result eleven times
+    has not been tested; it has been lucky, and the twelfth is where that is
+    discovered.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -791,7 +902,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Thirty-four** were found,
+The defence is not that no mistakes were made. **Thirty-six** were found,
 one of them published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
