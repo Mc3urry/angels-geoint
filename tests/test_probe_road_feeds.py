@@ -487,3 +487,88 @@ def test_an_arcgis_body_declares_no_version_and_is_not_flagged_for_it() -> None:
         assert s["feed_info_key"] is None, name
         assert s["declared_version"] is None, name
         assert s["flags"] == [], name
+
+
+# -- binary bodies, and a summariser that must not take the run with it -----
+
+def test_a_zip_is_named_a_zip_and_not_a_spreadsheet() -> None:
+    """2026-10-06. The Census cartographic bundle has commas in its first
+    four kilobytes -- compressed bytes contain every byte value -- so the
+    delimiter test called it CSV and `csv.reader` raised on a newline in an
+    unquoted field.
+
+    A classifier whose cheapest test is "does it contain a comma" will call
+    almost any binary file a spreadsheet. Magic numbers are checked first
+    and by name, because a zip where GeoJSON was expected is a different
+    fact from a corrupt response.
+    """
+    import io as _io
+    import zipfile
+    buf = _io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("states.csv", "x,y,z\n" * 5000)
+    s = summarise(buf.getvalue(), "application/zip", False)
+    assert s["kind"] == "binary"
+    assert s["binary_format"] == "zip"
+    assert any("BINARY, zip" in f for f in s["flags"])
+
+
+def test_gzip_is_recognised_too() -> None:
+    import gzip
+    s = summarise(gzip.compress(b"a,b\n1,2\n"), "application/gzip", False)
+    assert s["binary_format"] == "gzip"
+
+
+def test_an_unrecognised_binary_says_unrecognised() -> None:
+    """A NUL byte in the first 8 kB means this is not text, whatever else it
+    is. Saying 'unknown' is a different claim from naming a format, and the
+    report makes it."""
+    s = summarise(b"\x01\x02\x00\x03" + b"x,y" * 100,
+                  "application/octet-stream", False)
+    assert s["kind"] == "binary" and s["binary_format"] == "unknown"
+
+
+@pytest.mark.parametrize("body,ct,kind", [
+    (b"a,b\n1,2\n", "text/csv", "csv"),
+    (b'{"type":"FeatureCollection","features":[]}', "application/json",
+     "geojson"),
+    (b"<!DOCTYPE html><html></html>", "text/html", "html"),
+    (b"<a><b>1</b></a>", "text/xml", "xml"),
+])
+def test_text_still_classifies_as_it_did(body, ct, kind) -> None:
+    """Rule 16 again: a binary check placed first must not start calling
+    ordinary text something else."""
+    assert summarise(body, ct, False)["kind"] == kind
+
+
+def test_a_raising_summariser_is_reported_not_propagated(monkeypatch) -> None:
+    """THE WORSE OF THE TWO FAULTS.
+
+    This script's premise is that a failure is a fact about ONE endpoint:
+    it prints NOT INFERRED rather than guessing causes, and reports twelve
+    results when the thirteenth is down. Then a `csv.reader` raised on a zip
+    and took the process with it, including the other endpoint in the same
+    run -- which may well have answered.
+
+    A probe that cannot survive a surprising response is not a probe. The
+    exception type and message are kept, because "it failed" without saying
+    how is the defect this project is a catalogue of.
+    """
+    import scripts.probe_road_feeds as mod
+
+    def boom(*_a, **_k):
+        raise ValueError("deliberate")
+
+    monkeypatch.setattr(mod, "summarise", boom)
+    s = mod.safe_summarise(b"anything", "text/csv", False)
+    assert s["kind"] == "unsummarisable"
+    assert "ValueError" in s["summary_error"]
+    assert "deliberate" in s["summary_error"]
+    assert any("THE SUMMARISER RAISED" in f for f in s["flags"])
+
+
+def test_a_healthy_body_passes_straight_through_the_guard() -> None:
+    import scripts.probe_road_feeds as mod
+    direct = mod.summarise(b"a,b\n1,2\n", "text/csv", False)
+    guarded = mod.safe_summarise(b"a,b\n1,2\n", "text/csv", False)
+    assert guarded == direct

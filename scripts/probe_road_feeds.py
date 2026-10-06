@@ -200,6 +200,36 @@ ENDPOINTS: tuple[dict[str, str], ...] = (
             "number decides whether private vehicles can be separated "
             "from trucks and buses, or only counted among them."},
 
+    # ---- added 2026-10-06, for G2b -----------------------------------
+    # The border selection needs state polygons: a transit feed is relevant
+    # to the publication-regime test when its service area straddles a line
+    # across which the duty to publish changes. 184 of 191 feeds carry a
+    # usable bounding box; nothing in this project carries a state boundary.
+    #
+    # Two candidates, probed rather than chosen. The Census page lists the
+    # 2024 cartographic bundle at 1:20,000,000 and does NOT list a
+    # state-only file at that scale for 2024, so the national bundle is the
+    # documented url and the per-geography one would be a guess -- which is
+    # how two non-existent ArcGIS services got into fetch_limits.py and
+    # stayed for five days.
+    #
+    # The TIGERweb service would be better if it answers: GeoJSON over HTTP,
+    # no zip, no shapefile reader, and no dependency on the analysis extra.
+    # Whether it answers is measured here.
+    {"name": "census-cb-2024-bundle",
+     "url": "https://www2.census.gov/geo/tiger/GENZ2024/shp/"
+            "cb_2024_us_all_20m.zip",
+     "why": "G2b boundaries. The documented 2024 cartographic bundle, "
+            "2.2 MB, holding every geography at 1:20,000,000. A zip, so "
+            "this only confirms it exists and its size."},
+    {"name": "tigerweb-states",
+     "url": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
+            "State_County/MapServer/0/query"
+            "?f=geojson&where=1%3D1&outFields=STATE,NAME&resultRecordCount=3",
+     "why": "G2b boundaries, preferred if it answers: state polygons as "
+            "GeoJSON over HTTP, needing no zip, no shapefile reader and "
+            "nothing from the analysis extra."},
+
     {"name": "md-aadt-arcgis-alt",
      "url": "https://mdgeodata.md.gov/imap/rest/services/Transportation/"
             "MD_AnnualAverageDailyTraffic/FeatureServer/0/query"
@@ -570,6 +600,37 @@ def summarise(body: bytes, content_type: str, truncated: bool,
     head = body.lstrip()[:1]
     ct = (content_type or "").lower()
     sniff = body.lstrip()[:64].lower()
+
+    # Binary first, before any text sniff gets a chance.
+    #
+    # ADDED 2026-10-06. The Census cartographic zip has commas in its first
+    # four kilobytes -- compressed bytes contain every byte value -- so the
+    # delimiter test called it CSV and `csv.reader` raised on a newline in
+    # an unquoted field. A classifier whose cheapest test is "does it
+    # contain a comma" will call almost any binary file a spreadsheet.
+    #
+    # Magic numbers are checked by name so the report says what arrived
+    # rather than that it was unreadable: a zip where GeoJSON was expected
+    # is a different fact from a corrupt response.
+    magic = (
+        (b"PK\x03\x04", "zip"), (b"PK\x05\x06", "zip (empty)"),
+        (b"\x1f\x8b", "gzip"), (b"%PDF", "pdf"),
+        (b"\x89PNG", "png"), (b"GIF8", "gif"), (b"\xff\xd8\xff", "jpeg"),
+        (b"SQLite format 3", "sqlite"), (b"\x00\x00\x00 ftyp", "mp4"),
+    )
+    for sig, name in magic:
+        if body.startswith(sig):
+            return {"kind": "binary", "binary_format": name,
+                    "declared_content_type": content_type or "(none sent)",
+                    "bytes": len(body),
+                    "flags": [f"BINARY, {name}: nothing here is parsed as "
+                              f"text. Status and size are the measurement"]}
+    if b"\x00" in body[:8192]:
+        return {"kind": "binary", "binary_format": "unknown",
+                "declared_content_type": content_type or "(none sent)",
+                "bytes": len(body),
+                "flags": ["BINARY, format unrecognised: a NUL byte in the "
+                          "first 8 kB. Not parsed as text"]}
     if sniff.startswith(b"<!doctype html") or sniff.startswith(b"<html"):
         # The likeliest real failure for a public feed: a sign-in page, a
         # terms interstitial or a CDN error, served with HTTP 200. Named as
@@ -655,6 +716,34 @@ def body_credential(body: bytes) -> str | None:
     return None
 
 
+def safe_summarise(body: bytes, content_type: str, truncated: bool,
+                   requested_limit: bool = False) -> dict:
+    """`summarise`, with its exceptions turned into a reported outcome.
+
+    The summariser does a lot of speculative parsing of bodies it has never
+    seen, which is the job. Any of it can raise. When it does, that is a
+    finding about one response and not a reason to lose the others, so the
+    error is recorded in the same shape as every other result and the run
+    goes on.
+
+    The exception TYPE and message are kept, because "it failed" without
+    saying how is the defect this whole project is a catalogue of.
+    """
+    try:
+        return summarise(body, content_type, truncated, requested_limit)
+    except Exception as exc:                # noqa: BLE001 - that is the point
+        return {
+            "kind": "unsummarisable",
+            "declared_content_type": content_type or "(none sent)",
+            "bytes": len(body),
+            "summary_error": f"{type(exc).__name__}: {str(exc)[:160]}",
+            "flags": [f"THE SUMMARISER RAISED on this body: "
+                      f"{type(exc).__name__}. The response arrived and was "
+                      f"not understood, which is a fact about the parser as "
+                      f"much as about the body"],
+        }
+
+
 def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
           accept: str = "*/*", keep_body: bool = False) -> dict:
     """One GET. Records the status and infers no cause from it.
@@ -681,10 +770,22 @@ def probe(url: str, cap: int = CAP_BYTES, timeout: float = TIMEOUT_S,
                 "truncated": truncated,
                 "elapsed_s": round(time.monotonic() - started, 3),
                 "content_length_header": resp.headers.get("Content-Length"),
-                "summary": summarise(body,
-                                     resp.headers.get("Content-Type", ""),
-                                     truncated,
-                                     caller_capped(url)),
+                # CONTAINED 2026-10-06, after an unhandled parse error in
+                # the summariser killed a whole run.
+                #
+                # This script's entire premise is that a failure is a fact
+                # about ONE endpoint: it prints "NOT INFERRED" rather than
+                # guessing causes, and it reports twelve results when the
+                # thirteenth is down. Then a `csv.reader` raised on a zip
+                # and took the process with it -- including the other
+                # endpoint in the same run, which may well have answered.
+                #
+                # A probe that cannot survive a surprising response is not a
+                # probe. The failure is recorded where every other failure
+                # is recorded, and the run continues.
+                "summary": safe_summarise(
+                    body, resp.headers.get("Content-Type", ""),
+                    truncated, caller_capped(url)),
             }
             if keep_body:
                 # Underscored and popped by the caller before the report is
