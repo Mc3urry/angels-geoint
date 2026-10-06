@@ -17,6 +17,31 @@ dependencies = [
   "duckdb>=1.0",
   "fastapi>=0.110",
   "uvicorn[standard]>=0.29",
+  # DECLARED 2026-10-06, having been imported and undeclared since before
+  # anyone counted. tests/test_declared_dependencies.py found both on its
+  # first run: it reads the import statements with `ast` instead of comparing
+  # this file against another file somebody wrote by hand, which is why
+  # test_tasks_targets.py could not see them.
+  #
+  # Both arrived transitively. pydantic because fastapi requires it;
+  # websockets because `uvicorn[standard]` happens to include it. A
+  # transitive dependency that the code imports DIRECTLY is a dependency this
+  # project has, held open by a packaging decision somebody else is free to
+  # change -- and `[standard]`'s membership has changed before.
+  #
+  # pydantic: angels/api/routes/labels.py, `from pydantic import BaseModel`
+  # at module scope. Installed 2.13.5. No v1 or v2 specific idiom appears
+  # anywhere in the project, so >=2 is a statement about what it runs on
+  # rather than about what it needs.
+  "pydantic>=2.0",
+  # websockets: angels/adapters/maritime/aisstream.py calls
+  # websockets.connect in the LIVE maritime collector. Installed 17.1. The
+  # floor is 14 because that is the release where `websockets.connect`
+  # resolved to the asyncio implementation this code is exercised against;
+  # claiming support below it would claim the legacy implementation nobody
+  # here has tested. The call passes ping_interval, max_size and compression
+  # only -- all three valid in both -- so no deprecated keyword is in use.
+  "websockets>=14.0",
 ]
 
 [project.optional-dependencies]
