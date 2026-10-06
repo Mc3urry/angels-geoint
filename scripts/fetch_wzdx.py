@@ -861,20 +861,79 @@ def _sidecar(root: Path, feed: str) -> Path:
     return root / DATASET / "_last" / f"{feed}.json"
 
 
+def _stored_body(root: Path, name: str) -> Path | None:
+    """The archived body a sidecar names, wherever its hour partition is."""
+    if not name:
+        return None
+    for p in (root / DATASET).glob(f"hour=*/{name}"):
+        return p
+    return None
+
+
 def last_seen(root: Path, feed: str) -> dict[str, Any]:
     """What we last held for this feed: both digests, or an empty mapping.
 
     Read from a small sidecar rather than by hashing the newest file, so that
     an interrupted write cannot make an unchanged feed look changed forever.
+
+    THE MIGRATION, AND WHY IT IS NOT OPTIONAL. 2026-10-06.
+
+    `content_sha256` was added to this sidecar after two cycles had already
+    written the older shape, which held only `sha256`. The third cycle read
+    those sidecars, found no content digest, concluded it had never seen any
+    of the feeds, re-stored all twenty-two bodies and printed
+
+        23 of 25 feeds answered, 23617 events from 22 countable,
+        22 stored for the first time
+
+    Twenty of those were in the archive thirty minutes earlier. The program
+    changed the shape of its own memory, forgot, and **reported the forgetting
+    as a finding** -- a confident, plausible sentence with a true number
+    attached to a false claim. It cost 3.7 MB of duplicate bodies, 29 per
+    cent of the archive.
+
+    None of the seventy-five tests could have caught it, because every one of
+    them starts from `tmp_path`: an empty archive. **The suite only ever
+    exercised the fresh-install path.** A persisted format has two code paths
+    and the tests covered one.
+
+    So an older sidecar is upgraded rather than ignored: it names the body it
+    was written for, that body is still on disk, and the content digest is
+    recomputed from it. The upgrade is reported through `migrated` so it
+    appears in the ledger instead of happening silently -- a migration nobody
+    can see is the same class of thing as the amnesia it fixes.
     """
     p = _sidecar(root, feed)
     if not p.exists():
         return {}
     try:
         got = json.loads(p.read_text(encoding="utf-8"))
-        return got if isinstance(got, dict) else {}
     except (json.JSONDecodeError, OSError):
         return {}
+    if not isinstance(got, dict):
+        return {}
+    if got.get("content_sha256"):
+        return got
+
+    body = _stored_body(root, str(got.get("path", "")))
+    if body is None:
+        # Seen before, but what we held cannot be recovered. That is not a
+        # first sighting and must not be reported as one.
+        got["migration_failed"] = True
+        return got
+    try:
+        obj = json.loads(gzip.decompress(body.read_bytes()).decode("utf-8"))
+    except (OSError, ValueError, gzip.BadGzipFile):
+        got["migration_failed"] = True
+        return got
+
+    content = content_digest(obj)
+    if content is None:
+        got["migration_failed"] = True
+        return got
+    got["content_sha256"] = content
+    got["migrated"] = True
+    return got
 
 
 def last_digest(root: Path, feed: str) -> str | None:
@@ -919,9 +978,20 @@ def store_body(root: Path, feed: str, body: bytes, sha: str,
     seen = last_seen(root, feed)
     previous, previous_body = seen.get("content_sha256"), seen.get("sha256")
 
-    out: dict[str, Any] = {"path": None, "bytes_stored": 0,
-                           "digest_is_new": False, "first_sighting": False,
-                           "envelope_only": False}
+    out: dict[str, Any] = {
+        "path": None, "bytes_stored": 0,
+        "digest_is_new": False,
+        # A first sighting is "no sidecar at all". NOT "no content digest in
+        # the sidecar" -- that was the bug, and it turned a format change into
+        # twenty-two false first sightings.
+        "first_sighting": not seen,
+        "envelope_only": False,
+        "sidecar_migrated": bool(seen.get("migrated")),
+        # Seen before, but what we held cannot be recovered from disk. The
+        # body gets stored again, and the ledger says why rather than letting
+        # it look like news.
+        "sidecar_unreadable": bool(seen.get("migration_failed")),
+    }
 
     if previous == content_sha:
         # Nothing about any road changed. If the BYTES changed anyway, that is
@@ -931,13 +1001,19 @@ def store_body(root: Path, feed: str, body: bytes, sha: str,
         # archive does not. Four feeds did exactly this between the only two
         # cycles this collector has ever run.
         out["envelope_only"] = previous_body is not None and previous_body != sha
-        if out["envelope_only"]:
+        # Rewritten when the envelope moved, and also when the sidecar was
+        # upgraded -- otherwise an unchanged feed would re-migrate on every
+        # cycle forever, gunzipping its own archive to answer a question it
+        # had already answered.
+        if out["envelope_only"] or out["sidecar_migrated"]:
             _write_sidecar(root, feed, sha, content_sha, when,
-                           name=seen.get("path", ""))
+                           name=str(seen.get("path", "")))
         return out
 
     out["digest_is_new"] = True
-    # A FOURTH FACT, AND THE FLAG THAT NEEDED IT.
+    # NOTE: first_sighting is set above, from whether a sidecar exists at all.
+    #
+    # THE FLAG THAT NEEDED IT.
     #
     # "we have never seen this feed before" is not "this feed changed". On the
     # first cycle against an empty archive every feed is the former, and the
@@ -950,7 +1026,6 @@ def store_body(root: Path, feed: str, body: bytes, sha: str,
     # A guard that is correct only because of an unrelated accident has not
     # been tested, which is the same thing mechanism Z said about a convention
     # that had been right eleven times.
-    out["first_sighting"] = previous is None
     path = body_path(root, feed, when, sha)
     path.parent.mkdir(parents=True, exist_ok=True)
     out["path"] = path
@@ -1063,6 +1138,9 @@ class Snapshotter:
                     envelope_only.add(name)
                 rec["first_sighting"] = st["first_sighting"]
                 rec["envelope_only"] = st["envelope_only"]
+                rec["sidecar_migrated"] = st["sidecar_migrated"]
+                if st["sidecar_unreadable"]:
+                    rec["sidecar_unreadable"] = True
                 rec["bytes_stored"] = st["bytes_stored"]
                 if st["bytes_stored"]:
                     self.stored += 1

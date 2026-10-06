@@ -440,6 +440,99 @@ def test_an_envelope_change_is_recorded_and_not_stored(tmp_path) -> None:
     assert last_digest(tmp_path, "modot") == content_digest(json.loads(b))
 
 
+# -- starting from state a PREVIOUS VERSION wrote ---------------------------
+#
+# THE HOLE THESE CLOSE, 2026-10-06.
+#
+# `content_sha256` was added to the sidecar after two cycles had already
+# written the older shape. The third cycle found no content digest in them,
+# concluded it had never seen any feed before, re-stored all twenty-two
+# bodies, and printed "22 stored for the first time" -- twenty of which were
+# in the archive thirty minutes earlier. 3.7 MB of duplicates, 29 per cent of
+# the archive, and a sentence that was confident, plausible and false.
+#
+# Not one of the seventy-five tests could have caught it, and the reason is
+# structural rather than careless: **every test starts from `tmp_path`.** An
+# empty archive. A program with persisted state has two code paths -- fresh
+# install, and upgrade over what an earlier version left behind -- and the
+# suite only ever walked the first.
+#
+# So these begin by writing the old shape on purpose.
+
+def old_style_sidecar(root, feed: str, body: bytes, name: str) -> None:
+    """The sidecar exactly as the version before this one wrote it."""
+    import json as _json
+    p = root / "roads" / "wzdx" / "_last" / f"{feed}.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(_json.dumps({"sha256": digest(body),
+                              "iso": "2026-10-06T19:11:47+00:00",
+                              "path": name}), encoding="utf-8")
+
+
+def test_a_sidecar_from_an_older_version_is_not_a_first_sighting(tmp_path) -> None:
+    """The whole defect in one assertion."""
+    b = wzdx(n=3, update="2026-10-06T19:11:47Z")
+    first = store(tmp_path, "modot", b)
+    old_style_sidecar(tmp_path, "modot", b, first["path"].name)
+
+    moved = wzdx(n=3, update="2026-10-06T19:27:07Z")
+    again = store(tmp_path, "modot", moved)
+    assert again["first_sighting"] is False, (
+        "a sidecar exists, so this feed has been seen; a missing FIELD in it "
+        "is a format change and not an empty archive")
+    assert again["sidecar_migrated"] is True
+    assert again["digest_is_new"] is False, "and no road event changed"
+    assert again["bytes_stored"] == 0, "so nothing should be rewritten"
+
+
+def test_the_upgrade_is_recomputed_from_the_body_the_sidecar_names(tmp_path) -> None:
+    """Lossless, because the evidence is still on disk. The old sidecar names
+    the body it was written for; that body holds the road events; the content
+    digest follows from them."""
+    b = wzdx(n=4)
+    first = store(tmp_path, "modot", b)
+    old_style_sidecar(tmp_path, "modot", b, first["path"].name)
+    assert last_digest(tmp_path, "modot") == content_digest(json.loads(b))
+
+
+def test_the_upgrade_is_written_back_rather_than_repeated(tmp_path) -> None:
+    """Otherwise an unchanged feed re-migrates every cycle forever, gunzipping
+    its own archive to answer a question it answered ten minutes ago."""
+    b = wzdx(n=3, update="A")
+    first = store(tmp_path, "modot", b)
+    old_style_sidecar(tmp_path, "modot", b, first["path"].name)
+
+    store(tmp_path, "modot", wzdx(n=3, update="B"))
+    side = json.loads((tmp_path / "roads" / "wzdx" / "_last" /
+                       "modot.json").read_text(encoding="utf-8"))
+    assert "content_sha256" in side
+    third = store(tmp_path, "modot", wzdx(n=3, update="C"))
+    assert third["sidecar_migrated"] is False, "already upgraded"
+
+
+def test_a_sidecar_whose_body_is_gone_is_still_not_a_first_sighting(tmp_path) -> None:
+    """Seen before, and what we held cannot be recovered. Those are different
+    from never seen, and the ledger says which."""
+    b = wzdx(n=2)
+    store(tmp_path, "modot", b)
+    old_style_sidecar(tmp_path, "modot", b, "deleted_by_somebody.json.gz")
+
+    st = store(tmp_path, "modot", wzdx(n=2))
+    assert st["first_sighting"] is False
+    assert st["sidecar_unreadable"] is True
+    assert st["digest_is_new"] is True, (
+        "unable to prove we hold these events, so store them")
+
+
+def test_a_corrupt_sidecar_does_not_crash_the_cycle(tmp_path) -> None:
+    """One unreadable feed is a fact about one feed. The run continues."""
+    p = tmp_path / "roads" / "wzdx" / "_last" / "modot.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("{not json at all", encoding="utf-8")
+    st = store(tmp_path, "modot", wzdx(n=2))
+    assert st["digest_is_new"] is True and st["bytes_stored"] > 0
+
+
 def test_an_envelope_only_cycle_is_stated_but_not_flagged() -> None:
     """Rule 16, and this one would have fired on every cycle for four feeds.
     It belongs in the sentence as information, not in the flag list as an
