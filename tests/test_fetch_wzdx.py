@@ -48,26 +48,41 @@ import json
 
 import pytest
 
-from scripts.fetch_wzdx import (HTTP_ERROR, KNOWN_WZDX_VERSIONS, NOT_JSON,
-                                NOT_WZDX, OK, VERSION_UNKNOWN, append_ledger,
-                                blind_feeds, body_path, classify,
+from scripts.fetch_wzdx import (HTTP_ERROR, KNOWN_SPEC_VERSIONS,
+                                KNOWN_WZDX_VERSIONS, NOT_JSON, NOT_WZDX, OK,
+                                STORED_OUTCOMES, TRUNCATED, VERSION_UNKNOWN,
+                                append_ledger, blind_feeds, body_path,
+                                canonical_version, classify, content_digest,
                                 cycle_flags, cycle_health, cycle_sentence,
-                                cycle_summary, declared_version, digest,
-                                event_count, feed_record, feeds_from,
-                                last_digest, looks_like_html, store_body,
-                                version_verdict)
+                                cycle_summary, decorative_update_date,
+                                declared_version, digest, event_count,
+                                feed_record, feeds_from, last_digest,
+                                looks_like_html, store_body, version_verdict)
 
 FEED = {"feedName": "mcdot", "issuingOrganization": "Maricopa County DOT",
         "state": "arizona", "version": "4.2",
         "url": "https://wzdxapi.aztech.org/construction"}
 
 
-def wzdx(version: str = "4.2", n: int = 1, key: str = "feed_info") -> bytes:
+def wzdx(version: str = "4.2", n: int = 1, key: str = "feed_info",
+         update: str = "2026-10-06T19:11:47Z",
+         ids: list[str] | None = None) -> bytes:
+    names = ids if ids is not None else [str(i) for i in range(n)]
     return json.dumps({
-        key: {"version": version, "publisher": "x"},
+        key: {"version": version, "publisher": "x", "update_date": update},
         "type": "FeatureCollection",
-        "features": [{"type": "Feature", "id": str(i)} for i in range(n)],
+        "features": [{"type": "Feature", "id": i} for i in names],
     }).encode()
+
+
+def store(root, feed: str, body: bytes, when=None) -> dict:
+    """Store the way the collector does, with both digests.
+
+    A test that passed only the body digest would exercise the fallback and
+    quietly stop testing the path that runs in production -- which is how a
+    guard comes to be green over code nobody is checking."""
+    return store_body(root, feed, body, digest(body),
+                      content_digest(json.loads(body)), when)
 
 
 # -- what a body says about itself ------------------------------------------
@@ -99,11 +114,13 @@ def test_the_version_stays_a_string() -> None:
 
 @pytest.mark.parametrize("declared,registry,expected", [
     ("4.2", "4.2", "agrees"),
-    ("4.1", "4.2", "disagrees"),
+    ("4.0", "4", "agrees-by-alias"),
+    ("4.1", "4", "disagrees"),
+    ("3.1", "4", "disagrees"),
     (None, "4.2", "absent"),
     ("4.2", None, "registry-silent"),
 ])
-def test_the_version_check_has_four_outcomes_not_two(
+def test_the_version_check_has_five_outcomes_not_two(
         declared, registry, expected) -> None:
     """`absent` is not `agrees`. A feed that declares nothing has told us
     nothing, and substituting the registry's claim for its silence would make
@@ -112,12 +129,76 @@ def test_the_version_check_has_four_outcomes_not_two(
     assert version_verdict(declared, registry) == expected
 
 
-def test_the_four_verdicts_are_four_distinct_strings() -> None:
+def test_the_five_verdicts_are_five_distinct_strings() -> None:
     """Rule 13 applied to a verdict rather than a sentence: a swallowed branch
     returning a neighbour's value looks right in isolation."""
     said = {version_verdict(d, r) for d, r in
-            (("4.2", "4.2"), ("4.1", "4.2"), (None, "4.2"), ("4.2", None))}
-    assert len(said) == 4
+            (("4.2", "4.2"), ("4.0", "4"), ("4.1", "4"),
+             (None, "4.2"), ("4.2", None))}
+    assert len(said) == 5
+
+
+# -- the two vocabularies, bought with five states -------------------------
+
+def test_the_registry_shorthand_and_the_spec_notation_are_one_spec() -> None:
+    """THE CORRECTION OF 2026-10-06, FOUND BY THE FIRST LIVE CYCLE.
+
+    Five feeds -- Kansas, North Dakota, Utah, Illinois and Indiana -- declare
+    `"4.0"` in their bodies against a registry row saying `"4"`. One
+    specification, two notations: the registry writes the shorthand and the
+    spec writes the number.
+
+    String comparison rejected all five, and the rejection looked principled,
+    because this project has three separate entries about never coercing a
+    version to a float. The guard was right about the coercion and wrong about
+    the vocabulary: `KNOWN_WZDX_VERSIONS` was built from the catalogue rather
+    than from the thing the catalogue describes.
+
+    Its effect was not conservative. About 9.2 MB of real work zone data
+    across five states dropped out of the counted layer -- five states
+    quietly declaring nothing, in the direction that flatters the hypothesis.
+    Mechanism S: wrong in the safe direction, which is not safe.
+    """
+    assert canonical_version("4") == "4.0"
+    assert canonical_version("4.0") == "4.0"
+    assert "4.0" in KNOWN_SPEC_VERSIONS
+    for v in ("4.0", "4", "4.1", "4.2"):
+        assert canonical_version(v) in KNOWN_SPEC_VERSIONS, v
+    assert classify(200, wzdx("4.0"), "4.0") == OK, (
+        "a feed on WZDx 4.0 is countable; it was not, for five feeds, for as "
+        "long as this file took to run once against the real internet")
+
+
+def test_canonicalising_is_translation_and_not_coercion() -> None:
+    """The float trap stays shut. `4.10` is not `4.1`, and an alias table that
+    quietly became a numeric comparison would reopen it."""
+    assert canonical_version("4.10") == "4.10"
+    assert "4.10" not in KNOWN_SPEC_VERSIONS
+    assert classify(200, wzdx("4.10"), "4.10") == VERSION_UNKNOWN
+    assert version_verdict("4.10", "4.1") == "disagrees"
+
+
+def test_the_spec_versions_are_derived_from_the_registry_tuple() -> None:
+    """Not restated. `fetch_road_registries.KNOWN_WZDX_VERSIONS` is what G0
+    selects on, so a version added there must appear here without anyone
+    remembering to -- a fix landing on one side of a pair is mechanism E."""
+    assert len(KNOWN_SPEC_VERSIONS) == len(set(KNOWN_WZDX_VERSIONS))
+    for v in KNOWN_WZDX_VERSIONS:
+        assert canonical_version(v) in KNOWN_SPEC_VERSIONS
+
+
+def test_a_notation_difference_is_recorded_but_not_flagged() -> None:
+    """Rule 16, and it was earned. The first live cycle flagged six version
+    disagreements, five of which were this notation. St Charles County's was
+    real -- a body on 4.1 against a registry claiming 4 -- and it sat fifth in
+    a list of six, which is how a true alarm gets skipped."""
+    rows = [row("kansas", verdict="agrees-by-alias"),
+            row("stcharlesco_v4", verdict="disagrees")]
+    s = cycle_summary(rows, {"kansas"})
+    assert s["version_notation_differs"] == ["kansas"]
+    assert s["version_disagreements"] == ["stcharlesco_v4"]
+    assert sum("VERSION DISAGREEMENT" in f for f in s["flags"]) == 1
+    assert "kansas" not in " ".join(s["flags"])
 
 
 # -- zero is a finding, absent is not --------------------------------------
@@ -160,6 +241,7 @@ def test_html_served_with_a_200_is_not_a_feed() -> None:
 
 @pytest.mark.parametrize("status,body,declared,expected", [
     (200, wzdx("4.2"), "4.2", OK),
+    (200, wzdx("4.0", n=0), "4.0", OK),
     (200, wzdx("4", n=0), "4", OK),
     (200, wzdx("9.9"), "9.9", VERSION_UNKNOWN),
     (200, b"this is not json", None, NOT_JSON),
@@ -171,6 +253,57 @@ def test_html_served_with_a_200_is_not_a_feed() -> None:
 def test_one_outcome_name_per_distinguishable_fact(
         status, body, declared, expected) -> None:
     assert classify(status, body, declared) == expected
+
+
+# -- our ceiling is not their fault ----------------------------------------
+
+def test_a_body_cut_off_by_our_cap_is_not_called_bad_json() -> None:
+    """THE OTHER CORRECTION OF 2026-10-06.
+
+    North Carolina and Wisconsin both returned exactly 8,388,608 bytes on the
+    first live cycle -- the cap, to the byte -- so their bodies arrived chopped
+    mid-object, failed to parse, and were filed as `not_json`. That is a claim
+    about their data when the only fact in evidence was about our ceiling.
+
+    `truncated` is now checked before anything else, because a truncated body
+    tells us nothing about whether the feed is valid JSON, valid WZDx, or on a
+    known specification. Answering any of those questions from a prefix is
+    reading at a scale that cannot show the thing."""
+    whole = wzdx("4.2", n=5)
+    assert classify(200, whole, "4.2", False) == OK
+    assert classify(200, whole, "4.2", True) == TRUNCATED
+    assert classify(200, b'{"features":[{"id":"a"', None, True) == TRUNCATED
+    assert classify(200, b"genuinely not json", None, False) == NOT_JSON
+
+
+def test_a_truncated_body_is_never_stored() -> None:
+    """A chopped body written under a digest of its chopped bytes is a partial
+    answer wearing a whole answer's name -- the 483 polygons again. On the
+    first live cycle the archive was spared by luck rather than design:
+    `not_json` happened not to be in the stored set."""
+    assert TRUNCATED not in STORED_OUTCOMES
+    assert OK in STORED_OUTCOMES and VERSION_UNKNOWN in STORED_OUTCOMES
+
+
+def test_a_truncated_feed_is_not_counted_and_is_flagged_as_ours() -> None:
+    rec = feed_record(FEED, status=200, body=wzdx(n=9), elapsed_s=1.0,
+                      truncated=True)
+    assert rec["outcome"] == TRUNCATED
+    assert rec["n_events"] is None, "a prefix is not an event count"
+    assert rec["returned"] is True, "it answered; that is a separate fact"
+
+    s = cycle_summary([row("ncdot", TRUNCATED, True, None), row("b")], {"b"})
+    assert s["feeds_truncated"] == ["ncdot"]
+    flag = " ".join(s["flags"])
+    assert "TRUNCATED BY OUR OWN CAP" in flag
+    assert "our ceiling and not their fault" in flag
+
+
+def test_a_run_with_no_truncation_is_not_flagged() -> None:
+    """Rule 16."""
+    s = cycle_summary([row(f) for f in "abc"], {"a"})
+    assert s["feeds_truncated"] == []
+    assert not any("TRUNCATED" in f for f in s["flags"])
 
 
 def test_a_feed_on_an_unread_specification_is_recorded_not_counted() -> None:
@@ -200,8 +333,8 @@ def test_two_bodies_in_one_second_cannot_overwrite_each_other(tmp_path) -> None:
     one is mechanism N. The digest is in the name now, so the collision cannot
     occur rather than being made less likely."""
     b1, b2 = wzdx(n=1), wzdx(n=2)
-    s1 = store_body(tmp_path, "mcdot", b1, digest(b1))
-    s2 = store_body(tmp_path, "mcdot", b2, digest(b2))
+    s1 = store(tmp_path, "mcdot", b1)
+    s2 = store(tmp_path, "mcdot", b2)
     assert s1["path"] != s2["path"]
     assert gzip.decompress(s1["path"].read_bytes()) == b1
     assert gzip.decompress(s2["path"].read_bytes()) == b2
@@ -211,11 +344,137 @@ def test_an_unchanged_body_is_not_stored_again(tmp_path) -> None:
     """A work zone lives for weeks. Storing it on every cycle would write the
     same lane closure 144 times a day."""
     b = wzdx()
-    first = store_body(tmp_path, "mcdot", b, digest(b))
-    again = store_body(tmp_path, "mcdot", b, digest(b))
+    first = store(tmp_path, "mcdot", b)
+    again = store(tmp_path, "mcdot", b)
     assert first["digest_is_new"] and first["bytes_stored"] > 0
     assert not again["digest_is_new"]
     assert again["bytes_stored"] == 0 and again["path"] is None
+    assert not again["envelope_only"], (
+        "identical bytes are not an envelope change either")
+
+
+# -- the envelope moves and no road does -----------------------------------
+
+def test_a_moving_update_date_over_identical_events_is_not_a_change() -> None:
+    """THE MEASUREMENT OF 2026-10-06, FROM THE ONLY TWO CYCLES THIS COLLECTOR
+    HAS EVER RUN, 15.6 MINUTES APART.
+
+    Eleven of twenty-three feeds changed their bytes. Five changed nothing
+    about any road: iddot, modot, msdot and stcharlesco_v4 advanced
+    `feed_info.update_date` over byte-identical features, and necdot returned
+    the same 182 events in a different order. 581,926 bytes -- 36 per cent of
+    the recurring traffic -- for bodies carrying no new claim.
+
+    The storage was the smaller problem. A whole-body digest makes `changed`
+    mean "the bytes moved", when the quantity this layer exists to track is
+    "the agency's declaration about a road moved". A timestamp rewritten on
+    every request answers that question `always`, which is the WMATA header
+    timestamp exactly -- advancing every poll while the fleet sat still -- one
+    domain over.
+    """
+    a = wzdx(n=3, update="2026-10-06T19:11:47Z")
+    b = wzdx(n=3, update="2026-10-06T19:27:07Z")
+    assert a != b, "the bodies differ"
+    assert digest(a) != digest(b), "and so do their whole-body digests"
+    assert content_digest(json.loads(a)) == content_digest(json.loads(b)), (
+        "but no road event changed, so the content digest must not move")
+
+
+def test_reordered_features_are_the_same_claim() -> None:
+    """necdot returned its 182 events shuffled. A FeatureCollection is a set;
+    a different sequence is not news, and treating it as one would report
+    churn forever on a feed whose backend does not promise an order."""
+    a = wzdx(ids=["a", "b", "c"])
+    b = wzdx(ids=["c", "a", "b"])
+    assert digest(a) != digest(b)
+    assert content_digest(json.loads(a)) == content_digest(json.loads(b))
+
+
+def test_a_real_event_change_does_move_the_content_digest() -> None:
+    """The other half, and the half that would be catastrophic to lose. dedot
+    gained 8 events and njdot lost 60 in that same window."""
+    assert content_digest(json.loads(wzdx(n=3))) != \
+        content_digest(json.loads(wzdx(n=4)))
+    one = json.loads(wzdx(ids=["a"]))
+    two = json.loads(wzdx(ids=["a"]))
+    two["features"][0]["properties"] = {"lanes": "closed"}
+    assert content_digest(one) != content_digest(two), (
+        "a changed attribute on an unchanged id is a changed claim")
+
+
+def test_duplicate_ids_do_not_make_the_digest_unstable() -> None:
+    """Sorted by (id, canonical form) rather than id alone. Two features
+    under one id would be a real defect in somebody's feed, and it must not
+    also make this digest flip between orderings and report churn forever."""
+    a = {"features": [{"id": "a", "x": 1}, {"id": "a", "x": 2}]}
+    b = {"features": [{"id": "a", "x": 2}, {"id": "a", "x": 1}]}
+    assert content_digest(a) == content_digest(b)
+
+
+def test_no_features_has_no_content_digest() -> None:
+    """None, not the digest of an empty list. "not WZDx" and "a feed with no
+    work zones" are different facts and an empty-list digest would be a real
+    value standing in for an absent one."""
+    assert content_digest({"feed_info": {"version": "4.2"}}) is None
+    assert content_digest("<html>") is None
+    assert content_digest(json.loads(wzdx(n=0))) is not None, (
+        "an empty features list IS a claim and does have a digest")
+
+
+def test_an_envelope_change_is_recorded_and_not_stored(tmp_path) -> None:
+    """The ledger gets the observation; the archive does not get the body.
+    Four feeds did this between the only two cycles so far, and the fact that
+    their `update_date` moves is worth keeping even though the bytes are
+    not."""
+    a = wzdx(n=3, update="2026-10-06T19:11:47Z")
+    b = wzdx(n=3, update="2026-10-06T19:27:07Z")
+    first = store(tmp_path, "modot", a)
+    second = store(tmp_path, "modot", b)
+
+    assert first["digest_is_new"] and first["bytes_stored"] > 0
+    assert second["envelope_only"] is True
+    assert second["digest_is_new"] is False
+    assert second["bytes_stored"] == 0
+    bodies = list((tmp_path / "roads" / "wzdx").rglob("*.json.gz"))
+    assert len(bodies) == 1, "one body for one unchanged set of road events"
+    assert last_digest(tmp_path, "modot") == content_digest(json.loads(b))
+
+
+def test_an_envelope_only_cycle_is_stated_but_not_flagged() -> None:
+    """Rule 16, and this one would have fired on every cycle for four feeds.
+    It belongs in the sentence as information, not in the flag list as an
+    alarm."""
+    rows = [row(f) for f in "abcdef"]
+    s = cycle_summary(rows, {"a"}, set(), {"b", "c", "d", "e"})
+    assert s["n_feeds_envelope_only"] == 4
+    assert s["feeds_envelope_only"] == ["b", "c", "d", "e"]
+    assert s["flags"] == []
+    assert "moved their update_date over identical road events" in \
+        cycle_sentence(s)
+
+
+def test_a_feed_whose_update_date_is_decorative_is_named_across_cycles() -> None:
+    """A cross-cycle question, so it is a function over the ledger rather than
+    a per-cycle flag: one envelope-only cycle is ordinary, and a feed that has
+    done nothing else all day is telling us its freshness claim is furniture.
+
+    This is the finding that matters beyond storage. If G4 or G6 ever reads
+    `feed_info.update_date` as "how current is this declaration", these feeds
+    answer "seconds old" and mean nothing by it -- an unverified self-report
+    about the self-report's own freshness, which is this project's whole
+    subject one level up."""
+    rows = ([{"feed": "modot", "envelope_only": True} for _ in range(4)]
+            + [{"feed": "mcdot", "envelope_only": True}]
+            + [{"feed": "mcdot", "stored_as": "x.json.gz"}]
+            + [{"feed": "njdot", "stored_as": "y.json.gz"} for _ in range(3)])
+    assert decorative_update_date(rows) == {"modot": 4}, (
+        "mcdot had one real change so its update_date is earning its place; "
+        "njdot never moved an envelope at all")
+
+
+def test_one_envelope_only_cycle_is_not_enough_to_call_it_decorative() -> None:
+    rows = [{"feed": "modot", "envelope_only": True}]
+    assert decorative_update_date(rows) == {}
 
 
 def test_a_changed_feed_and_a_written_file_are_separate_facts(tmp_path) -> None:
@@ -231,14 +490,14 @@ def test_a_changed_feed_and_a_written_file_are_separate_facts(tmp_path) -> None:
     shape that published `n_polls` as a file count against 19,329 attempted
     polls, understated 11.7x, for three days."""
     b1, b2 = wzdx(n=1), wzdx(n=2)
-    store_body(tmp_path, "mcdot", b1, digest(b1))
-    store_body(tmp_path, "mcdot", b2, digest(b2))
-    revert = store_body(tmp_path, "mcdot", b1, digest(b1))
+    store(tmp_path, "mcdot", b1)
+    store(tmp_path, "mcdot", b2)
+    revert = store(tmp_path, "mcdot", b1)
 
     assert revert["digest_is_new"] is True, "the feed did change"
     assert revert["bytes_stored"] == 0, "and needed no write"
     assert revert["path"] is not None, "and the bytes are at a known path"
-    assert last_digest(tmp_path, "mcdot") == digest(b1), (
+    assert last_digest(tmp_path, "mcdot") == content_digest(json.loads(b1)), (
         "the sidecar records what we last SAW, which is true whether or not a "
         "write was needed")
 
@@ -248,7 +507,7 @@ def test_the_stored_body_is_the_body_that_arrived(tmp_path) -> None:
     on its first run. Compression that lost or altered a byte would be a
     storage win paid for in data."""
     b = wzdx(n=40)
-    s = store_body(tmp_path, "mcdot", b, digest(b))
+    s = store(tmp_path, "mcdot", b)
     assert gzip.decompress(s["path"].read_bytes()) == b
     assert json.loads(gzip.decompress(s["path"].read_bytes()))["features"]
 
@@ -333,6 +592,46 @@ def test_the_blind_count_agrees_with_itself_grammatically() -> None:
     assert "are named in the ledger" in cycle_sentence(two)
 
 
+def test_the_event_yield_names_the_feeds_it_came_from() -> None:
+    """THE THIRD CORRECTION OF 2026-10-06.
+
+    The first live cycle printed "23 of 25 feeds answered with 9225 events".
+    Every number in it was correct and the sentence was not: the 9,225 came
+    from 15 feeds, not 23. Eight answered and were not countable -- two
+    truncated, two unparseable, one not WZDx, three on a notation the guard
+    rejected -- so the reader got a yield attached to the wrong denominator,
+    and `n_feeds_counted` was sitting in the summary unused.
+
+    Mechanism U: a correct number under a shape that answers a question nobody
+    asked. The denominator of a rate appears beside it.
+    """
+    mixed = ([row(f"ok{i}", n=100) for i in range(15)]
+             + [row(f"bad{i}", NOT_WZDX, True, None) for i in range(8)]
+             + [row(f"down{i}", HTTP_ERROR, False, None) for i in range(2)])
+    s = cycle_summary(mixed, {f"ok{i}" for i in range(15)})
+    assert (s["n_feeds_returned"], s["n_feeds_counted"]) == (23, 15)
+    said = cycle_sentence(s)
+    assert "1500 events from 15 countable" in said
+    assert "23 of 25 feeds answered" in said
+
+
+def test_the_yield_is_stated_plainly_when_every_answer_counted() -> None:
+    """The clause only earns its place when the two numbers differ. Printing
+    "15 events from 3 countable" on every ordinary cycle would be noise of the
+    same kind as a flag that always fires."""
+    s = cycle_summary([row(f) for f in "abc"], {"a"})
+    assert "15 events," in cycle_sentence(s)
+    assert "countable" not in cycle_sentence(s)
+
+
+def test_uncountable_feeds_are_named_and_not_merely_counted() -> None:
+    """"Which eight?" is the next question anyone asks, and the summary has to
+    answer it without going back to the ledger."""
+    s = cycle_summary([row("a"), row("nysdot", NOT_WZDX, True, None),
+                       row("ncdot", TRUNCATED, True, None)], {"a"})
+    assert s["feeds_uncountable"] == ["ncdot", "nysdot"]
+
+
 def test_a_healthy_cycle_raises_no_flags() -> None:
     """Rule 16. A flag's currency is the reader's attention, and one that
     fires on an ordinary cycle spends what the next real one will need."""
@@ -349,13 +648,59 @@ def test_zero_work_zones_everywhere_is_not_flagged() -> None:
     assert s["flags"] == []
 
 
-def test_every_feed_changing_at_once_is_flagged() -> None:
+def test_every_feed_refreshing_at_once_is_flagged() -> None:
     """Twenty-five independent agencies do not refresh in lockstep. That is a
     generation timestamp in the body, and it would make every cycle look like
     new information and defeat the change-only storage entirely -- the
     resolution-floor problem from the transit cadence work, one layer up."""
-    s = cycle_summary([row(f) for f in "abcde"], set("abcde"))
-    assert any("NEARLY EVERY FEED CHANGED" in f for f in s["flags"])
+    s = cycle_summary([row(f) for f in "abcde"], set("abcde"), set())
+    assert any("NEARLY EVERY FEED REFRESHED" in f for f in s["flags"])
+
+
+def test_an_empty_archive_is_not_twenty_five_agencies_in_lockstep() -> None:
+    """THE FOURTH CORRECTION OF 2026-10-06.
+
+    On the first cycle against an empty archive, every feed's body is new by
+    definition. The lockstep flag compared changes against answers, so it
+    would have fired and accused the agencies of refreshing in unison on the
+    strength of the instrument's own initial condition.
+
+    It did not fire on the real run -- 20 of 23 is below the threshold -- but
+    only because three unrelated feeds were uncountable. A guard that is
+    correct by accident has not been tested, which is what mechanism Z said
+    about a convention that had been right eleven times running.
+    """
+    feeds = set("abcde")
+    s = cycle_summary([row(f) for f in feeds], feeds, first_seen=feeds)
+    assert s["n_feeds_first_seen"] == 5
+    assert s["n_feeds_refreshed"] == 0
+    assert not any("REFRESHED" in f for f in s["flags"])
+    assert "stored for the first time" in cycle_sentence(s)
+
+
+def test_a_mixed_cycle_separates_refreshes_from_first_sightings() -> None:
+    """One new feed added to a running collector must not drag the whole
+    cycle's reading with it."""
+    s = cycle_summary([row(f) for f in "abcde"], {"a", "b", "c"},
+                      first_seen={"c"})
+    assert (s["n_feeds_changed"], s["n_feeds_first_seen"],
+            s["n_feeds_refreshed"]) == (3, 1, 2)
+    assert "3 changed, 1 of them a first sighting" in cycle_sentence(s)
+
+
+def test_a_first_sighting_is_reported_by_the_writer() -> None:
+    """The fact has to come from the archive, not be inferred by the caller
+    from a path being non-None -- which is how `digest_is_new` and
+    `bytes_stored` came to be one variable in the first place."""
+    import tempfile
+    from pathlib import Path as _P
+    with tempfile.TemporaryDirectory() as d:
+        root, b1, b2 = _P(d), wzdx(n=1), wzdx(n=2)
+        first = store(root, "mcdot", b1)
+        later = store(root, "mcdot", b2)
+        assert first["first_sighting"] is True
+        assert later["first_sighting"] is False
+        assert later["digest_is_new"] is True
 
 
 def test_nothing_returning_is_an_outage_and_not_a_measurement() -> None:

@@ -165,9 +165,17 @@ REGISTRY = REFERENCE / "roads" / "wzdx-registry.json"
 DEFAULT_INTERVAL_S = 600.0
 INTERVAL_BAND_S = (300.0, 900.0)
 
-# A feed is not expected to be large. Cap anyway: an endpoint answering with
-# something unbounded should cost one truncated record, not the process.
-CAP_BYTES = 8 * 1024 * 1024
+# Cap anyway: an endpoint answering with something unbounded should cost one
+# truncated record and not the process.
+#
+# MEASURED 2026-10-06, AND THE FIRST GUESS WAS WRONG. The cap was 8 MiB, on
+# the reasoning that "a feed is not expected to be large". Two state DOTs --
+# North Carolina and Wisconsin -- hit it exactly on the first live cycle, so
+# their bodies arrived chopped mid-JSON and were classified `not_json`, which
+# blamed them for our ceiling. Observed sizes among the feeds that fit:
+# Indiana 4.7 MB, Kansas 1.86 MB, Utah 0.62 MB, North Dakota 0.28 MB. 64 MiB
+# is generous against those and still bounded.
+CAP_BYTES = 64 * 1024 * 1024
 
 TIMEOUT_S = 30.0
 USER_AGENT = ("angels-geoint/0.1 (senior capstone, GIS; contact via "
@@ -177,17 +185,69 @@ USER_AGENT = ("angels-geoint/0.1 (senior capstone, GIS; contact via "
 # both are tried and the answering key is reported either way.
 FEED_INFO_KEYS = ("feed_info", "road_event_feed_info")
 
+# TWO VOCABULARIES FOR ONE SPECIFICATION, discovered on the first live cycle.
+#
+# `KNOWN_WZDX_VERSIONS` is ("4", "4.1", "4.2") because that is how the DOT
+# registry CSV writes them, and G0 selects on that column. Five feeds --
+# Kansas, North Dakota, Utah, Illinois and Indiana -- declare `"4.0"` in their
+# own bodies, which is how the SPECIFICATION writes the same thing.
+#
+# String comparison then rejected all five, and the rejection was invisible
+# because it looked principled: `"4.0" != "4"` is true, and this project has
+# three separate entries about not coercing a version to a float. The guard was
+# right about the coercion and wrong about the vocabulary -- the constant was
+# built from the catalogue rather than from the thing the catalogue describes,
+# which is rule 20 pointing at a version column instead of a feed count.
+#
+# Its effect was not conservative. Five feeds and about 9.2 MB of real work
+# zone data dropped out of the counted layer, which in the land domain means
+# five states quietly declaring nothing. A check wrong in the safe direction
+# is mechanism S, and "safe" here meant understating the cooperative layer in
+# precisely the direction that flatters the hypothesis.
+#
+# So: translate, do not coerce. The registry's shorthand maps into the spec's
+# notation, the table is derived from the imported tuple so the two cannot
+# drift, and the raw strings from both sides stay in the ledger.
+#
+# Aliases are added when OBSERVED in the ledger, never in anticipation. "4.0"
+# is here because five feeds sent it today.
+SPEC_FROM_REGISTRY = {"4": "4.0"}
+KNOWN_SPEC_VERSIONS = tuple(sorted(
+    {SPEC_FROM_REGISTRY.get(v, v) for v in KNOWN_WZDX_VERSIONS}))
+
+
+def canonical_version(v: str | None) -> str | None:
+    """A version string in the specification's notation, or None.
+
+    Never a float. `float("4.10") == float("4.1")` is True and those are not
+    the same specification; this maps between two spellings of one spec and
+    does nothing else.
+    """
+    if v is None:
+        return None
+    return SPEC_FROM_REGISTRY.get(str(v), str(v))
+
+
 # Outcomes. One name per distinguishable fact, because a shared return value
 # for "no" and "cannot tell" is mechanism A and is the oldest entry in the
 # catalogue.
 OK = "ok"                       # parsed, is WZDx, events counted (may be 0)
 HTTP_ERROR = "http_error"       # a status, or a transport failure
-NOT_JSON = "not_json"           # bytes arrived and are not JSON
+TRUNCATED = "truncated"         # OUR cap cut it off. Not their fault, and not
+                                # a claim about their JSON. Never stored.
+NOT_JSON = "not_json"           # bytes arrived whole and are not JSON
 NOT_WZDX = "not_wzdx"           # JSON arrived with no FeatureCollection shape
 VERSION_UNKNOWN = "version_unknown"   # WZDx, but on a spec not read for this
                                       # project. Body kept, events NOT counted.
 
 COUNTED_OUTCOMES = (OK,)
+
+# Bodies worth keeping even though their events are not summed. A body on an
+# unread specification is the first thing anyone wants when a feed changes
+# spec. A TRUNCATED body is deliberately absent: storing a chopped body under
+# a digest of its chopped bytes would put a partial answer in the archive
+# wearing a whole answer's name, which is the 483 polygons again.
+STORED_OUTCOMES = (OK, VERSION_UNKNOWN)
 
 # Every feed changing its bytes on every cycle across twenty-five independent
 # agencies is not twenty-five agencies working in lockstep; it is a timestamp
@@ -263,18 +323,30 @@ def declared_version(obj: Any) -> tuple[str | None, str | None]:
 
 
 def version_verdict(declared: str | None, registry: str | None) -> str:
-    """Three outcomes, not two. See the module docstring.
+    """Five outcomes, and the fifth was bought with five states.
 
     `absent` is NOT `agrees`. A feed that declares nothing has told us nothing,
     and filling the silence with the registry's claim would make a catalogue
-    row look like a measurement -- which is the whole of mechanism D and is
-    why two feeds were excluded by G0 in the first place.
+    row look like a measurement -- mechanism D, and why two feeds were
+    excluded by G0 in the first place.
+
+    `agrees-by-alias` exists because the first live cycle found five feeds
+    declaring `"4.0"` against a registry saying `"4"`. Those are one
+    specification in two notations. Reporting them as `disagrees` buried a
+    real disagreement (St Charles County, 4.1 against a registry claiming 4)
+    among five false ones, and a flag that cries wolf five times out of six
+    is rule 16's failure. The notation difference is still named rather than
+    smoothed away, because it is a fact about the registry worth having.
     """
     if declared is None:
         return "absent"
     if registry is None:
         return "registry-silent"
-    return "agrees" if str(declared) == str(registry) else "disagrees"
+    if str(declared) == str(registry):
+        return "agrees"
+    if canonical_version(declared) == canonical_version(registry):
+        return "agrees-by-alias"
+    return "disagrees"
 
 
 def event_count(obj: Any) -> int | None:
@@ -307,8 +379,19 @@ def looks_like_html(body: bytes) -> bool:
 
 
 def classify(status: int | None, body: bytes | None,
-             declared: str | None) -> str:
-    """One outcome name per distinguishable fact about one feed."""
+             declared: str | None, truncated: bool = False) -> str:
+    """One outcome name per distinguishable fact about one feed.
+
+    `truncated` is checked FIRST, and the first version of this function did
+    not take the argument at all. North Carolina and Wisconsin both hit the
+    8 MiB cap exactly on the first live cycle, so their bodies arrived chopped
+    mid-object, failed to parse, and were filed as `not_json` -- a claim about
+    their data when the only fact in evidence was about our ceiling. The
+    archive was spared by luck rather than by design: `not_json` happened not
+    to be in the stored set, so a half body never reached the disk.
+    """
+    if truncated:
+        return TRUNCATED
     if status is None or body is None or not (200 <= status < 300):
         return HTTP_ERROR
     if looks_like_html(body):
@@ -319,7 +402,8 @@ def classify(status: int | None, body: bytes | None,
         return NOT_JSON
     if event_count(obj) is None:
         return NOT_WZDX
-    if declared is not None and declared not in KNOWN_WZDX_VERSIONS:
+    if (declared is not None
+            and canonical_version(declared) not in KNOWN_SPEC_VERSIONS):
         return VERSION_UNKNOWN
     return OK
 
@@ -329,7 +413,57 @@ def classify(status: int | None, body: bytes | None,
 # --------------------------------------------------------------------------
 
 def digest(body: bytes) -> str:
+    """Of the bytes exactly as they arrived. Verifies the archive."""
     return hashlib.sha256(body).hexdigest()
+
+
+def content_digest(obj: Any) -> str | None:
+    """Of the road events alone, insensitive to order and to the envelope.
+
+    MEASURED 2026-10-06, FROM TWO CYCLES 15.6 MINUTES APART.
+
+    Eleven of twenty-three feeds changed their bytes in that window. Five of
+    those eleven changed nothing about any road:
+
+        iddot, modot, msdot, stcharlesco_v4   `feed_info.update_date` advanced
+                                              and the features were byte
+                                              identical, in the same order
+        necdot                                the same 182 features, shuffled
+
+    That is 581,926 bytes stored -- 36 per cent of the cycle's recurring
+    traffic -- for bodies carrying no new claim about any road. A whole-body
+    digest cannot tell those from the six feeds where lane closures genuinely
+    appeared and vanished (dedot +8 events, njdot -60).
+
+    Worse than the storage: it makes `changed` mean the wrong thing. The
+    quantity this layer exists to track is **when an agency's declaration
+    about a road changes**, and a timestamp rewritten on every request answers
+    that question "always". This is the WMATA header timestamp exactly -- a
+    header that advanced every poll while the fleet sat still -- one domain
+    over, and it is a cooperative-reporting defect in its own right: a
+    declaration of freshness that the content does not support.
+
+    Feature ORDER is excluded deliberately. A GeoJSON FeatureCollection is a
+    set; necdot returning its 182 events in a different sequence is not news.
+    Sorted by `(id, canonical form)` rather than `id` alone, so the ordering
+    stays total even if a feed ships two features under one id -- which would
+    be a real defect, and one that must not be allowed to make this digest
+    unstable and so report churn forever.
+
+    Returns None when there are no features to digest, which is `not WZDx`
+    and is a different fact from an empty feed.
+    """
+    if not isinstance(obj, dict):
+        return None
+    feats = obj.get("features")
+    if not isinstance(feats, list):
+        return None
+    canonical = json.dumps(
+        sorted(feats, key=lambda f: (str(f.get("id") if isinstance(f, dict)
+                                         else f),
+                                     json.dumps(f, sort_keys=True))),
+        sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def feed_record(feed: dict[str, Any], *, status: int | None,
@@ -351,7 +485,7 @@ def feed_record(feed: dict[str, Any], *, status: int | None,
 
     declared, version_key = declared_version(obj)
     registry_version = feed.get("version")
-    outcome = classify(status, body, declared)
+    outcome = classify(status, body, declared, truncated)
     n_events = event_count(obj) if outcome in COUNTED_OUTCOMES else None
 
     rec: dict[str, Any] = {
@@ -370,9 +504,20 @@ def feed_record(feed: dict[str, Any], *, status: int | None,
         # published a file count against 19,329 attempted polls.
         "bytes_received": len(body) if body is not None else 0,
         "truncated": truncated,
+        # Two digests, two questions. `sha256` verifies the archived bytes;
+        # `content_sha256` is what "did this agency's claim change" means, and
+        # the difference between them is how four feeds were found rewriting
+        # `update_date` over identical road events.
         "sha256": digest(body) if body else None,
+        "content_sha256": content_digest(obj),
         "n_events": n_events,
+        # The raw strings from both sides, and the canonical form beside them.
+        # Keeping only the canonical form would hide that a registry row and a
+        # feed spell one specification two ways, which is a fact about the
+        # registry; keeping only the raw strings is what made five feeds look
+        # like disagreements.
         "version_declared": declared,
+        "version_canonical": canonical_version(declared),
         "version_key": version_key,
         "version_registry": registry_version,
         "version_verdict": version_verdict(declared, registry_version),
@@ -386,7 +531,9 @@ def feed_record(feed: dict[str, Any], *, status: int | None,
 # --------------------------------------------------------------------------
 
 def cycle_summary(records: list[dict[str, Any]],
-                  changed: set[str] | None = None) -> dict[str, Any]:
+                  changed: set[str] | None = None,
+                  first_seen: set[str] | None = None,
+                  envelope_only: set[str] | None = None) -> dict[str, Any]:
     """Counts over one cycle, each named for exactly what it holds.
 
     `changed` is the set of feed names whose digest differed from the previous
@@ -395,6 +542,8 @@ def cycle_summary(records: list[dict[str, Any]],
     went to disk would not be testable without one.
     """
     changed = changed or set()
+    first_seen = first_seen or set()
+    envelope_only = envelope_only or set()
     by_outcome: dict[str, int] = {}
     for r in records:
         by_outcome[r["outcome"]] = by_outcome.get(r["outcome"], 0) + 1
@@ -408,13 +557,36 @@ def cycle_summary(records: list[dict[str, Any]],
         "n_feeds_returned": len(returned),
         "n_feeds_counted": len(counted),
         "n_feeds_changed": len(changed),
+        # Of those changes, how many were the first body we ever held for that
+        # feed. On an empty archive this equals n_feeds_changed and the cycle
+        # has measured no change rate at all.
+        "n_feeds_first_seen": len(first_seen),
+        "n_feeds_refreshed": len(changed - first_seen),
+        # Bodies that moved while no road did: `feed_info.update_date`
+        # advancing, or the same features in a different order. Not stored,
+        # and recorded here because it is a fact about the feed -- a claim of
+        # freshness its own content does not support.
+        "n_feeds_envelope_only": len(envelope_only),
+        "feeds_envelope_only": sorted(envelope_only),
         "n_events_total": events,
         "by_outcome": by_outcome,
         "feeds_failed": sorted(r["feed"] for r in records
                                if not r["returned"]),
         "feeds_changed": sorted(changed),
+        "feeds_truncated": sorted(r["feed"] for r in records
+                                  if r["outcome"] == TRUNCATED),
+        "feeds_uncountable": sorted(
+            r["feed"] for r in records
+            if r["returned"] and r["n_events"] is None),
         "version_disagreements": sorted(
             r["feed"] for r in records if r["version_verdict"] == "disagrees"),
+        # Separate from the disagreements, because one notation is the
+        # registry's and the other is the specification's and neither party is
+        # wrong. Recorded so the registry's shorthand stays visible; not
+        # flagged, because it is neither actionable nor rare.
+        "version_notation_differs": sorted(
+            r["feed"] for r in records
+            if r["version_verdict"] == "agrees-by-alias"),
         "feeds_without_declared_version": sorted(
             r["feed"] for r in records if r["version_verdict"] == "absent"),
         "flags": [],
@@ -454,9 +626,14 @@ def cycle_flags(s: dict[str, Any]) -> list[str]:
                      "WZDx, so n_events_total is 0 for want of data rather "
                      "than for want of work zones")
 
-    if returned and s["n_feeds_changed"] / returned >= ALL_CHANGED_FRACTION:
+    # Refreshes, not first sightings. A cycle against an empty archive changes
+    # everything by definition and has measured no change rate; accusing the
+    # agencies of lockstep on the strength of it would be the instrument
+    # reporting its own initial condition as a finding.
+    refreshed = s.get("n_feeds_refreshed", s["n_feeds_changed"])
+    if refreshed and refreshed / returned >= ALL_CHANGED_FRACTION:
         flags.append(
-            f"NEARLY EVERY FEED CHANGED ({s['n_feeds_changed']} of {returned}): "
+            f"NEARLY EVERY FEED REFRESHED ({refreshed} of {returned}): "
             f"twenty-five independent agencies do not refresh in lockstep. "
             f"Suspect a generation timestamp in the body, which would make "
             f"every cycle look like new information and defeat the "
@@ -467,6 +644,14 @@ def cycle_flags(s: dict[str, Any]) -> list[str]:
             f"VERSION DISAGREEMENT, feed vs registry: "
             f"{', '.join(s['version_disagreements'])}. The body's claim is "
             f"the one to believe; the registry row is a catalogue entry")
+
+    if s["feeds_truncated"]:
+        flags.append(
+            f"TRUNCATED BY OUR OWN CAP: {', '.join(s['feeds_truncated'])}. "
+            f"These bodies were cut off at {CAP_BYTES // (1024 * 1024)} MiB "
+            f"and are NOT stored, because a chopped body under a digest of "
+            f"its chopped bytes is a partial answer wearing a whole answer's "
+            f"name. Raise CAP_BYTES; this is our ceiling and not their fault")
 
     return flags
 
@@ -491,8 +676,44 @@ def cycle_sentence(s: dict[str, Any]) -> str:
     """
     attempted = s["n_feeds_attempted"]
     returned = s["n_feeds_returned"]
+    counted = s["n_feeds_counted"]
     changed = s["n_feeds_changed"]
     events = s["n_events_total"]
+
+    # THE CORRECTION OF 2026-10-06, AFTER THE FIRST LIVE CYCLE.
+    #
+    # The sentence used to read "23 of 25 feeds answered with 9225 events".
+    # Every number in it was correct and the sentence was not: the 9,225 came
+    # from 15 feeds, not 23. Eight answered and were not countable -- two
+    # truncated, two unparseable, one not WZDx, three on a notation the guard
+    # then rejected -- so the reader was handed a yield attached to the wrong
+    # denominator. `n_feeds_counted` was sitting in the summary unused.
+    #
+    # That is mechanism U: a correct number under a shape that answers a
+    # question nobody asked. The denominator of a rate has to appear beside it.
+    yield_ = (f"{events} events from {counted} countable" if counted != returned
+              else f"{events} events")
+
+    # A cycle that is mostly first sightings says so, because "20 changed"
+    # against an empty archive is the instrument's initial condition and not a
+    # fact about anybody's roads.
+    first = s.get("n_feeds_first_seen", 0)
+    if first and first == changed:
+        changed_clause = f"{changed} stored for the first time"
+    elif first:
+        changed_clause = (f"{changed} changed, {first} of them a first "
+                          f"sighting")
+    else:
+        changed_clause = f"{changed} changed"
+
+    # Not flagged -- for the four feeds doing it, it happens every cycle, and
+    # rule 16 says a warning that always fires teaches the reader to skip the
+    # list. Stated in the sentence instead, where it is information rather
+    # than an alarm.
+    envelope = s.get("n_feeds_envelope_only", 0)
+    if envelope:
+        changed_clause += (f" ({envelope} more moved their update_date over "
+                           f"identical road events)")
 
     if attempted == 0:
         return "no feeds were attempted, so this cycle measured nothing"
@@ -501,19 +722,18 @@ def cycle_sentence(s: dict[str, Any]) -> str:
                 f"answered, which is our outage to explain")
     if returned < attempted:
         blind = attempted - returned
-        return (f"{returned} of {attempted} feeds answered with {events} "
-                f"events, {changed} changed; {blind} {_were(blind)} blind "
-                f"this cycle and {'is' if blind == 1 else 'are'} named in "
-                f"the ledger")
+        return (f"{returned} of {attempted} feeds answered, {yield_}, "
+                f"{changed_clause}; {blind} {_were(blind)} blind this cycle "
+                f"and {'is' if blind == 1 else 'are'} named in the ledger")
     if changed == 0:
-        return (f"all {attempted} feeds answered with {events} events and "
-                f"not one body changed, so nothing was stored this cycle")
+        return (f"all {attempted} feeds answered, {yield_}, and not one body "
+                f"changed, so nothing was stored this cycle")
     if changed == returned:
-        return (f"all {attempted} feeds answered with {events} events and "
-                f"every single body changed, which is more coordination than "
-                f"twenty-five agencies have")
-    return (f"all {attempted} feeds answered with {events} events, "
-            f"{changed} changed and were stored")
+        return (f"all {attempted} feeds answered, {yield_}, and "
+                f"{changed_clause} -- every one of them, which is more "
+                f"coordination than twenty-five agencies have")
+    return (f"all {attempted} feeds answered, {yield_}, {changed_clause} "
+            f"and were stored")
 
 
 def cycle_health(s: dict[str, Any]) -> tuple[bool, str | None]:
@@ -549,6 +769,33 @@ def blind_feeds(rows: list[dict[str, Any]]) -> dict[str, int]:
         if r.get("returned"):
             returned[name] = returned.get(name, 0) + 1
     return {name: n for name, n in attempted.items() if not returned.get(name)}
+
+
+def decorative_update_date(rows: list[dict[str, Any]],
+                           min_cycles: int = 3) -> dict[str, int]:
+    """Feeds whose bytes keep moving while their road events never do.
+
+    A cross-cycle question, so it lives here rather than in a per-cycle flag:
+    one envelope-only cycle is ordinary, and a feed that has done nothing else
+    for a day is telling us its `update_date` is decorative.
+
+    That matters beyond storage. If G4 or G6 ever wants "how current is this
+    agency's declaration", `feed_info.update_date` answers "seconds old" for
+    these feeds and means nothing by it -- which is the same defect as a
+    transit header stamped at generation, and the same defect, one level up,
+    as the unverified self-reporting this whole project is about. The freshest
+    thing in the feed is the claim about its own freshness.
+    """
+    envelope: dict[str, int] = {}
+    real: dict[str, int] = {}
+    for r in rows:
+        name = r.get("feed")
+        if r.get("envelope_only"):
+            envelope[name] = envelope.get(name, 0) + 1
+        elif r.get("stored_as"):
+            real[name] = real.get(name, 0) + 1
+    return {name: n for name, n in envelope.items()
+            if n >= min_cycles and not real.get(name)}
 
 
 # --------------------------------------------------------------------------
@@ -610,22 +857,33 @@ def body_path(root: Path, feed: str, when: datetime, sha: str) -> Path:
     return part / f"{feed}_{when:%Y%m%dT%H%M%S}_{sha[:12]}.json.gz"
 
 
-def last_digest(root: Path, feed: str) -> str | None:
-    """The digest of the most recently stored body for this feed.
+def _sidecar(root: Path, feed: str) -> Path:
+    return root / DATASET / "_last" / f"{feed}.json"
+
+
+def last_seen(root: Path, feed: str) -> dict[str, Any]:
+    """What we last held for this feed: both digests, or an empty mapping.
 
     Read from a small sidecar rather than by hashing the newest file, so that
     an interrupted write cannot make an unchanged feed look changed forever.
     """
-    p = root / DATASET / "_last" / f"{feed}.json"
+    p = _sidecar(root, feed)
     if not p.exists():
-        return None
+        return {}
     try:
-        return json.loads(p.read_text(encoding="utf-8")).get("sha256")
+        got = json.loads(p.read_text(encoding="utf-8"))
+        return got if isinstance(got, dict) else {}
     except (json.JSONDecodeError, OSError):
-        return None
+        return {}
+
+
+def last_digest(root: Path, feed: str) -> str | None:
+    """The CONTENT digest we last stored, which is what change means here."""
+    return last_seen(root, feed).get("content_sha256")
 
 
 def store_body(root: Path, feed: str, body: bytes, sha: str,
+               content_sha: str | None = None,
                when: datetime | None = None) -> dict[str, Any]:
     """Write the body iff its digest differs from the last stored one.
 
@@ -653,12 +911,46 @@ def store_body(root: Path, feed: str, body: bytes, sha: str,
     way G2a replaced a 1.11 TiB/month guess with a 22 GiB/month measurement.
     """
     when = when or datetime.now(timezone.utc)
+    # A feed with no features has no content digest, so it falls back to the
+    # body's. Such a body is not stored anyway (TRUNCATED and NOT_WZDX are not
+    # in STORED_OUTCOMES), but the fallback keeps the function total rather
+    # than relying on a caller's discipline.
+    content_sha = content_sha or sha
+    seen = last_seen(root, feed)
+    previous, previous_body = seen.get("content_sha256"), seen.get("sha256")
+
     out: dict[str, Any] = {"path": None, "bytes_stored": 0,
-                           "digest_is_new": False}
-    if last_digest(root, feed) == sha:
+                           "digest_is_new": False, "first_sighting": False,
+                           "envelope_only": False}
+
+    if previous == content_sha:
+        # Nothing about any road changed. If the BYTES changed anyway, that is
+        # the envelope moving -- `feed_info.update_date`, or the features in a
+        # different order -- and it is a fact about the feed worth recording
+        # even though the body is not worth keeping. The ledger gets it; the
+        # archive does not. Four feeds did exactly this between the only two
+        # cycles this collector has ever run.
+        out["envelope_only"] = previous_body is not None and previous_body != sha
+        if out["envelope_only"]:
+            _write_sidecar(root, feed, sha, content_sha, when,
+                           name=seen.get("path", ""))
         return out
 
     out["digest_is_new"] = True
+    # A FOURTH FACT, AND THE FLAG THAT NEEDED IT.
+    #
+    # "we have never seen this feed before" is not "this feed changed". On the
+    # first cycle against an empty archive every feed is the former, and the
+    # lockstep flag -- which accuses the agencies of refreshing in unison and
+    # suspects a generation timestamp -- compares changes against answers. On
+    # 2026-10-06 it did not fire, at 20 of 23, purely because three feeds were
+    # uncountable; at 23 of 23 it would have fired and been wrong, blaming
+    # twenty-five agencies for an archive that was empty an hour earlier.
+    #
+    # A guard that is correct only because of an unrelated accident has not
+    # been tested, which is the same thing mechanism Z said about a convention
+    # that had been right eleven times.
+    out["first_sighting"] = previous is None
     path = body_path(root, feed, when, sha)
     path.parent.mkdir(parents=True, exist_ok=True)
     out["path"] = path
@@ -668,15 +960,24 @@ def store_body(root: Path, feed: str, body: bytes, sha: str,
         path.write_bytes(blob)
         out["bytes_stored"] = len(blob)
 
-    # Written in both branches. The sidecar answers "what digest did we last
-    # see for this feed", which is true whether or not a write was needed; a
-    # sidecar updated only on write would disagree with the archive and make
-    # the next cycle re-decide a question already answered.
-    side = root / DATASET / "_last" / f"{feed}.json"
-    side.parent.mkdir(parents=True, exist_ok=True)
-    side.write_text(json.dumps({"sha256": sha, "iso": when.isoformat(),
-                                "path": path.name}), encoding="utf-8")
+    # Written whether or not bytes were needed. The sidecar answers "what did
+    # we last see for this feed", which is true either way; one updated only
+    # on write would disagree with the archive and make the next cycle
+    # re-decide a question already answered.
+    _write_sidecar(root, feed, sha, content_sha, when, name=path.name)
     return out
+
+
+def _write_sidecar(root: Path, feed: str, sha: str, content_sha: str,
+                   when: datetime, name: str = "") -> None:
+    side = _sidecar(root, feed)
+    side.parent.mkdir(parents=True, exist_ok=True)
+    side.write_text(json.dumps({
+        "sha256": sha,                 # the last bytes we saw
+        "content_sha256": content_sha,  # the last road events we saw
+        "iso": when.isoformat(),
+        "path": name,                  # the body that holds those events
+    }), encoding="utf-8")
 
 
 # --------------------------------------------------------------------------
@@ -732,6 +1033,8 @@ class Snapshotter:
         when = datetime.now(timezone.utc)
         records: list[dict[str, Any]] = []
         changed: set[str] = set()
+        first_seen: set[str] = set()
+        envelope_only: set[str] = set()
 
         for feed in self.feeds:
             name = str(feed.get("feedName"))
@@ -742,16 +1045,24 @@ class Snapshotter:
             rec["registry_sha256"] = self.registry_sha
             rec["bytes_stored"] = 0
 
-            if rec["outcome"] in (OK, VERSION_UNKNOWN) and body:
-                # VERSION_UNKNOWN bodies ARE stored. The first thing wanted
-                # when a feed changes specification is the body from before
-                # it did. Not counted, not discarded.
-                st = store_body(self.root, name, body, rec["sha256"], when)
-                # `changed` tracks the FEED, so it follows digest_is_new and
-                # not whether bytes reached the disk.
+            if rec["outcome"] in STORED_OUTCOMES and body:
+                # VERSION_UNKNOWN bodies ARE stored: the first thing anyone
+                # wants when a feed changes specification is the body from
+                # before it did. Not counted, not discarded. TRUNCATED bodies
+                # are NOT in that set -- see the constant.
+                st = store_body(self.root, name, body, rec["sha256"],
+                                rec["content_sha256"], when)
+                # `changed` tracks the FEED's road events, so it follows
+                # digest_is_new and not whether bytes reached the disk.
                 if st["digest_is_new"]:
                     changed.add(name)
                     rec["stored_as"] = st["path"].name
+                if st["first_sighting"]:
+                    first_seen.add(name)
+                if st["envelope_only"]:
+                    envelope_only.add(name)
+                rec["first_sighting"] = st["first_sighting"]
+                rec["envelope_only"] = st["envelope_only"]
                 rec["bytes_stored"] = st["bytes_stored"]
                 if st["bytes_stored"]:
                     self.stored += 1
@@ -760,7 +1071,7 @@ class Snapshotter:
             records.append(rec)
 
         append_ledger(self.root, records, when)
-        summary = cycle_summary(records, changed)
+        summary = cycle_summary(records, changed, first_seen, envelope_only)
         self.cycles += 1
 
         ok, error = cycle_health(summary)
