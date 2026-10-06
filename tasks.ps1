@@ -50,6 +50,8 @@ function Show-Help {
     Write-Host "rasterio"
     Write-Host "    .\tasks.ps1 forensics  " -NoNewline -ForegroundColor Cyan
     Write-Host "pvlib, pillow"
+    Write-Host "    .\tasks.ps1 roads      " -NoNewline -ForegroundColor Cyan
+    Write-Host "gtfs-realtime-bindings, for the road domain"
     Write-Host ""
     Write-Host "    Install through these, never a bare pip: on this machine" -ForegroundColor DarkGray
     Write-Host "    `python` is ArcGIS Pro's 3.14t, which has no wheels." -ForegroundColor DarkGray
@@ -117,6 +119,7 @@ switch ($Task.ToLower()) {
     "ml"         { & $Py -m pip install -e ".[ml]" }
     "sar"        { & $Py -m pip install -e ".[sar]" }
     "forensics"  { & $Py -m pip install -e ".[forensics]" }
+    "roads"      { & $Py -m pip install -e ".[roads]" }
 
     "test"     { & $Py -m pytest -q }
     "doctor"   { & $Py scripts\doctor.py }

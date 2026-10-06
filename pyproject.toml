@@ -39,6 +39,14 @@ ml = ["scikit-learn>=1.4"]
 sar = ["rasterio>=1.3"]
 # Phase 5.
 forensics = ["pvlib>=0.11", "pillow>=10.0"]
+# Phase G. GTFS-Realtime is protobuf, and two separate questions forced this
+# rather than one preference choosing it. The feed's update cadence cannot be
+# measured from response digests -- a server that stamps its header at
+# generation returns a different body to every request whether or not a
+# vehicle moved -- so the header has to be read. And one feed stored raw is
+# 203 MiB a day, measured, so the archive has to hold the handful of columns
+# the analysis needs rather than whole bodies, which means decoding them.
+roads = ["gtfs-realtime-bindings>=1.0"]
 
 dev = ["pytest>=8.0", "hypothesis>=6.100", "ruff>=0.5", "httpx>=0.27"]
 
