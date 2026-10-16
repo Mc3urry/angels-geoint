@@ -32,10 +32,13 @@ bar, and reports two things over that common, adequately-sampled ground:
 
     class agreement        do they call the same water heard?
     median gap ratio       how much less often does B hear a vessel than A?
+    silence ratio          how much more of the time is B quiet than A?
 
-The second is the one that travels. It is per-cell, so it does not care that
-the two archives cover different spans or different years, and it is a
-direct statement about receiver density.
+The second and third are the ones that travel. They are per-cell, so they do
+not care that the two archives cover different spans or different years, and
+both are direct statements about receiver density. Prefer the THIRD: a median
+describes the ordinary case, and a dark-vessel claim is never about the
+ordinary case.
 
 THE EDGE
 
@@ -137,6 +140,64 @@ def main() -> int:
               f"   ({len(ratio)} cells)")
         print(f"\n  B hears a given vessel about {st.median(ratio):.2f}x less "
               f"often than A in the same water.")
+
+    # -- how often does B fall SILENT, which is the dark-vessel question ---
+    #
+    # THE MEDIAN IS THE WRONG STATISTIC FOR WHAT THIS PROJECT CLAIMS.
+    #
+    # A dark-vessel reading is a claim about silence: not "did this vessel
+    # report a little less often than usual" but "did it go quiet long
+    # enough to mean something, and would the reference network have gone
+    # quiet too". The median answers only the first. The deficit between
+    # these two feeds is in the TAIL and grows with the length of the
+    # silence -- the figures, which date, are in the WORKLOG entry for
+    # 2026-10-16 rather than hardcoded here where nothing would recompute
+    # them.
+    #
+    # p_long is P(gap > LONG_GAP_S), and every grid has carried it since the
+    # first one was written. Nothing ever printed it, so the shape of the
+    # distribution sat on disk unread through four measurements while the
+    # median was quoted as the headline.
+    pa  = [a[k]["p_long"] for k in well if a[k].get("p_long") is not None]
+    pb  = [b[k]["p_long"] for k in well if b[k].get("p_long") is not None]
+    # CELLS WHERE A WAS NEVER SILENT ARE EXCLUDED FROM THE RATIO, AND SAID SO.
+    #
+    # A p_long of exactly 0 makes B/A infinite, so those cells cannot enter a
+    # median. They are not missing data -- they are the cells where B looks
+    # WORST, and dropping them silently would make the ratio look precise
+    # while quietly discarding its most extreme evidence. Counted and
+    # reported instead, so the printed ratio is visibly a lower bound.
+    finite = [k for k in well
+              if a[k].get("p_long") and b[k].get("p_long") is not None]
+    nosil = [k for k in well
+             if a[k].get("p_long") == 0 and b[k].get("p_long") is not None]
+    nosil_b_worse = sum(1 for k in nosil if b[k]["p_long"] > 0)
+    plr = [b[k]["p_long"] / a[k]["p_long"] for k in finite]
+    if pa and pb:
+        worse = sum(1 for k in well
+                    if a[k].get("p_long") is not None
+                    and b[k].get("p_long") is not None
+                    and b[k]["p_long"] > a[k]["p_long"])
+        cut = A.get("long_gap_s", 180)
+        if B.get("long_gap_s", cut) != cut:
+            print(f"    NOTE: grids disagree on long_gap_s "
+                  f"({cut} vs {B.get('long_gap_s')}); not comparable")
+        print(f"\n  P(gap > {cut:.0f}s) -- how much of the time each feed "
+              f"is silent")
+        print(f"    A   {st.median(pa):6.1%}")
+        print(f"    B   {st.median(pb):6.1%}")
+        if plr:
+            print(f"    per-cell B/A ratio, median {st.median(plr):.2f}x"
+                  f"   ({len(plr):,} of {len(well):,} cells)")
+        if nosil:
+            print(f"    excluded {len(nosil):,} cells where A was never "
+                  f"silent; B was quieter in")
+            print(f"      {nosil_b_worse:,} of them, so the ratio above is a "
+                  f"LOWER BOUND")
+        print(f"    B is the quieter feed in {worse:,} of {len(well):,} cells")
+        print(f"\n  Read this before any dark-vessel rate, not the median. A"
+              f" detector tuned\n  on A's silence distribution will fire "
+              f"constantly on B.")
 
     # -- the edge, with its own warning ------------------------------------
     print(f"\n  furthest HEARD cell per latitude band  (degrees longitude)")
