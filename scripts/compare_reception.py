@@ -217,9 +217,19 @@ def main() -> int:
             f = lambda v: f"{v:10.2f}" if v is not None else f"{'-':>10}"
             print(f"    {y:5.1f}-{y + 0.5:4.1f}{f(edges['A'])}{f(edges['B'])}")
         y += 0.5
-    print("\n  The edge is duration-sensitive. Until the younger archive has "
-          "about a\n  week behind it, a short B edge means it has not been "
-          "there yet.\n")
+    # NOT duration any more. Measured 2026-10-16: between 429 h and 529 h
+    # six of eight latitude bands did not move at all, so the edge has
+    # stopped walking east and waiting will not change it. What blocks it is
+    # that `heard` is not reliably decidable in B at the sample sizes most of
+    # its cells have: drawing 3 vessels from a B cell with 20+ reproduces the
+    # cell's own class only 80% of the time, against 97% in A. The same
+    # min_vessels means a different thing on each side of this comparison.
+    print("\n  The edge is NOT duration-sensitive any more and waiting will not "
+          "fix it.\n  What blocks it is that `heard` is not reliably decidable "
+          "in B at the\n  sample sizes most of its cells have -- 3 vessels "
+          "recover a B cell's own\n  class 80% of the time, against 97% in A. "
+          "Read the table as a lower\n  bound on B's reach, never as its "
+          "reception envelope.\n")
 
     heard_b = sum(cell_km2(int(k.split(",")[1]), cd)
                   for k, c in b.items() if c["reception"] == "heard")

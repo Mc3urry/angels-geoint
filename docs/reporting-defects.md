@@ -14,11 +14,17 @@ from recorded server responses rather than from expectations. Extended once
 more the same evening to thirty-four, with X, which is the only entry here
 that did harm outside this repository rather than threatening a number.
 Extended again 2026-10-06 to thirty-six, with Y and Z -- neither found by a
-test. Both were sitting in the output of commands run for other reasons.*
+test. Both were sitting in the output of commands run for other reasons.
+Extended once more the same afternoon to forty-two, when the road collector
+met the real internet: six sightings in three cycles, one of them a program
+that changed the shape of its own memory and reported the forgetting as a
+finding. The catalogue ran out of letters and continues at AA. Forty-three
+arrived the same evening, while syncing a stale copy of this project: a second
+instance of X, and the second credential exposure of the week.*
 
-Over the course of this project, **thirty-six** separate faults were found
+Over the course of this project, **forty-three** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, thirty-six
+this pipeline computes, it computed correctly. What failed, forty-three
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -67,7 +73,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **thirty-six**. A few logged
+The running count in the worklog reached **forty-three**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -78,14 +84,23 @@ file, and being actively watched for. **Knowing the failure mode did not
 prevent it.** Three of the seven L-to-R sightings were committed by someone
 who had read this document that week.
 
-Y and Z close the catalogue on a flatter note than X did, and the flatness is
-the point. Neither cost a number or a credential. One was a dependency that
-worked everywhere it was run and was written down nowhere; the other was a
-commit message that said the right thing in the wrong shape. Both were
-visible, in plain text, in output already on screen. By the thirty-sixth
-sighting the interesting question is no longer whether this class can be
-eliminated -- it cannot -- but how cheaply an instance can be caught, and the
-answer those two give is: by reading what the last command printed.
+Y and Z arrived on a flatter note than X did, and the flatness was the point.
+Neither cost a number or a credential. One was a dependency that worked
+everywhere it was run and was written down nowhere; the other was a commit
+message that said the right thing in the wrong shape. Both were visible, in
+plain text, in output already on screen. By the thirty-sixth sighting the
+interesting question was no longer whether this class can be eliminated -- it
+cannot -- but how cheaply an instance can be caught, and the answer those two
+gave is: by reading what the last command printed.
+
+AA, six sightings later the same afternoon, gives a harder answer. It was not
+in any printed output, because the output was wrong in a way that read as
+correct. It was found by asking a question nobody had thought to ask of a
+sentence that looked ordinary: *stored for the first time -- is that true?*
+Forty-two sightings in, the honest summary is that the cheap techniques catch
+most of these and the expensive one is still necessary, and the expensive one
+is simply disbelieving a plausible line of your own output for long enough to
+check it against the disk.
 
 S and T go further. Both were committed **inside a script whose entire
 purpose was to catch this class before it reached an analysis** — a probe
@@ -529,6 +544,23 @@ The rule that follows is narrow on purpose: a summary is a pointer to a
 source, never a substitute for it, and any number or identifier that will be
 published is read from the source and committed as a fixture.
 
+**A fourth instance, 2026-10-06, and it cost five states.** `fetch_wzdx.py`
+decides whether a feed is on a specification this project has read, against
+`KNOWN_WZDX_VERSIONS = ("4", "4.1", "4.2")`. Those strings are how the federal
+registry CSV spells them. They are not how the specification does: five feeds
+-- Kansas, North Dakota, Utah, Illinois and Indiana -- declare `"4.0"` in
+their own bodies, and string comparison rejected all five. About 9.2 MB of
+real work zone data stopped being counted, which in the land domain means five
+states quietly declaring nothing.
+
+The constant was built from the catalogue rather than from the thing the
+catalogue describes, which is this mechanism exactly, one level further from
+the data. And the rejection looked principled from the inside, because this
+project has three separate entries about never coercing a version to a float.
+The guard was right about the coercion and wrong about the vocabulary -- and a
+guard that is right about the thing you were worried about will not prompt you
+to check the thing you were not.
+
 ### X. A guard pointed at the surface its author was thinking about
 
 Every other entry in this catalogue cost a number, a conclusion or an
@@ -670,6 +702,82 @@ spent on a leaked credential -- and a force-push for typography, in a
 repository whose history was rewritten for a real reason, is a worse entry in
 the record than the long line it would remove. The line stays. This section
 is the reason, which is the trade the whole document argues for.
+
+### AA. State written by an earlier version, read as if it were absent
+
+The catalogue runs out of letters here. That is worth a sentence of its own:
+twenty-five distinguishable mechanisms, in one project, by one person, nearly
+all of them found rather than avoided.
+
+`fetch_wzdx.py` keeps a small sidecar per feed recording what it last held, so
+that a body which has not changed is not stored again. On 2026-10-06 that
+sidecar gained a second field, `content_sha256`, because the first one --
+a digest of the whole body -- had turned out to mean the wrong thing.
+
+Two cycles had already written the older shape. The third read them, found no
+`content_sha256`, concluded it had never seen any of the twenty-five feeds,
+re-stored all twenty-two that answered, and printed:
+
+    23 of 25 feeds answered, 23617 events from 22 countable,
+    22 stored for the first time
+
+**Twenty of those bodies were in the archive thirty minutes earlier.** Every
+number in the sentence is correct. The claim attached to them is false. The
+program changed the shape of its own memory, lost it, and reported the loss as
+news -- 3.7 MB of duplicates, twenty-nine per cent of the archive, and a line
+in a log that a reader in February would have had no reason to doubt.
+
+What makes this its own mechanism rather than an instance of U is where the
+wrongness lives. U is a correct quantity under a wrong field name, fixable by
+renaming. Here the quantity and the name agree -- twenty-two bodies really
+were written -- and what is false is the program's belief about its own past.
+No amount of care in the reporting line would have helped, because the
+reporting line was faithfully reporting a corrupted premise.
+
+**And the test suite could not have caught it, for a reason worth more than
+the bug.** Seventy-five tests covered this file. Every one of them starts from
+`tmp_path`: an empty directory. A program with persisted state has two code
+paths -- the first run, and every run after an earlier version left something
+behind -- and the suite had only ever walked the first. Every assertion in it
+was about a world in which the program had never run before.
+
+That is a blind spot with a shape, and the shape is familiar: like Y, it is a
+check that cannot see a thing because of how it was constructed rather than
+because anyone was careless. A fixture that begins empty is the testing
+equivalent of a parity check between two files written by one hand.
+
+The fix is ordinary once named. An older sidecar names the body it was written
+for; that body is still on disk; the content digest is recomputed from it, so
+the upgrade loses nothing because the evidence never left. It reports itself
+through a `sidecar_migrated` field into the ledger, because a migration nobody
+can see is the same class of thing as the amnesia it repairs. `first_sighting`
+now means *no sidecar at all* rather than *no content digest in the sidecar*,
+and a sidecar whose body has vanished gets a third name of its own: seen
+before, unable to prove what we held.
+
+**A SECOND INSTANCE, 2026-10-06, and it was found by accident.** Checking
+whether a stale copy of this project in the user's Obsidian vault held
+anything the repository did not, the listing showed `Project_Files/.env`:
+four live credentials, including a password, copied there on 2026-09-18 and
+sitting in a OneDrive-synced folder that the workspace changelog describes as
+**shared between agents**.
+
+`.gitignore` excludes `.env` from the repository, and it did its job perfectly
+for the whole period. **Nothing guarded the copy.** The hazard was never the
+repository; it was that a copy made for a different purpose carried a file the
+repository had been carefully taught to refuse, out through a boundary nobody
+had modelled as a boundary.
+
+X said a guard is aimed from where the hazard arrives rather than from where
+the author is looking. This is the same sentence with "surface" replaced by
+"location". A file excluded from one container is not excluded from the world,
+and `cp -r` does not read `.gitignore`.
+
+The repair is not a better ignore rule. It is that a copy of a project is
+made from **what the project tracks** -- which is a list the project already
+maintains and can be read straight out of `.git/index` -- rather than from
+what happens to be in the directory. That is how the 2026-10-06 sync was done,
+and it is why that sync could not have carried the file.
 
 ## 4. What actually caught them
 
@@ -862,6 +970,17 @@ Each of these exists because something went wrong that it would have stopped.
     has not been tested; it has been lucky, and the twelfth is where that is
     discovered.
 
+25. **A persisted format has two code paths, and the tests cover both.** The
+    first run, and every run after an earlier version left state behind. A
+    suite whose fixtures all begin from an empty directory has asserted only
+    that the program works the first time it is ever run -- which is the one
+    circumstance that never recurs.
+26. **A change to the shape of stored state ships with its migration, in the
+    same commit, and the migration announces itself in the record.** Silently
+    re-deriving what was already known is how a program comes to report its
+    own amnesia as a finding, and an upgrade that leaves no trace is
+    indistinguishable afterwards from the data loss it was meant to prevent.
+
 ## 6. What it cost, and what it bought
 
 The chip labels were revised three times in two days. Each revision forced a
@@ -902,8 +1021,8 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Thirty-six** were found,
-one of them published and withdrawn. The defence is that **the mistakes were
+The defence is not that no mistakes were made. **Forty-three** were found,
+two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
 the headline number in the direction that would have helped the hypothesis,
