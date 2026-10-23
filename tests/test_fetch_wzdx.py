@@ -331,10 +331,26 @@ def test_two_bodies_in_one_second_cannot_overwrite_each_other(tmp_path) -> None:
     That is the 2026-10-02 `probe-<date>.json` decision one directory over --
     and raising a resolution because the collision you met was at the previous
     one is mechanism N. The digest is in the name now, so the collision cannot
-    occur rather than being made less likely."""
+    occur rather than being made less likely.
+
+    PINNED 2026-10-23, the twin of the revert test below. This one called
+    store() with no time too, and "in one second" in its name was a hope, not
+    a condition: on a run slow enough for the clock to tick between the two
+    calls, the timestamps differ, the paths differ for that reason alone, and
+    the test goes GREEN without having put two bodies in one second at all.
+    The revert test failed loudly when its luck ran out; this one would have
+    gone on passing silently over the exact collision it is named for, which
+    is the worse of the two. Now the time is given, and the first assertion
+    checks the precondition before the second checks the result."""
+    from datetime import datetime, timezone
+    t0 = datetime(2026, 10, 6, 19, 11, 47, tzinfo=timezone.utc)
     b1, b2 = wzdx(n=1), wzdx(n=2)
-    s1 = store(tmp_path, "mcdot", b1)
-    s2 = store(tmp_path, "mcdot", b2)
+    s1 = store(tmp_path, "mcdot", b1, when=t0)
+    s2 = store(tmp_path, "mcdot", b2, when=t0)
+    stem = lambda p: p.name.rsplit("_", 1)[0]          # feed_timestamp
+    assert stem(s1["path"]) == stem(s2["path"]), (
+        "precondition: same feed, same second -- the names must differ ONLY "
+        "by digest, or this test is not testing the collision")
     assert s1["path"] != s2["path"]
     assert gzip.decompress(s1["path"].read_bytes()) == b1
     assert gzip.decompress(s2["path"].read_bytes()) == b2
@@ -582,10 +598,23 @@ def test_a_changed_feed_and_a_written_file_are_separate_facts(tmp_path) -> None:
     One variable holding whichever of two quantities is convenient is the
     shape that published `n_polls` as a file count against 19,329 attempted
     polls, understated 11.7x, for three days."""
+    # PINNED, 2026-10-23. This test called store() three times with no time
+    # and assumed all three landed in the same second, because "needed no
+    # write" is only true when the revert's content-addressed path -- which
+    # carries a timestamp -- is the one already on disk. It passed at least
+    # seven times and then failed on a full Windows run of 1,351 tests, when
+    # the clock ticked over between the first call and the third.
+    #
+    # A test green by timing luck is the lockstep flag of sighting 40 again,
+    # correct by accident, inside the suite that is supposed to catch that.
+    # The time is now given, and the later-second branch -- which the clock
+    # used to choose silently -- has a test of its own below.
+    from datetime import datetime, timezone
+    t0 = datetime(2026, 10, 6, 19, 11, 47, tzinfo=timezone.utc)
     b1, b2 = wzdx(n=1), wzdx(n=2)
-    store(tmp_path, "mcdot", b1)
-    store(tmp_path, "mcdot", b2)
-    revert = store(tmp_path, "mcdot", b1)
+    store(tmp_path, "mcdot", b1, when=t0)
+    store(tmp_path, "mcdot", b2, when=t0)
+    revert = store(tmp_path, "mcdot", b1, when=t0)
 
     assert revert["digest_is_new"] is True, "the feed did change"
     assert revert["bytes_stored"] == 0, "and needed no write"
@@ -593,6 +622,24 @@ def test_a_changed_feed_and_a_written_file_are_separate_facts(tmp_path) -> None:
     assert last_digest(tmp_path, "mcdot") == content_digest(json.loads(b1)), (
         "the sidecar records what we last SAW, which is true whether or not a "
         "write was needed")
+
+
+def test_a_revert_in_a_later_second_is_written_again(tmp_path) -> None:
+    """The branch the wall clock used to choose for the test above, now chosen
+    on purpose. Ten minutes later the same body is a new observation at a new
+    time, so it gets its own content-addressed file -- and the feed has still
+    changed. digest_is_new and bytes_stored agree here and disagree above,
+    which is the whole reason they are two fields."""
+    from datetime import datetime, timedelta, timezone
+    t0 = datetime(2026, 10, 6, 19, 11, 47, tzinfo=timezone.utc)
+    b1, b2 = wzdx(n=1), wzdx(n=2)
+    store(tmp_path, "mcdot", b1, when=t0)
+    store(tmp_path, "mcdot", b2, when=t0)
+    later = store(tmp_path, "mcdot", b1, when=t0 + timedelta(minutes=10))
+    assert later["digest_is_new"] is True
+    assert later["bytes_stored"] > 0
+    assert later["path"].name != store.__name__   # a real path came back
+    assert len(list((tmp_path / "roads" / "wzdx").rglob("*.json.gz"))) == 3
 
 
 def test_the_stored_body_is_the_body_that_arrived(tmp_path) -> None:

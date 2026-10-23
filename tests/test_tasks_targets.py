@@ -194,7 +194,7 @@ def test_the_restated_branches_match_the_builder() -> None:
 
 
 def test_process_detection_is_derived_from_the_footprints() -> None:
-    """A collector the process scan cannot match is one `status` cannot see.
+    r"""A collector the process scan cannot match is one `status` cannot see.
 
     REWRITTEN 2026-10-23. This test used to read the literal alternation
     'ingest_(aviation|maritime|adsbfi)\.py' out of Find-CollectorProcesses and

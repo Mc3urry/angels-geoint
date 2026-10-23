@@ -20,11 +20,12 @@ met the real internet: six sightings in three cycles, one of them a program
 that changed the shape of its own memory and reported the forgetting as a
 finding. The catalogue ran out of letters and continues at AA. Forty-three
 arrived the same evening, while syncing a stale copy of this project: a second
-instance of X, and the second credential exposure of the week.*
+instance of X, and the second credential exposure of the week. Forty-four,
+2026-10-23: a test that passed by measuring how fast its machine was.*
 
-Over the course of this project, **forty-three** separate faults were found
+Over the course of this project, **forty-four** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, forty-three
+this pipeline computes, it computed correctly. What failed, forty-four
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -73,7 +74,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **forty-three**. A few logged
+The running count in the worklog reached **forty-four**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -133,9 +134,21 @@ from "don't know" will eventually be asked to act on the difference.**
 | the bootstrap guard | the test had a hole; on its first honest run it caught a pre-existing offender |
 | the headless render harness | it screenshotted the card's HTML against the stylesheet. The 240 px clip is applied inline by MapLibre, not in the stylesheet, so the harness rendered every card at a width the browser never uses |
 | `pip install -e ".[ml]"` | it resolved to ArcGIS Pro's Python 3.14t, which has no wheels |
+| two storage tests in `test_fetch_wzdx.py` | they assumed three calls land in one wall-clock second. True on the Linux VM they were written on; on the Windows machine that runs the suite, the clock ticked over |
 
 A reproduction script that has only been run by its author is not a
 reproduction script. It is a record of one person's environment.
+
+**The fourth row is a test that measured the speed of the machine running
+it.** Sighting 44, 2026-10-23. Two tests about bodies landing inside one second
+never pinned the clock. One failed on a full Windows run -- "needed no write",
+144 bytes written -- when the third call crossed a second boundary. Its twin
+is the worse of the pair, because it went on PASSING: named for a collision
+inside one second, it went green on slow runs without putting two bodies in one
+second at all, so the guard against the overwrite of 2026-10-06 was silently
+not testing it. The failing one announced itself; the passing one would never
+have. `store_body` always took a `when` argument. The tests just did not use
+it, and both now check their own precondition before checking the result.
 
 ### C. The verifier only checks what it generated
 
@@ -1021,7 +1034,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Forty-three** were found,
+The defence is not that no mistakes were made. **Forty-four** were found,
 two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
