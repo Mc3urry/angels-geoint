@@ -547,6 +547,43 @@ def artefact(kind: str, url: str, raw: bytes, rows: list[dict],
     }
 
 
+def bbox_sentence(boxes: dict) -> str:
+    """What the bounding-box counts say, as one line for the console.
+
+    ADDED 2026-10-23. These counts were computed and stored in the artefact
+    from the day G0b was written, and never printed. The number that decides
+    how far a geographic narrowing can go was invisible at the moment of
+    deciding it -- the same shape as the `feed_info` silence, where a value
+    recorded and not shown reads as nothing to show.
+
+    Four cases, four sentences (rule 13). The one that matters most to keep
+    apart is ALL ABSENT from MOSTLY ABSENT: the WZDx registry has no geometry
+    columns at all, so its 25 absences are a fact about the catalogue and not
+    25 facts about feeds. Printing "0 usable, 25 absent" would read as 25
+    feeds with missing boxes, which is a data-quality alarm about the wrong
+    thing.
+    """
+    usable = int(boxes.get("usable", 0))
+    invalid = int(boxes.get("invalid", 0))
+    absent = int(boxes.get("absent", 0))
+    total = usable + invalid + absent
+    if total == 0:
+        return "bounding boxes: no feeds to count"
+    if usable == 0 and invalid == 0:
+        return (f"bounding boxes: this registry carries no geometry at all "
+                f"({absent} of {absent} absent) -- selection by location has "
+                f"to come from the feeds themselves, not from the catalogue")
+    head = (f"bounding boxes: {usable} of {total} usable, {invalid} invalid, "
+            f"{absent} absent")
+    if invalid:
+        return head + (f" -- {invalid} box(es) failed the range check and "
+                       f"are recorded with the reason in the artefact")
+    if absent:
+        return head + (f" -- the {absent} without one cannot be selected "
+                       f"geometrically and must be named by hand or dropped")
+    return head
+
+
 def check_arithmetic(art: dict) -> None:
     """Selected plus excluded equals rows read, or the artefact is wrong.
 
@@ -698,6 +735,7 @@ def main(argv: list[str] | None = None) -> int:
         for rule, n in sorted(art["excluded_by_rule"].items(),
                               key=lambda kv: -kv[1]):
             print(f"      {n:>4}  {rule}")
+        print(f"    {bbox_sentence(art['bounding_boxes'])}")
         if args.dry_run:
             print("    --dry-run: nothing written")
             continue

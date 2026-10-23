@@ -550,3 +550,61 @@ def test_real_recorded_rows_have_real_boxes() -> None:
     for b in usable:
         assert -90 <= b["min_lat"] <= b["max_lat"] <= 90
         assert -180 <= b["min_lon"] <= b["max_lon"] <= 180
+
+
+# -- the bounding-box line, which was computed and never shown -------------
+#
+# ADDED 2026-10-23. The usable/invalid/absent counts went into the artefact
+# and not the console from the day G0b was written, so the number that decides
+# a geographic narrowing was invisible at the moment of deciding it.
+
+from scripts.fetch_road_registries import bbox_sentence  # noqa: E402
+
+BOX_CASES = [
+    {"usable": 0, "invalid": 0, "absent": 25},     # WZDx: no geometry columns
+    {"usable": 184, "invalid": 0, "absent": 7},    # Mobility, as measured
+    {"usable": 184, "invalid": 2, "absent": 5},
+    {"usable": 191, "invalid": 0, "absent": 0},
+    {},
+]
+
+
+def test_five_box_situations_give_five_sentences() -> None:
+    """Rule 13. The count is what catches a swallowed branch."""
+    said = [bbox_sentence(b) for b in BOX_CASES]
+    assert len(set(said)) == len(BOX_CASES), said
+
+
+def test_a_registry_with_no_geometry_is_not_reported_as_missing_boxes() -> None:
+    """The WZDx CSV has no bounding-box columns. Its 25 absences are one fact
+    about the catalogue, and "0 usable, 25 absent" would read as 25 feeds
+    each missing a box -- a data-quality alarm about the wrong thing."""
+    s = bbox_sentence({"usable": 0, "invalid": 0, "absent": 25})
+    assert "carries no geometry at all" in s
+    assert "usable" not in s
+
+
+def test_the_measured_mobility_counts_name_the_seven() -> None:
+    """184 usable and 7 absent, as G0b measured. TANK is one of the seven and
+    is a genuine border agency, which is why the sentence says the absent ones
+    must be named by hand rather than silently dropped."""
+    s = bbox_sentence({"usable": 184, "invalid": 0, "absent": 7})
+    assert "184 of 191 usable" in s
+    assert "named by hand or dropped" in s
+
+
+def test_an_invalid_box_is_called_out_and_a_clean_run_is_not() -> None:
+    """Rule 16: a clean registry gets a plain line, not a warning."""
+    assert "failed the range check" in bbox_sentence(
+        {"usable": 1, "invalid": 1, "absent": 0})
+    clean = bbox_sentence({"usable": 191, "invalid": 0, "absent": 0})
+    assert "--" not in clean
+
+
+def test_the_sentence_is_printed_by_main() -> None:
+    """Not merely defined. A function that composes the line and is never
+    called would be the original defect with an extra step."""
+    import inspect
+
+    from scripts import fetch_road_registries as m
+    assert "bbox_sentence(art['bounding_boxes'])" in inspect.getsource(m.main)
