@@ -79,6 +79,7 @@ import gzip
 import hashlib
 import json
 import logging
+import logging.handlers
 import os
 import signal
 import statistics
@@ -1213,11 +1214,40 @@ def main() -> int:
     ap.add_argument("--force", action="store_true",
                     help="take the collector lock even if one is held")
     ap.add_argument("-v", "--verbose", action="store_true")
+    ap.add_argument("--log-file", type=Path,
+                    help="also write logs here, rotating at 5 MB. Required in "
+                         "practice under Task Scheduler, which gives the "
+                         "process no console to print to.")
     args = ap.parse_args()
 
-    logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO,
-        format="%(asctime)s  %(message)s", datefmt="%H:%M:%S")
+    # THE HOUSE COLLECTOR CONTRACT, and why this flag exists at all.
+    #
+    # collector.ps1 starts every collector with --log-file, because a process
+    # run by Task Scheduler has no console and anything it prints goes
+    # nowhere. Without this flag the scheduled task would have died on its
+    # first argparse call, every time, and `collector.ps1 status` would have
+    # shown a collector that never ran -- the nine silent days of September
+    # in a new costume. Same rotation as ingest_aviation.py: five files of
+    # 5 MB, a few weeks of history, never needing attention.
+    #
+    # The FILE carries the date and the console does not. A console is read
+    # as it scrolls; a log is read three weeks later, and "14:26" alone in a
+    # file spanning a fortnight names fourteen different moments.
+    level = logging.DEBUG if args.verbose else logging.INFO
+    root = logging.getLogger()
+    root.setLevel(level)
+    console = logging.StreamHandler()
+    console.setFormatter(logging.Formatter("%(asctime)s  %(message)s",
+                                           datefmt="%H:%M:%S"))
+    root.addHandler(console)
+    if args.log_file:
+        args.log_file.parent.mkdir(parents=True, exist_ok=True)
+        to_file = logging.handlers.RotatingFileHandler(
+            args.log_file, maxBytes=5_000_000, backupCount=5,
+            encoding="utf-8")
+        to_file.setFormatter(logging.Formatter(
+            "%(asctime)s  %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+        root.addHandler(to_file)
 
     lo, hi = INTERVAL_BAND_S
     if not args.once and not (lo <= args.interval <= hi):

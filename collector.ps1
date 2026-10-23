@@ -44,7 +44,7 @@ param(
                  "logs", "clear-locks", "windows", "install-all")]
     [string]$Action = "status",
 
-    [ValidateSet("air", "conus", "sea", "sea-conus", "air-indep")]
+    [ValidateSet("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx")]
     [string]$Aoi = "air",
 
     # 0 means "use the AOI's own default" -- 30 s for air, 600 s for conus.
@@ -149,6 +149,33 @@ $Footprints = @{
                Label = "DC-Baltimore, independent";
                Credits = 0;  Flush = 10;
                Script = "scripts\ingest_adsbfi.py" }
+
+    # THE LAND DOMAIN'S DECLARED LAYER, and the first collector whose
+    # arguments are not one of the two shapes the builders below hard-coded.
+    #
+    # It has no --aoi: the 25 feeds it polls are chosen by the G0 registry,
+    # not by a bounding box. It has no --flush-every: it writes a body only
+    # when a feed's road events change and appends one ledger line per feed
+    # per cycle, fsynced, so there is no buffer to lose. Forcing either flag
+    # on it would have killed the task on its first argparse call, every
+    # logon, and status would have shown a collector that never ran.
+    #
+    # So the footprint carries its own ArgTemplate, and the builders use it
+    # when present. A sixth collector then adds a row here instead of a third
+    # branch to two functions -- which is the change that keeps breaking in
+    # this file, as the comment in Find-CollectorProcesses records.
+    #
+    # Interval = 600: a work zone lives for days; ten minutes sits inside the
+    # 300-900 s band fetch_wzdx.py was designed for, and its ledger will say
+    # from a day of cycles whether that is right.
+    'roads-wzdx' = @{
+               Task = "ANGELS Collector ROADS WZDX";
+               Dataset = "roads/wzdx";
+               Log  = "collector-roads-wzdx.log"; Interval = 600;
+               Label = "WZDx work zones, 25 feeds";
+               Credits = 0;  Flush = 0;
+               Script = "scripts\fetch_wzdx.py";
+               ArgTemplate = '"{script}" --interval {interval} --log-file "{log}"' }
 }
 
 # ONE ordered list of footprints, used by status, process detection,
@@ -157,7 +184,7 @@ $Footprints = @{
 # 2026-09-25 would have had to find every one of them, and missing the
 # process-detection copy would have made the new collector invisible to
 # `status` and killable by `install-all` without ever appearing in a list.
-$Order = @("air", "conus", "sea", "sea-conus", "air-indep")
+$Order = @("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx")
 
 $AoiWasGiven = $PSBoundParameters.ContainsKey("Aoi")
 
@@ -216,7 +243,17 @@ function Install-Collector {
     # The two collectors take different flags because they are different
     # kinds of thing: one polls on an interval, the other holds a socket and
     # flushes on rows or seconds.
-    if ($IsSea) {
+    if ($Fp.ArgTemplate) {
+        # The footprint states its own argument shape. See the roads-wzdx
+        # entry for why this exists.
+        #
+        # Two statements, not one chain broken across lines: a trailing-dot
+        # continuation is not something to trust in the Windows PowerShell
+        # 5.1 this file runs under, and see Find-CollectorProcesses for what
+        # a construct that only PowerShell 7 accepts does to the whole file.
+        $args = $Fp.ArgTemplate.Replace('{script}', $Script)
+        $args = $args.Replace('{log}', $LogFile).Replace('{interval}', "$Interval")
+    } elseif ($IsSea) {
         $args = "`"$Script`" --aoi $($Fp.SeaAoi) --log-file `"$LogFile`""
     } else {
         $args = "`"$Script`" --aoi $Aoi --interval $Interval --flush-every $FlushEvery --log-file `"$LogFile`""
@@ -700,7 +737,34 @@ function Find-CollectorProcesses {
     $script:LastProcScan.Visible = @($all | Where-Object { $_.CommandLine }).Count
     $script:LastProcScan.Blind   = $all.Count - $script:LastProcScan.Visible
 
-    $procs = @($all | Where-Object { $_.CommandLine -match 'ingest_(aviation|maritime|adsbfi)\.py' })
+    # THE SECOND INSTANCE OF THE DEFECT RECORDED THREE LINES BELOW.
+    #
+    # This pre-filter read 'ingest_(aviation|maritime|adsbfi)\.py' -- a literal
+    # list of script names, true while every collector happened to be called
+    # ingest_*, and silently wrong for roads-wzdx, whose script is
+    # fetch_wzdx.py. The scan would have dropped it before the per-footprint
+    # loop ever saw it, and `status` would have reported a running collector
+    # as stopped. The comment below describes the identical mistake one level
+    # down, fixed once already; a guard specified by the names in front of it
+    # is mechanism N, and this is the next instance.
+    #
+    # So the leaves come from $Footprints. A new collector is covered by
+    # adding its row and nothing else.
+    #
+    # AND ANCHORED AT A PATH SEPARATOR. tests\test_fetch_wzdx.py exists, so an
+    # unanchored "fetch_wzdx.py" matches `python -m pytest
+    # tests\test_fetch_wzdx.py` and reports the collector running whenever
+    # someone runs that file. The four older scripts escape this only by the
+    # accident of their test files having different names.
+    $leafOf = @{}
+    foreach ($k in $Order) {
+        $f = $Footprints[$k]
+        $leafOf[$k] = if ($f.Script) { Split-Path $f.Script -Leaf } else { "ingest_aviation.py" }
+    }
+    $leafPattern = { param($leaf) '(?:^|[\\/"\s])' + [regex]::Escape($leaf) + '(?:"|\s|$)' }
+    $anyLeaf = (@($leafOf.Values | Sort-Object -Unique) |
+                ForEach-Object { & $leafPattern $_ }) -join '|'
+    $procs = @($all | Where-Object { $_.CommandLine -match $anyLeaf })
     $script:LastProcScan.Matched = $procs.Count
 
     foreach ($k in $Order) {
@@ -710,12 +774,18 @@ function Find-CollectorProcesses {
         # which was true while the only footprints with their own script were
         # the two sea ones -- and silently wrong the moment a third kind of
         # collector arrived.
-        $script = if ($fp.Script) { Split-Path $fp.Script -Leaf }
-                  else            { "ingest_aviation.py" }
+        $script = $leafOf[$k]
+        # --aoi only separates footprints that SHARE a script: air and conus
+        # both run ingest_aviation.py, sea and sea-conus both run
+        # ingest_maritime.py. A script used by one footprint is identified by
+        # its name alone, which is why roads-wzdx needs no --aoi to be seen.
+        $shared = @($leafOf.Values | Where-Object { $_ -eq $script }).Count -gt 1
         $aoiArg = if ($fp.SeaAoi) { $fp.SeaAoi } else { $k }
+        $mine   = & $leafPattern $script
         $hit = @($procs | Where-Object {
-            $_.CommandLine -like "*$script*" -and
-            $_.CommandLine -match ("--aoi\s+" + [regex]::Escape($aoiArg) + "(\s|$)")
+            $_.CommandLine -match $mine -and
+            ((-not $shared) -or
+             ($_.CommandLine -match ("--aoi\s+" + [regex]::Escape($aoiArg) + "(\s|$)")))
         })
         # WHO OWNS IT IS WHAT SAYS WHERE IT CAME FROM.
         #
@@ -1002,7 +1072,10 @@ function Start-Windows {
         $fp  = $Footprints[$k]
         $log = Join-Path $Repo ("data\logs\" + $fp.Log)
         $scr = Join-Path $Repo $(if ($fp.Script) { $fp.Script } else { "scripts\ingest_aviation.py" })
-        if ($fp.SeaAoi) {
+        if ($fp.ArgTemplate) {
+            $a = $fp.ArgTemplate.Replace('{script}', $scr)
+            $a = $a.Replace('{log}', $log).Replace('{interval}', "$($fp.Interval)") + " -v"
+        } elseif ($fp.SeaAoi) {
             $a = "`"$scr`" --aoi $($fp.SeaAoi) --log-file `"$log`" -v"
         } else {
             $a = "`"$scr`" --aoi $k --interval $($fp.Interval) --flush-every $($fp.Flush) --log-file `"$log`" -v"
