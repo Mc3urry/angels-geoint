@@ -114,6 +114,12 @@ data/reference/airspace/*
 data/reference/roads/*
 !data/reference/roads/wzdx-registry.json
 !data/reference/roads/transit-registry.json
+# G2b's selection: which feeds are polled because they straddle a state
+# line, and why every other one is not. Tracked for the same reason as the
+# two registries above -- it is the record of a decision, not fetchable
+# data. The polygons it was made from (states-generalised/) stay ignored:
+# they are refetchable, and the artefact records their manifest's digest.
+!data/reference/roads/border-feeds.json
 
 # The corrected nulls. See the EXCEPTION note above: a multi-hour run, not a
 # seconds-long rebuild.

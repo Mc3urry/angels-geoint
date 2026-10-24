@@ -1,0 +1,2962 @@
+{
+ "_what": "G2b: transit feeds whose service area straddles or abuts a state line, and every feed that does not, with the reason",
+ "_built_at_utc": "2026-10-24T01:52:28+00:00",
+ "_inputs": {
+  "transit_registry": "transit-registry.json",
+  "transit_registry_sha256": "fe7df0eed06d315114e4a3776e2fc05e8cf11eb74d58e9566e674d6e912ca5a0",
+  "boundary_manifest_sha256": "671cd1ec089b9acbf629faa08fa8dda2048f716562bcf286035ed30f5e1d1e65",
+  "boundary_source": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/0/query",
+  "boundary_generalised": true
+ },
+ "_rules": {
+  "test": "the feed's bounding box, grown by buffer_m on every side, overlaps two or more state polygons",
+  "buffer_m": 2000.0,
+  "generalisation_m_upper_bound": 111.3,
+  "buffer_applied_m": 2111.3,
+  "note": "buffer_m is an UPPER bound on any border threshold G5 may choose. A G5 threshold above it requires re-running this selection, or feeds whose vehicles reach the border zone were never polled.",
+  "named_by_hand": {
+   "mdb-1566": {
+    "decision": "exclude",
+    "reason": "Beach Cities Transit, Redondo Beach CA: interior Los Angeles County. Judged from the municipality."
+   },
+   "mdb-1695": {
+    "decision": "include",
+    "reason": "Transit Authority of Northern Kentucky, Fort Wright KY, runs across the Ohio River into downtown Cincinnati: the Kentucky-Ohio line. The clearest border agency in the registry, and the catalogue gave it no box, so geometry could never have found it."
+   },
+   "tld-1260-vp": {
+    "decision": "exclude",
+    "reason": "Long Beach Transit, Long Beach CA: interior Los Angeles County. Judged from the municipality."
+   },
+   "tld-3391-vp": {
+    "decision": "exclude",
+    "reason": "Sacramento Regional Transit, Sacramento CA: central California. Judged from the municipality."
+   },
+   "tld-4364-vp": {
+    "decision": "exclude",
+    "reason": "Torrance Transit, Long Beach CA area: interior Los Angeles County. Judged from the municipality."
+   },
+   "tld-5865-vp": {
+    "decision": "exclude",
+    "reason": "Concho Valley Transit District, San Angelo TX: its registry box is 1,512 km wide and reaches Georgia, stretched by a stray stop. San Angelo is not on a state line. Judged from the municipality."
+   },
+   "tld-6884-vp": {
+    "decision": "exclude",
+    "reason": "Rochester Institute of Technology, Rochester NY: a campus shuttle whose registry box is 1,029 km tall across twelve states, stretched by a stray stop. Rochester is not on a state line. Judged from the municipality."
+   },
+   "tld-6890-vp": {
+    "decision": "exclude",
+    "reason": "Green Bay Metro, Green Bay WI: northeast Wisconsin, well short of the Michigan line. Judged from the municipality."
+   },
+   "tld-7044-vp": {
+    "decision": "exclude",
+    "reason": "Lexington Transit Authority, Lexington KY: central Kentucky, far from any state line. Judged from the municipality."
+   }
+  },
+  "max_box_km": 500.0,
+  "same_agency": {
+   "mdb-1734 + tld-1127-vp": {
+    "decision": "keep:tld-1127-vp",
+    "reason": "Virginia Railway Express from two hosts with the same feed name, VehiclePositionFeed: almost certainly the same trains twice. Kept: the agency's https host. The http one answered HTTP 403 when tried on 2026-10-23, which is a fact about that request and not yet a reason. PROVISIONAL until vehicle ids are compared."
+   },
+   "mdb-1850 + mdb-1853": {
+    "decision": "both",
+    "reason": "WMATA bus and rail: the URLs name the mode (bus-gtfsrt, rail-gtfsrt), and buses and trains are different vehicles."
+   },
+   "mdb-2670 + tld-4679-vp": {
+    "decision": "keep:tld-4679-vp",
+    "reason": "Pioneer Valley published twice, by Swiftly and by Avail InfoPoint: the same buses from two vendors. Kept: the agency's own host over the third-party one. PROVISIONAL until vehicle ids are compared."
+   },
+   "mdb-3060 + mdb-3063": {
+    "decision": "both",
+    "reason": "SEPTA rail and bus: the URLs name the mode (septarail, septa), and trains and buses are different vehicles."
+   }
+  },
+  "states_in_set": 49
+ },
+ "rows_read": 191,
+ "n_selected": 38,
+ "n_excluded": 153,
+ "excluded_by_reason": {
+  "one state: no discontinuity inside the service area": 142,
+  "no box, excluded by hand": 8,
+  "in a state the boundary set skips by rule (no land neighbour)": 1,
+  "same agency as another selected feed: one kept, see SAME_AGENCY": 2
+ },
+ "warnings": [],
+ "selected": [
+  {
+   "id": "mdb-1414",
+   "provider": "Metro St. Louis",
+   "subdivision": "Illinois",
+   "url": "https://www.metrostlouis.org/RealTimeData/StlRealTimeVehicles.pb",
+   "how": "geometry",
+   "states": [
+    "17",
+    "29"
+   ],
+   "state_names": [
+    "Illinois",
+    "Missouri"
+   ],
+   "box_km": [
+    68.5,
+    37.7
+   ]
+  },
+  {
+   "id": "mdb-1461",
+   "provider": "Duluth Transit",
+   "subdivision": "Minnesota",
+   "url": "https://duluthtransit.com/gtfsrt/Vehicle/VehiclePositions.pb",
+   "how": "geometry",
+   "states": [
+    "27",
+    "55"
+   ],
+   "state_names": [
+    "Minnesota",
+    "Wisconsin"
+   ],
+   "box_km": [
+    16.6,
+    22.1
+   ]
+  },
+  {
+   "id": "mdb-1489",
+   "provider": "Cincinnati Metro",
+   "subdivision": "Ohio",
+   "url": "https://tmgtfsprd.sorttrpcloud.com/TMGTFSRealTimeWebService/vehicle/vehiclepositions.pb",
+   "how": "geometry",
+   "states": [
+    "18",
+    "21",
+    "39"
+   ],
+   "state_names": [
+    "Indiana",
+    "Kentucky",
+    "Ohio"
+   ],
+   "box_km": [
+    46.1,
+    32.5
+   ]
+  },
+  {
+   "id": "mdb-1530",
+   "provider": "Suffolk County Transit",
+   "subdivision": "New York",
+   "url": "http://gtfsrealtime.suffolkcountyny.gov:8080/gtfsrealtime/VehiclePositions",
+   "how": "geometry",
+   "states": [
+    "09",
+    "36"
+   ],
+   "state_names": [
+    "Connecticut",
+    "New York"
+   ],
+   "box_km": [
+    103.9,
+    59.2
+   ]
+  },
+  {
+   "id": "mdb-1602",
+   "provider": "Massachusetts Bay Transportation Authority (MBTA)",
+   "subdivision": "Massachusetts",
+   "url": "https://cdn.mbta.com/realtime/VehiclePositions.pb",
+   "how": "geometry",
+   "states": [
+    "09",
+    "25",
+    "33",
+    "44"
+   ],
+   "state_names": [
+    "Connecticut",
+    "Massachusetts",
+    "New Hampshire",
+    "Rhode Island"
+   ],
+   "box_km": [
+    129.7,
+    135.4
+   ]
+  },
+  {
+   "id": "mdb-1662",
+   "provider": "Rhode Island Public Transit Authority",
+   "subdivision": "Massachusetts",
+   "url": "http://realtime.ripta.com:81/api/vehiclepositions?format=gtfs.proto",
+   "how": "geometry",
+   "states": [
+    "09",
+    "25",
+    "44"
+   ],
+   "state_names": [
+    "Connecticut",
+    "Massachusetts",
+    "Rhode Island"
+   ],
+   "box_km": [
+    56.1,
+    71.8
+   ]
+  },
+  {
+   "id": "mdb-1683",
+   "provider": "Metro Transit",
+   "subdivision": "Minnesota",
+   "url": "https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb",
+   "how": "geometry",
+   "states": [
+    "27",
+    "55"
+   ],
+   "state_names": [
+    "Minnesota",
+    "Wisconsin"
+   ],
+   "box_km": [
+    72.8,
+    69.3
+   ]
+  },
+  {
+   "id": "mdb-1695",
+   "provider": "Transit Authority of Northern Kentucky (TANK)",
+   "subdivision": "Kentucky",
+   "url": "http://66.42.202.74:89/api/vehiclepositions",
+   "how": "named by hand",
+   "states": null,
+   "reason": "Transit Authority of Northern Kentucky, Fort Wright KY, runs across the Ohio River into downtown Cincinnati: the Kentucky-Ohio line. The clearest border agency in the registry, and the catalogue gave it no box, so geometry could never have found it."
+  },
+  {
+   "id": "mdb-1790",
+   "provider": "Arlington Transit",
+   "subdivision": "Virginia",
+   "url": "https://realtime.arlingtontransit.com/gtfsrt/vehicles",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    9.8,
+    9.5
+   ]
+  },
+  {
+   "id": "mdb-1850",
+   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
+   "subdivision": "District of Columbia",
+   "url": "https://api.wmata.com/gtfs/bus-gtfsrt-vehiclepositions.pb",
+   "env_var": "WMATA_API_KEY",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    55.9,
+    51.4
+   ]
+  },
+  {
+   "id": "mdb-1853",
+   "provider": "Washington Metropolitan Area Transit Authority (WMATA)",
+   "subdivision": "District of Columbia",
+   "url": "https://api.wmata.com/gtfs/rail-gtfsrt-vehiclepositions.pb",
+   "env_var": "WMATA_API_KEY",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    56.1,
+    39.4
+   ]
+  },
+  {
+   "id": "mdb-1921",
+   "provider": "C-TRAN",
+   "subdivision": "Oregon",
+   "url": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePostions",
+   "how": "geometry",
+   "states": [
+    "41",
+    "53"
+   ],
+   "state_names": [
+    "Oregon",
+    "Washington"
+   ],
+   "box_km": [
+    30.1,
+    41.2
+   ]
+  },
+  {
+   "id": "mdb-2422",
+   "provider": "Connecticut Transit",
+   "subdivision": "Connecticut",
+   "url": "https://cttprdtmgtfs.ctttrpcloud.com/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "how": "geometry",
+   "states": [
+    "09",
+    "25",
+    "36",
+    "44"
+   ],
+   "state_names": [
+    "Connecticut",
+    "Massachusetts",
+    "New York",
+    "Rhode Island"
+   ],
+   "box_km": [
+    165.0,
+    113.6
+   ]
+  },
+  {
+   "id": "mdb-2665",
+   "provider": "Transit Authority of River City (TARC)",
+   "subdivision": "Indiana",
+   "url": "https://tarc.rideralerts.com/InfoPoint/GTFS-realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "18",
+    "21"
+   ],
+   "state_names": [
+    "Indiana",
+    "Kentucky"
+   ],
+   "box_km": [
+    29.1,
+    27.8
+   ]
+  },
+  {
+   "id": "mdb-3060",
+   "provider": "Southeastern Pennsylvania Transportation Authority (SEPTA)",
+   "subdivision": "Delaware",
+   "url": "https://www3.septa.org/gtfsrt/septarail-pa-us/Vehicle/rtVehiclePosition.pb",
+   "how": "geometry",
+   "states": [
+    "10",
+    "34",
+    "42"
+   ],
+   "state_names": [
+    "Delaware",
+    "New Jersey",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    86.1,
+    70.9
+   ]
+  },
+  {
+   "id": "mdb-3063",
+   "provider": "Southeastern Pennsylvania Transportation Authority (SEPTA)",
+   "subdivision": "Delaware",
+   "url": "https://www3.septa.org/gtfsrt/septa-pa-us/Vehicle/rtVehiclePosition.pb",
+   "how": "geometry",
+   "states": [
+    "10",
+    "34",
+    "42"
+   ],
+   "state_names": [
+    "Delaware",
+    "New Jersey",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    92.0,
+    59.0
+   ]
+  },
+  {
+   "id": "mdb-3070",
+   "provider": "Frederick County TransIT",
+   "subdivision": "Maryland",
+   "url": "https://passio3.com/frederick/passioTransit/gtfs/realtime/vehiclePositions",
+   "how": "geometry",
+   "states": [
+    "24",
+    "42",
+    "51"
+   ],
+   "state_names": [
+    "Maryland",
+    "Pennsylvania",
+    "Virginia"
+   ],
+   "box_km": [
+    29.8,
+    48.0
+   ]
+  },
+  {
+   "id": "mdb-3077",
+   "provider": "South Bend Public Transportation Corporation",
+   "subdivision": "Illinois",
+   "url": "https://passio3.com/transpo/passioTransit/gtfs/realtime/vehiclePositions",
+   "how": "geometry",
+   "states": [
+    "17",
+    "18",
+    "26"
+   ],
+   "state_names": [
+    "Illinois",
+    "Indiana",
+    "Michigan"
+   ],
+   "box_km": [
+    109.1,
+    40.1
+   ]
+  },
+  {
+   "id": "mdb-3080",
+   "provider": "Cecil Transit",
+   "subdivision": "Delaware",
+   "url": "https://passio3.com/cecil/passioTransit/gtfs/realtime/vehiclePositions",
+   "how": "geometry",
+   "states": [
+    "10",
+    "24"
+   ],
+   "state_names": [
+    "Delaware",
+    "Maryland"
+   ],
+   "box_km": [
+    28.5,
+    14.8
+   ]
+  },
+  {
+   "id": "mdb-3199",
+   "provider": "NY Waterway",
+   "subdivision": "New Jersey",
+   "url": "https://nywaterway.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "how": "geometry",
+   "states": [
+    "34",
+    "36"
+   ],
+   "state_names": [
+    "New Jersey",
+    "New York"
+   ],
+   "box_km": [
+    34.0,
+    84.5
+   ]
+  },
+  {
+   "id": "mdb-3204",
+   "provider": "El Paso Transportation Authority",
+   "subdivision": "Texas",
+   "url": "https://data.peaktransit.com/gtfsrt/193/VehiclePosition.pb",
+   "how": "geometry",
+   "states": [
+    "35",
+    "48"
+   ],
+   "state_names": [
+    "New Mexico",
+    "Texas"
+   ],
+   "box_km": [
+    49.0,
+    61.5
+   ]
+  },
+  {
+   "id": "mdb-3436",
+   "provider": "Monroe County Transportation Authority (MCTA)",
+   "subdivision": "Pennsylvania",
+   "url": "https://ponytracker.availtec.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "how": "geometry",
+   "states": [
+    "34",
+    "42"
+   ],
+   "state_names": [
+    "New Jersey",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    31.7,
+    26.3
+   ]
+  },
+  {
+   "id": "mdb-3443",
+   "provider": "Shore Transit",
+   "subdivision": "Maryland",
+   "url": "https://myride.shoretransit.org/gtfs/GTFS_VehiclePositions.pb",
+   "how": "geometry",
+   "states": [
+    "10",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "Delaware",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    67.0,
+    53.1
+   ]
+  },
+  {
+   "id": "tld-1127-vp",
+   "provider": "Virginia Railway Express",
+   "subdivision": "District of Columbia",
+   "url": "https://gtfs.vre.org/containercdngtfsupload/VehiclePositionFeed",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    45.3,
+    75.4
+   ]
+  },
+  {
+   "id": "tld-4337-vp",
+   "provider": "NYC Ferry",
+   "subdivision": "New York",
+   "url": "http://nycferry.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "how": "geometry",
+   "states": [
+    "34",
+    "36"
+   ],
+   "state_names": [
+    "New Jersey",
+    "New York"
+   ],
+   "box_km": [
+    25.8,
+    26.6
+   ]
+  },
+  {
+   "id": "tld-4347-vp",
+   "provider": "Fairfax Connector",
+   "subdivision": "District of Columbia",
+   "url": "https://www.fairfaxcounty.gov/gtfsrt/vehicles",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    38.3,
+    37.8
+   ]
+  },
+  {
+   "id": "tld-4451-vp",
+   "provider": "Maryland Transit Administration",
+   "subdivision": "District of Columbia",
+   "url": "https://mdotmta-gtfs-rt.s3.amazonaws.com/MARC%20RT/marc-vp.pb",
+   "how": "geometry",
+   "states": [
+    "11",
+    "24",
+    "51",
+    "54"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia",
+    "West Virginia"
+   ],
+   "box_km": [
+    162.7,
+    73.4
+   ]
+  },
+  {
+   "id": "tld-4532-vp",
+   "provider": "Charlotte Area Transit System",
+   "subdivision": "North Carolina",
+   "url": "https://gtfsrealtime.ridetransit.org/GTFSRealTime/Vehicle/VehiclePositions.pb",
+   "how": "geometry",
+   "states": [
+    "37",
+    "45"
+   ],
+   "state_names": [
+    "North Carolina",
+    "South Carolina"
+   ],
+   "box_km": [
+    49.1,
+    50.5
+   ]
+  },
+  {
+   "id": "tld-4552-vp",
+   "provider": "Area Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://rideata.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "36",
+    "42"
+   ],
+   "state_names": [
+    "New York",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    97.7,
+    117.1
+   ]
+  },
+  {
+   "id": "tld-4664-vp",
+   "provider": "Shenango Valley Shuttle Service",
+   "subdivision": "Pennsylvania",
+   "url": "https://svss.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "39",
+    "42"
+   ],
+   "state_names": [
+    "Ohio",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    5.9,
+    7.1
+   ]
+  },
+  {
+   "id": "tld-4679-vp",
+   "provider": "Pioneer Valley Transit Authority",
+   "subdivision": "Connecticut",
+   "url": "https://bustracker.pvta.com/infopoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "09",
+    "25",
+    "44"
+   ],
+   "state_names": [
+    "Connecticut",
+    "Massachusetts",
+    "Rhode Island"
+   ],
+   "box_km": [
+    120.1,
+    64.3
+   ]
+  },
+  {
+   "id": "tld-4785-vp",
+   "provider": "Lehigh and Northampton Transportation Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://realtimelanta.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "34",
+    "42"
+   ],
+   "state_names": [
+    "New Jersey",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    58.2,
+    39.8
+   ]
+  },
+  {
+   "id": "tld-4790-vp",
+   "provider": "Norwalk Transit District",
+   "subdivision": "Connecticut",
+   "url": "https://mystop.norwalktransit.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "how": "geometry",
+   "states": [
+    "09",
+    "36"
+   ],
+   "state_names": [
+    "Connecticut",
+    "New York"
+   ],
+   "box_km": [
+    50.2,
+    24.0
+   ]
+  },
+  {
+   "id": "tld-5539-vp",
+   "provider": "rabbittransit",
+   "subdivision": "Maryland",
+   "url": "https://realtime.rabbittransit.org/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "24",
+    "42"
+   ],
+   "state_names": [
+    "Maryland",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    66.3,
+    99.6
+   ]
+  },
+  {
+   "id": "tld-5903-vp",
+   "provider": "Housatonic Area Regional Transit",
+   "subdivision": "Connecticut",
+   "url": "https://passio3.com/hart/passioTransit/gtfs/realtime/vehiclePositions",
+   "how": "geometry",
+   "states": [
+    "09",
+    "36"
+   ],
+   "state_names": [
+    "Connecticut",
+    "New York"
+   ],
+   "box_km": [
+    25.4,
+    54.3
+   ]
+  },
+  {
+   "id": "tld-6744-vp",
+   "provider": "North Central Regional Transit District",
+   "subdivision": "New Mexico",
+   "url": "https://bluebustracker.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "08",
+    "35"
+   ],
+   "state_names": [
+    "Colorado",
+    "New Mexico"
+   ],
+   "box_km": [
+    267.5,
+    220.3
+   ]
+  },
+  {
+   "id": "tld-7022-vp",
+   "provider": "Endless Mountains Transportation Authority",
+   "subdivision": "New York",
+   "url": "https://best.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "36",
+    "42"
+   ],
+   "state_names": [
+    "New York",
+    "Pennsylvania"
+   ],
+   "box_km": [
+    107.7,
+    64.3
+   ]
+  },
+  {
+   "id": "tld-7031-vp",
+   "provider": "New Castle Area Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://ncata.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "how": "geometry",
+   "states": [
+    "39",
+    "42",
+    "54"
+   ],
+   "state_names": [
+    "Ohio",
+    "Pennsylvania",
+    "West Virginia"
+   ],
+   "box_km": [
+    50.9,
+    88.6
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "id": "mdb-1424",
+   "provider": "Capital Area Transportation Authority",
+   "subdivision": "Michigan",
+   "url": "http://developers.cata.org/gtfsrt/vehicle/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "26"
+   ],
+   "box_km": [
+    37.4,
+    23.1
+   ]
+  },
+  {
+   "id": "mdb-1427",
+   "provider": "Capital Metro",
+   "subdivision": "Texas",
+   "url": "https://data.texas.gov/download/eiei-9rpf/application%2Foctet-stream",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "48"
+   ],
+   "box_km": [
+    59.5,
+    49.1
+   ]
+  },
+  {
+   "id": "mdb-1430",
+   "provider": "Central Ohio Transit Authority",
+   "subdivision": "Ohio",
+   "url": "http://realtime.cota.com/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "39"
+   ],
+   "box_km": [
+    33.8,
+    36.2
+   ]
+  },
+  {
+   "id": "mdb-1436",
+   "provider": "Big Blue Bus",
+   "subdivision": "California",
+   "url": "http://gtfs.bigbluebus.com/vehiclepositions.bin",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    28.8,
+    13.8
+   ]
+  },
+  {
+   "id": "mdb-1448",
+   "provider": "Community Transit",
+   "subdivision": "Washington",
+   "url": "https://s3.amazonaws.com/commtrans-realtime-prod/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    58.4,
+    76.4
+   ]
+  },
+  {
+   "id": "mdb-1456",
+   "provider": "Denton County Transportation Authority",
+   "subdivision": "Texas",
+   "url": "http://api.transitime.org/api/v1/key/dca04420/agency/dcta/command/gtfs-rt/vehiclePositions?format=bin",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "48"
+   ],
+   "box_km": [
+    36.6,
+    36.9
+   ]
+  },
+  {
+   "id": "mdb-1474",
+   "provider": "Shreveport Area Transit System (SporTran)",
+   "subdivision": "Louisiana",
+   "url": "https://sportranbus.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "22"
+   ],
+   "box_km": [
+    25.5,
+    20.0
+   ]
+  },
+  {
+   "id": "mdb-1506",
+   "provider": "Merced County Transit (The Bus)",
+   "subdivision": "California",
+   "url": "https://thebuslive.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    68.4,
+    62.0
+   ]
+  },
+  {
+   "id": "mdb-1528",
+   "provider": "Hillsborough Area Regional Transit",
+   "subdivision": "Florida",
+   "url": "http://api.tampa.onebusaway.org:8088/vehicle-positions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    35.3,
+    54.6
+   ]
+  },
+  {
+   "id": "mdb-1537",
+   "provider": "Intercity Transit",
+   "subdivision": "Washington",
+   "url": "https://its.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    37.5,
+    25.4
+   ]
+  },
+  {
+   "id": "mdb-1542",
+   "provider": "King County Metro",
+   "subdivision": "Washington",
+   "url": "https://s3.amazonaws.com/kcm-alerts-realtime-prod/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    54.2,
+    75.3
+   ]
+  },
+  {
+   "id": "mdb-1566",
+   "provider": "Beach Cities Transit",
+   "subdivision": "California",
+   "url": "https://redondobeachbct.com/gtfs-rt/vehiclepositions",
+   "reason": "no box, excluded by hand",
+   "detail": "Beach Cities Transit, Redondo Beach CA: interior Los Angeles County. Judged from the municipality."
+  },
+  {
+   "id": "mdb-1601",
+   "provider": "Metropolitan Atlanta Rapid Transit Authority (MARTA)",
+   "subdivision": "Georgia",
+   "url": "https://gtfs-rt.itsmarta.com/TMGTFSRealTimeWebService/vehicle/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "13"
+   ],
+   "box_km": [
+    54.3,
+    74.9
+   ]
+  },
+  {
+   "id": "mdb-1614",
+   "provider": "Stanislaus Regional Transit Authority (StanRTA)",
+   "subdivision": "California",
+   "url": "https://max.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    101.3,
+    71.7
+   ]
+  },
+  {
+   "id": "mdb-1616",
+   "provider": "Monterey-Salinas Transit",
+   "subdivision": "California",
+   "url": "http://206.128.158.191/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    112.0,
+    153.8
+   ]
+  },
+  {
+   "id": "mdb-1622",
+   "provider": "Nashville MTA WeGo Public Transit",
+   "subdivision": "Tennessee",
+   "url": "http://transitdata.nashvillemta.org/TMGTFSRealTimeWebService/vehicle/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "47"
+   ],
+   "box_km": [
+    97.3,
+    87.2
+   ]
+  },
+  {
+   "id": "mdb-1643",
+   "provider": "Orange County Transportation Authority (OCTA)",
+   "subdivision": "California",
+   "url": "http://api.octa.net/GTFSRealTime/protoBuf/VehiclePositions.aspx",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    50.2,
+    60.5
+   ]
+  },
+  {
+   "id": "mdb-1649",
+   "provider": "Tompkins Consolidated Area Transit (TCAT)",
+   "subdivision": "New York",
+   "url": "https://realtimetcatbus.availtec.com/InfoPoint/GTFS-Realtime.ashx?&Type=VehiclePosition&serverid=0",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "36"
+   ],
+   "box_km": [
+    32.6,
+    29.3
+   ]
+  },
+  {
+   "id": "mdb-1656",
+   "provider": "Anchorage People Mover",
+   "subdivision": "Alaska",
+   "url": "http://gtfs-rt.codeforanchorage.org/people_mover.pb",
+   "reason": "in a state the boundary set skips by rule (no land neighbour)",
+   "states": [],
+   "skipped_state": "02",
+   "detail": "Alaska: its only land boundary is with Canada",
+   "box_km": [
+    21.9,
+    24.4
+   ]
+  },
+  {
+   "id": "mdb-1665",
+   "provider": "Riverside Transit Agency",
+   "subdivision": "California",
+   "url": "https://rtabus.com/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    96.2,
+    72.1
+   ]
+  },
+  {
+   "id": "mdb-1678",
+   "provider": "Regional Transportation District (RTD)",
+   "subdivision": "Colorado",
+   "url": "https://www.rtd-denver.com/files/gtfs-rt/VehiclePosition.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "08"
+   ],
+   "box_km": [
+    333.5,
+    195.4
+   ]
+  },
+  {
+   "id": "mdb-1711",
+   "provider": "Port Authority of Allegheny County",
+   "subdivision": "Pennsylvania",
+   "url": "http://truetime.portauthority.org/gtfsrt-train/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    46.0,
+    43.9
+   ]
+  },
+  {
+   "id": "mdb-1714",
+   "provider": "Port Authority of Allegheny County",
+   "subdivision": "Pennsylvania",
+   "url": "https://truetime.portauthority.org/gtfsrt-bus/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    46.0,
+    43.9
+   ]
+  },
+  {
+   "id": "mdb-1734",
+   "provider": "Virginia Railway Express",
+   "subdivision": "Virginia",
+   "url": "http://www.vre.org/gtfs-realtime/VehiclePositionFeed",
+   "states": [
+    "11",
+    "24",
+    "51"
+   ],
+   "state_names": [
+    "District of Columbia",
+    "Maryland",
+    "Virginia"
+   ],
+   "box_km": [
+    45.3,
+    75.5
+   ],
+   "reason": "same agency as another selected feed: one kept, see SAME_AGENCY",
+   "detail": "Virginia Railway Express from two hosts with the same feed name, VehiclePositionFeed: almost certainly the same trains twice. Kept: the agency's https host. The http one answered HTTP 403 when tried on 2026-10-23, which is a fact about that request and not yet a reason. PROVISIONAL until vehicle ids are compared."
+  },
+  {
+   "id": "mdb-1740",
+   "provider": "Votran",
+   "subdivision": "Florida",
+   "url": "http://realtimevotran.availtec.com/infopoint/GTFS-Realtime.ashx?&Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    64.1,
+    58.8
+   ]
+  },
+  {
+   "id": "mdb-1766",
+   "provider": "Central Florida Regional Transit Authority (LYNX)",
+   "subdivision": "Florida",
+   "url": "http://gtfsrt.golynx.com/gtfsrt/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    46.2,
+    70.4
+   ]
+  },
+  {
+   "id": "mdb-1771",
+   "provider": "Des Moines Area Regional Transit Authority (DART)",
+   "subdivision": "Iowa",
+   "url": "https://www.ridedart.com/gtfs/real-time/vehicle-positions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "19"
+   ],
+   "box_km": [
+    25.5,
+    24.5
+   ]
+  },
+  {
+   "id": "mdb-1781",
+   "provider": "Springfield Mass Transit District (SMTD)",
+   "subdivision": "Illinois",
+   "url": "http://ride.smtd.org/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "17"
+   ],
+   "box_km": [
+    13.5,
+    17.1
+   ]
+  },
+  {
+   "id": "mdb-1787",
+   "provider": "Towson Loop",
+   "subdivision": "Maryland",
+   "url": "https://passio3.com/towson/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "24"
+   ],
+   "box_km": [
+    4.4,
+    4.3
+   ]
+  },
+  {
+   "id": "mdb-1794",
+   "provider": "Commerce Municipal Bus Lines",
+   "subdivision": "California",
+   "url": "https://citycommbus.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    12.6,
+    10.9
+   ]
+  },
+  {
+   "id": "mdb-1910",
+   "provider": "Santa Cruz Metro (SCMTD)",
+   "subdivision": "California",
+   "url": "https://rt.scmetro.org/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    43.5,
+    48.3
+   ]
+  },
+  {
+   "id": "mdb-1969",
+   "provider": "Minnesota Valley Transit Authority",
+   "subdivision": "Minnesota",
+   "url": "https://srv.mvta.com/infoPoint/GTFS-realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "27"
+   ],
+   "box_km": [
+    39.5,
+    32.5
+   ]
+  },
+  {
+   "id": "mdb-1980",
+   "provider": "Mountain Line Transit",
+   "subdivision": "Arizona",
+   "url": "https://mountainline.syncromatics.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "04"
+   ],
+   "box_km": [
+    13.4,
+    18.9
+   ]
+  },
+  {
+   "id": "mdb-2097",
+   "provider": "Metro Transit - City of Madison",
+   "subdivision": "Wisconsin",
+   "url": "https://metromap.cityofmadison.com/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "55"
+   ],
+   "box_km": [
+    29.1,
+    23.6
+   ]
+  },
+  {
+   "id": "mdb-2110",
+   "provider": "Mountain View Transportation Management Association (MVgo)",
+   "subdivision": "California",
+   "url": "https://mtma.tripshot.com/v1/gtfs/realtime/feed/mvgo?types=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    5.6,
+    4.9
+   ]
+  },
+  {
+   "id": "mdb-2125",
+   "provider": "Ben Franklin Transit",
+   "subdivision": "Washington",
+   "url": "https://myride.bft.org/Realtime/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    57.3,
+    19.4
+   ]
+  },
+  {
+   "id": "mdb-2130",
+   "provider": "Milwaukee County Transit System (MCTS)",
+   "subdivision": "Wisconsin",
+   "url": "https://realtime.ridemcts.com/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "55"
+   ],
+   "box_km": [
+    18.0,
+    35.5
+   ]
+  },
+  {
+   "id": "mdb-2218",
+   "provider": "Montebello Bus Lines",
+   "subdivision": "California",
+   "url": "https://mbl.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    25.1,
+    24.4
+   ]
+  },
+  {
+   "id": "mdb-2221",
+   "provider": "Spirit Bus",
+   "subdivision": "California",
+   "url": "https://passio3.com/montereyp/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    5.5,
+    4.0
+   ]
+  },
+  {
+   "id": "mdb-2227",
+   "provider": "Emery Go-Round",
+   "subdivision": "California",
+   "url": "https://emerygoround.tripshot.com/v1/gtfs/realtime/feed/egr?types=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    4.1,
+    2.5
+   ]
+  },
+  {
+   "id": "mdb-2229",
+   "provider": "Foothill Transit",
+   "subdivision": "California",
+   "url": "https://foothill_3rdparty.rideralerts.com/myStop/GTFS-Realtime.ashx?&Type=VehiclePosition&serverid=0",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    53.2,
+    26.2
+   ]
+  },
+  {
+   "id": "mdb-2398",
+   "provider": "Via Mobility",
+   "subdivision": "Colorado",
+   "url": "https://passio3.com/viaboulder/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "08"
+   ],
+   "box_km": [
+    43.4,
+    64.2
+   ]
+  },
+  {
+   "id": "mdb-2428",
+   "provider": "Butte Regional Transit (B-Line)",
+   "subdivision": "California",
+   "url": "https://planmyride.blinetransit.com/gtfsrealtime/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    37.3,
+    50.7
+   ]
+  },
+  {
+   "id": "mdb-2454",
+   "provider": "Valley Regional Transit",
+   "subdivision": "Idaho",
+   "url": "https://s3.amazonaws.com/etatransit.gtfs/valleyregionaltransit.etaspot.net/position_updates.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "16"
+   ],
+   "box_km": [
+    44.9,
+    12.7
+   ]
+  },
+  {
+   "id": "mdb-2619",
+   "provider": "University of Georgia",
+   "subdivision": "Georgia",
+   "url": "https://passio3.com/uga/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "13"
+   ],
+   "box_km": [
+    5.9,
+    7.8
+   ]
+  },
+  {
+   "id": "mdb-2645",
+   "provider": "Greater Portland Metro Bus",
+   "subdivision": "Maine",
+   "url": "https://gtfsrt.gptd.cadavl.com/ProfilGtfsRt2_0RSProducer-GPTD/VehiclePosition.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "23"
+   ],
+   "box_km": [
+    51.0,
+    33.3
+   ]
+  },
+  {
+   "id": "mdb-2647",
+   "provider": "South Portland",
+   "subdivision": "Maine",
+   "url": "https://api.goswift.ly/real-time/south-portland-transit/gtfs-rt-vehicle-positions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "23"
+   ],
+   "box_km": [
+    10.3,
+    4.9
+   ]
+  },
+  {
+   "id": "mdb-2670",
+   "provider": "Pioneer Valley Transit Authority",
+   "subdivision": "Connecticut",
+   "url": "https://api.goswift.ly/real-time/pioneer-valley-pvta/gtfs-rt-vehicle-positions",
+   "states": [
+    "09",
+    "25",
+    "44"
+   ],
+   "state_names": [
+    "Connecticut",
+    "Massachusetts",
+    "Rhode Island"
+   ],
+   "box_km": [
+    120.1,
+    64.3
+   ],
+   "reason": "same agency as another selected feed: one kept, see SAME_AGENCY",
+   "detail": "Pioneer Valley published twice, by Swiftly and by Avail InfoPoint: the same buses from two vendors. Kept: the agency's own host over the third-party one. PROVISIONAL until vehicle ids are compared."
+  },
+  {
+   "id": "mdb-2693",
+   "provider": "Kitsap Transit",
+   "subdivision": "Washington",
+   "url": "https://kttracker.com/gtfsrt/vehicles?debug",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    38.4,
+    49.3
+   ]
+  },
+  {
+   "id": "mdb-2700",
+   "provider": "Capital District Transportation Authority",
+   "subdivision": "New York",
+   "url": "http://gtfs.cdta.org:8080/gtfsrealtime/VehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "36"
+   ],
+   "box_km": [
+    62.5,
+    121.5
+   ]
+  },
+  {
+   "id": "mdb-2707",
+   "provider": "South Metro Area Regional Transit (SMART)",
+   "subdivision": "Oregon",
+   "url": "https://mysmartbus.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    36.6,
+    55.6
+   ]
+  },
+  {
+   "id": "mdb-2744",
+   "provider": "ClackCo Connects (Clackamas County)",
+   "subdivision": "Oregon",
+   "url": "https://passio3.com/clackamas/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    23.9,
+    17.4
+   ]
+  },
+  {
+   "id": "mdb-2747",
+   "provider": "Sandy Area Metro",
+   "subdivision": "Oregon",
+   "url": "https://passio3.com/sandyor/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    67.6,
+    24.1
+   ]
+  },
+  {
+   "id": "mdb-2889",
+   "provider": "Champaign-Urbana Mass Transit District",
+   "subdivision": "Illinois",
+   "url": "https://gtfs-rt.mtd.org/vehicle-positions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "17"
+   ],
+   "box_km": [
+    13.9,
+    11.7
+   ]
+  },
+  {
+   "id": "mdb-2897",
+   "provider": "Clovis Transit",
+   "subdivision": "California",
+   "url": "https://passio3.com/clovis/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    10.4,
+    11.3
+   ]
+  },
+  {
+   "id": "mdb-3074",
+   "provider": "Everett Transit",
+   "subdivision": "Washington",
+   "url": "https://everett.mapstrat.com/current/gtfrealtime_VehiclePositions.bin",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    9.1,
+    14.5
+   ]
+  },
+  {
+   "id": "mdb-3148",
+   "provider": "Lane Transit District LTD",
+   "subdivision": "Oregon",
+   "url": "https://feed.ltd.org/TMGTFSRealTimeWebService/GTFS/google_transit.zip",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    99.4,
+    48.7
+   ]
+  },
+  {
+   "id": "mdb-3195",
+   "provider": "CobbLinc",
+   "subdivision": "Georgia",
+   "url": "https://cobb.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition&Debug=True",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "13"
+   ],
+   "box_km": [
+    21.5,
+    32.1
+   ]
+  },
+  {
+   "id": "mdb-3214",
+   "provider": "Acadia National Park - Island Explorer",
+   "subdivision": "Maine",
+   "url": "https://islandexplorertracker.availtec.com/InfoPoint/GTFS-Realtime.ashx?&Type=VehiclePosition&serverid=0",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "23"
+   ],
+   "box_km": [
+    27.4,
+    30.1
+   ]
+  },
+  {
+   "id": "mdb-3410",
+   "provider": "Greater Cleveland Regional Transit Authority (GCRTA)",
+   "subdivision": "Ohio",
+   "url": "https://gtfs-rt.gcrta.vontascloud.com/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "39"
+   ],
+   "box_km": [
+    44.2,
+    39.4
+   ]
+  },
+  {
+   "id": "mdb-3431",
+   "provider": "City-Line Trolley (City of Kokomo)",
+   "subdivision": "Indiana",
+   "url": "https://drive.google.com/uc?export=download&id=12OWJm28dWakSVM3TnmajNWmUrmcytZPq",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "18"
+   ],
+   "box_km": [
+    5.7,
+    11.1
+   ]
+  },
+  {
+   "id": "mdb-3458",
+   "provider": "Rogue Valley Transportation District",
+   "subdivision": "Oregon",
+   "url": "https://gtfsrt.rvtd.cadavl.com/ProfilGtfsRt2_0RSProducer-RVTD/VehiclePosition.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    20.4,
+    29.8
+   ]
+  },
+  {
+   "id": "mdb-3475",
+   "provider": "Broward County Transit",
+   "subdivision": "Florida",
+   "url": "https://myride2.broward.org/gtfsrealtime/api/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    35.6,
+    65.6
+   ]
+  },
+  {
+   "id": "mdb-3513",
+   "provider": "Knoxville Area Transit (KAT)",
+   "subdivision": "Tennessee",
+   "url": "https://knoxville.syncromatics.com/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "47"
+   ],
+   "box_km": [
+    23.8,
+    15.4
+   ]
+  },
+  {
+   "id": "tld-1125-vp",
+   "provider": "VIA Metropolitan Transit",
+   "subdivision": "Texas",
+   "url": "http://gtfs.viainfo.net/vehicle/vehiclepositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "48"
+   ],
+   "box_km": [
+    42.3,
+    41.6
+   ]
+  },
+  {
+   "id": "tld-1258-vp",
+   "provider": "Modesto Area Express",
+   "subdivision": "California",
+   "url": "https://stanrta.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    101.2,
+    71.7
+   ]
+  },
+  {
+   "id": "tld-1260-vp",
+   "provider": "Long Beach Transit",
+   "subdivision": "California",
+   "url": "https://lbtgtfs.lbtransit.com/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "reason": "no box, excluded by hand",
+   "detail": "Long Beach Transit, Long Beach CA: interior Los Angeles County. Judged from the municipality."
+  },
+  {
+   "id": "tld-1261-vp",
+   "provider": "Pasadena Transit",
+   "subdivision": "California",
+   "url": "http://rt.pasadenatransit.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    11.5,
+    9.8
+   ]
+  },
+  {
+   "id": "tld-2266-vp_1",
+   "provider": "Greenlink",
+   "subdivision": "South Carolina",
+   "url": "https://gtfsrt.greenlink.cadavl.com/ProfilGtfsRt2_0RSProducer-GTA/VehiclePosition.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "45"
+   ],
+   "box_km": [
+    21.2,
+    24.5
+   ]
+  },
+  {
+   "id": "tld-3391-vp",
+   "provider": "Sacramento Regional Transit",
+   "subdivision": "California",
+   "url": "https://bustime.sacrt.com/gtfsrt/vehicles",
+   "reason": "no box, excluded by hand",
+   "detail": "Sacramento Regional Transit, Sacramento CA: central California. Judged from the municipality."
+  },
+  {
+   "id": "tld-4062-vp",
+   "provider": "GoDurham",
+   "subdivision": "North Carolina",
+   "url": "https://godurham.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    26.0,
+    34.2
+   ]
+  },
+  {
+   "id": "tld-4067-vp",
+   "provider": "Cascades East Transit",
+   "subdivision": "Oregon",
+   "url": "https://passio3.com/cet/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    66.5,
+    145.0
+   ]
+  },
+  {
+   "id": "tld-4299-vp",
+   "provider": "Capital Area Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://cat.rideralerts.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    76.3,
+    56.7
+   ]
+  },
+  {
+   "id": "tld-4328-vp",
+   "provider": "City of Santa Clarita Transit",
+   "subdivision": "California",
+   "url": "http://apps.santaclaritatransit.com/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    39.6,
+    51.2
+   ]
+  },
+  {
+   "id": "tld-4332-vp",
+   "provider": "Akron Metro Regional Transit Authority",
+   "subdivision": "Ohio",
+   "url": "https://realtimemetro.availtec.com/infopoint/GTFS-Realtime.ashx?&Type=VehiclePosition&serverid=0",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "39"
+   ],
+   "box_km": [
+    26.3,
+    67.2
+   ]
+  },
+  {
+   "id": "tld-4336-vp",
+   "provider": "Kings Area Rural Transit",
+   "subdivision": "California",
+   "url": "http://kart.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    76.8,
+    85.7
+   ]
+  },
+  {
+   "id": "tld-4358-vp",
+   "provider": "Whatcom Transportation Authority",
+   "subdivision": "Washington",
+   "url": "https://bustracker.ridewta.com/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    47.9,
+    64.7
+   ]
+  },
+  {
+   "id": "tld-4360-vp",
+   "provider": "Santa Barbara Metropolitan Transit District",
+   "subdivision": "California",
+   "url": "https://bustracker.sbmtd.gov/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    39.1,
+    8.0
+   ]
+  },
+  {
+   "id": "tld-4363-vp",
+   "provider": "Spokane Transit Authority",
+   "subdivision": "Washington",
+   "url": "https://gtfsbridge.spokanetransit.com/realtime/vehicle/VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    47.3,
+    32.5
+   ]
+  },
+  {
+   "id": "tld-4364-vp",
+   "provider": "Torrance Transit",
+   "subdivision": "California",
+   "url": "http://www.mybusinfo.com/gtfsrt/vehicles",
+   "reason": "no box, excluded by hand",
+   "detail": "Torrance Transit, Long Beach CA area: interior Los Angeles County. Judged from the municipality."
+  },
+  {
+   "id": "tld-4374-vp",
+   "provider": "Metropolitan Tulsa Transit Authority",
+   "subdivision": "Oklahoma",
+   "url": "https://tulsa.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "40"
+   ],
+   "box_km": [
+    29.6,
+    24.8
+   ]
+  },
+  {
+   "id": "tld-4375-vp",
+   "provider": "Valley Regional Transit",
+   "subdivision": "Idaho",
+   "url": "https://www.valleyregionaltransit.org/GTFS/position_updates.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "16"
+   ],
+   "box_km": [
+    44.9,
+    12.7
+   ]
+  },
+  {
+   "id": "tld-4483-vp",
+   "provider": "Fresno Area Express",
+   "subdivision": "California",
+   "url": "https://gis4u.fresno.gov/TMGTFSRealTimeWebService/Vehicle/VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    20.2,
+    23.4
+   ]
+  },
+  {
+   "id": "tld-4485-vp",
+   "provider": "Antelope Valley Transit Authority",
+   "subdivision": "California",
+   "url": "https://track-it.avta.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    71.1,
+    75.2
+   ]
+  },
+  {
+   "id": "tld-4549-vp",
+   "provider": "River Valley Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://my.ridervt.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    48.5,
+    12.0
+   ]
+  },
+  {
+   "id": "tld-4554-vp",
+   "provider": "County of Lackawanna Transit System",
+   "subdivision": "Pennsylvania",
+   "url": "https://coltsivl.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    28.2,
+    37.1
+   ]
+  },
+  {
+   "id": "tld-4556-vp",
+   "provider": "Luzerne County Transportation Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://realtimelctabus.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    28.2,
+    24.3
+   ]
+  },
+  {
+   "id": "tld-4660-vp",
+   "provider": "Butler Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://butlerivl.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    20.3,
+    51.1
+   ]
+  },
+  {
+   "id": "tld-4662-vp",
+   "provider": "Indiana County Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://indigobus.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    24.9,
+    57.2
+   ]
+  },
+  {
+   "id": "tld-4666-vp",
+   "provider": "Hazleton Public Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://realtimehpts.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    24.5,
+    40.9
+   ]
+  },
+  {
+   "id": "tld-4670-vp",
+   "provider": "Altoona Metro Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://amtran.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    17.6,
+    28.1
+   ]
+  },
+  {
+   "id": "tld-4672-vp",
+   "provider": "Cambria County Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://live.camtranbus.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    48.2,
+    50.3
+   ]
+  },
+  {
+   "id": "tld-4673-vp",
+   "provider": "Centre County Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://realtime.catabus.com/infopoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    10.9,
+    8.6
+   ]
+  },
+  {
+   "id": "tld-4675-vp",
+   "provider": "Crawford Area Transportation Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://catabus.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    53.3,
+    42.3
+   ]
+  },
+  {
+   "id": "tld-4676-vp",
+   "provider": "The Rapid",
+   "subdivision": "Michigan",
+   "url": "https://connect.ridetherapid.org/infopoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "26"
+   ],
+   "box_km": [
+    34.9,
+    95.1
+   ]
+  },
+  {
+   "id": "tld-4677-vp",
+   "provider": "Kalamazoo Metro Transit",
+   "subdivision": "Michigan",
+   "url": "https://trackmybus.kmetro.org/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "26"
+   ],
+   "box_km": [
+    14.9,
+    18.7
+   ]
+  },
+  {
+   "id": "tld-4678-vp",
+   "provider": "Palm Tran",
+   "subdivision": "Florida",
+   "url": "https://www.palmtran.org/TripPlanner/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    68.3,
+    104.0
+   ]
+  },
+  {
+   "id": "tld-4689-vp",
+   "provider": "Schuylkill Transportation System",
+   "subdivision": "Pennsylvania",
+   "url": "https://sts.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    37.1,
+    31.0
+   ]
+  },
+  {
+   "id": "tld-4692-vp",
+   "provider": "Western Reserve Transit Authority",
+   "subdivision": "Ohio",
+   "url": "https://myvalleystops.wrtaonline.com/infopoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "39"
+   ],
+   "box_km": [
+    26.6,
+    29.0
+   ]
+  },
+  {
+   "id": "tld-4706-vp",
+   "provider": "SunLine Transit Agency",
+   "subdivision": "California",
+   "url": "https://infopoint.sunline.org/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    129.9,
+    73.2
+   ]
+  },
+  {
+   "id": "tld-4780-vp",
+   "provider": "Philomath Connection",
+   "subdivision": "Oregon",
+   "url": "http://www.corvallistransit.com/rtt/public/utility/gtfsrealtime.aspx/vehicleposition?ProjectID=PC",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    9.0,
+    3.3
+   ]
+  },
+  {
+   "id": "tld-4783-vp",
+   "provider": "Athens Clarke County Transit",
+   "subdivision": "Georgia",
+   "url": "https://bustracker.accgov.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "13"
+   ],
+   "box_km": [
+    15.9,
+    13.1
+   ]
+  },
+  {
+   "id": "tld-4784-vp",
+   "provider": "Manatee County Area Transit",
+   "subdivision": "Florida",
+   "url": "https://realtimemcat.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    32.4,
+    52.8
+   ]
+  },
+  {
+   "id": "tld-4788-vp",
+   "provider": "Sarasota County Area Transit",
+   "subdivision": "Florida",
+   "url": "https://breezerider.tripsparkhost.com/gtfs/Realtime/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    37.8,
+    50.6
+   ]
+  },
+  {
+   "id": "tld-4793-vp",
+   "provider": "Valley Transit",
+   "subdivision": "Washington",
+   "url": "https://itransitnw.com/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    9.5,
+    6.2
+   ]
+  },
+  {
+   "id": "tld-4795-vp",
+   "provider": "Missoula Urban Transportation District (MUTD)",
+   "subdivision": "Montana",
+   "url": "https://bt.mountainline.com/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "30"
+   ],
+   "box_km": [
+    17.0,
+    11.6
+   ]
+  },
+  {
+   "id": "tld-4832-vp",
+   "provider": "Muskegon Area Transit System",
+   "subdivision": "Michigan",
+   "url": "https://muskegon.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "26"
+   ],
+   "box_km": [
+    8.6,
+    12.9
+   ]
+  },
+  {
+   "id": "tld-4923-vp",
+   "provider": "Bustang",
+   "subdivision": "Colorado",
+   "url": "https://www.rtd-denver.com/files/bustang/gtfs-rt/Bustang_VehiclePosition.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "08"
+   ],
+   "box_km": [
+    321.0,
+    195.4
+   ]
+  },
+  {
+   "id": "tld-5502-vp",
+   "provider": "Link Transit",
+   "subdivision": "Washington",
+   "url": "https://link.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    52.0,
+    58.2
+   ]
+  },
+  {
+   "id": "tld-5504-vp",
+   "provider": "Mid Mon Valley Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://mmvta.rideralerts.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    16.4,
+    47.6
+   ]
+  },
+  {
+   "id": "tld-5532-vp",
+   "provider": "Lebanon Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://realtime.lebanontransit.org/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    59.1,
+    40.9
+   ]
+  },
+  {
+   "id": "tld-5545-vp",
+   "provider": "Concord Kannapolis Area Transit",
+   "subdivision": "North Carolina",
+   "url": "https://passio3.com/concordk/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    15.3,
+    24.8
+   ]
+  },
+  {
+   "id": "tld-5546-vp",
+   "provider": "Norwalk Transit System",
+   "subdivision": "California",
+   "url": "https://nts.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    16.1,
+    23.0
+   ]
+  },
+  {
+   "id": "tld-5549-vp",
+   "provider": "CityBus of Greater Lafayette Indiana",
+   "subdivision": "Indiana",
+   "url": "https://bus.gocitybus.com/GTFSRT/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "18"
+   ],
+   "box_km": [
+    13.3,
+    12.9
+   ]
+  },
+  {
+   "id": "tld-5550-vp",
+   "provider": "Ride Gwinnett",
+   "subdivision": "Georgia",
+   "url": "https://realtimegwinnett.availtec.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "13"
+   ],
+   "box_km": [
+    28.0,
+    36.1
+   ]
+  },
+  {
+   "id": "tld-5553-vp",
+   "provider": "San Luis Obispo Regional Transit Authority",
+   "subdivision": "California",
+   "url": "http://slo.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    70.2,
+    90.0
+   ]
+  },
+  {
+   "id": "tld-5554-vp",
+   "provider": "StarTran",
+   "subdivision": "Nebraska",
+   "url": "https://startran.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "31"
+   ],
+   "box_km": [
+    16.5,
+    17.1
+   ]
+  },
+  {
+   "id": "tld-5555-vp",
+   "provider": "Yamhill County Transit Area",
+   "subdivision": "Oregon",
+   "url": "https://ycta.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "41"
+   ],
+   "box_km": [
+    66.5,
+    63.5
+   ]
+  },
+  {
+   "id": "tld-5569-vp",
+   "provider": "Santa Ynez Valley Transit",
+   "subdivision": "California",
+   "url": "https://lat-long-prototype.wl.r.appspot.com/vehicle-positions.pb?agency=santa-ynez-valley-transit",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    11.7,
+    7.7
+   ]
+  },
+  {
+   "id": "tld-5581-vp",
+   "provider": "Greater Peoria Mass Transit",
+   "subdivision": "Illinois",
+   "url": "https://clk.rideralerts.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "17"
+   ],
+   "box_km": [
+    18.0,
+    31.0
+   ]
+  },
+  {
+   "id": "tld-5582-vp",
+   "provider": "Racine Transit",
+   "subdivision": "Wisconsin",
+   "url": "https://racine.connexionz.net/rtt/public/utility/gtfsrealtime.aspx/vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "55"
+   ],
+   "box_km": [
+    14.5,
+    11.6
+   ]
+  },
+  {
+   "id": "tld-5584-vp",
+   "provider": "South Florida Regional Transportation Authority",
+   "subdivision": "Florida",
+   "url": "http://gtfsr.tri-rail.com/download.aspx?file=position_updates.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    19.7,
+    108.8
+   ]
+  },
+  {
+   "id": "tld-5839-vp",
+   "provider": "Berks Area Regional Transportation Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://busfinder.bartabus.com/Infopoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    36.5,
+    34.6
+   ]
+  },
+  {
+   "id": "tld-5840-vp",
+   "provider": "Red Rose Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://busfinder.redrosetransit.com/Infopoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    58.4,
+    23.9
+   ]
+  },
+  {
+   "id": "tld-5865-vp",
+   "provider": "Concho Valley Transit District",
+   "subdivision": "Georgia",
+   "url": "https://passio3.com/conchovt/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "no box, excluded by hand",
+   "detail": "Concho Valley Transit District, San Angelo TX: its registry box is 1,512 km wide and reaches Georgia, stretched by a stray stop. San Angelo is not on a state line. Judged from the municipality.",
+   "box_km": [
+    1511.6,
+    280.2
+   ]
+  },
+  {
+   "id": "tld-5892-vp",
+   "provider": "Culver CityBus",
+   "subdivision": "California",
+   "url": "https://nextccbus.org/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    9.5,
+    13.1
+   ]
+  },
+  {
+   "id": "tld-5894-vp",
+   "provider": "Billings Metropolitan Transit",
+   "subdivision": "Montana",
+   "url": "https://passio3.com/billings/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "30"
+   ],
+   "box_km": [
+    14.2,
+    12.1
+   ]
+  },
+  {
+   "id": "tld-5896-vp",
+   "provider": "Skagit Transit",
+   "subdivision": "Washington",
+   "url": "https://strweb.skagittransit.org/GTFS/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "53"
+   ],
+   "box_km": [
+    70.2,
+    86.5
+   ]
+  },
+  {
+   "id": "tld-5898-vp",
+   "provider": "Lakeland Area Mass Transit District",
+   "subdivision": "Florida",
+   "url": "https://www.ccbusinfo.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "12"
+   ],
+   "box_km": [
+    36.2,
+    45.6
+   ]
+  },
+  {
+   "id": "tld-6096-vp",
+   "provider": "Bis-Man Transit",
+   "subdivision": "North Dakota",
+   "url": "https://passio3.com/bisman/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "38"
+   ],
+   "box_km": [
+    13.4,
+    14.6
+   ]
+  },
+  {
+   "id": "tld-6626-vp",
+   "provider": "Chapel Hill Transit",
+   "subdivision": "North Carolina",
+   "url": "http://mychtransit.org/gtfs-rt/vehiclepositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    9.5,
+    13.0
+   ]
+  },
+  {
+   "id": "tld-6669-vp",
+   "provider": "Wichita Transit",
+   "subdivision": "Kansas",
+   "url": "https://bus.wichitatransit.org/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "20"
+   ],
+   "box_km": [
+    24.1,
+    16.8
+   ]
+  },
+  {
+   "id": "tld-6672-vp",
+   "provider": "GoRaleigh",
+   "subdivision": "North Carolina",
+   "url": "https://www.goraleighlive.org/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    33.3,
+    29.7
+   ]
+  },
+  {
+   "id": "tld-6714-vp",
+   "provider": "New River Transit Authority",
+   "subdivision": "West Virginia",
+   "url": "https://passio3.com/beckley/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "54"
+   ],
+   "box_km": [
+    38.4,
+    54.2
+   ]
+  },
+  {
+   "id": "tld-6725-vp",
+   "provider": "City of Irvine",
+   "subdivision": "California",
+   "url": "https://passio3.com/irvine/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    7.1,
+    8.9
+   ]
+  },
+  {
+   "id": "tld-6732-vp",
+   "provider": "Rosemead Explorer",
+   "subdivision": "California",
+   "url": "https://passio3.com/rosemead/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "06"
+   ],
+   "box_km": [
+    4.2,
+    5.3
+   ]
+  },
+  {
+   "id": "tld-6774-vp",
+   "provider": "City of Mobile",
+   "subdivision": "Alabama",
+   "url": "https://realtimemobile.availtec.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "01"
+   ],
+   "box_km": [
+    15.6,
+    16.6
+   ]
+  },
+  {
+   "id": "tld-6783-vp",
+   "provider": "Research Triangle Regional Public Transportation Authority",
+   "subdivision": "North Carolina",
+   "url": "https://gotriangle.tripsparkhost.com/gtfs/Realtime/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    87.8,
+    51.5
+   ]
+  },
+  {
+   "id": "tld-6784-vp",
+   "provider": "Capital Area Transit System",
+   "subdivision": "Louisiana",
+   "url": "https://cats.rideralerts.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "22"
+   ],
+   "box_km": [
+    19.1,
+    26.9
+   ]
+  },
+  {
+   "id": "tld-6786-vp",
+   "provider": "Westmoreland County Transit Authority",
+   "subdivision": "Pennsylvania",
+   "url": "https://wcta.rideralerts.com/InfoPoint/gtfs-realtime.ashx?type=vehicleposition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    92.3,
+    58.3
+   ]
+  },
+  {
+   "id": "tld-6820-vp",
+   "provider": "City of Jacksonville",
+   "subdivision": "North Carolina",
+   "url": "https://passio3.com/jacksonville/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    14.0,
+    24.4
+   ]
+  },
+  {
+   "id": "tld-6821-vp",
+   "provider": "GoCary",
+   "subdivision": "North Carolina",
+   "url": "https://www.gocarylive.org/gtfs/Realtime/GTFS_VehiclePositions.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    17.3,
+    13.1
+   ]
+  },
+  {
+   "id": "tld-6882-vp",
+   "provider": "Bloomington Transit",
+   "subdivision": "Indiana",
+   "url": "https://s3.amazonaws.com/etatransit.gtfs/bloomingtontransit.etaspot.net/position_updates.pb",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "18"
+   ],
+   "box_km": [
+    10.9,
+    9.7
+   ]
+  },
+  {
+   "id": "tld-6884-vp",
+   "provider": "Rochester Institute of Technology",
+   "subdivision": "Georgia",
+   "url": "https://passio3.com/ritech/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "no box, excluded by hand",
+   "detail": "Rochester Institute of Technology, Rochester NY: a campus shuttle whose registry box is 1,029 km tall across twelve states, stretched by a stray stop. Rochester is not on a state line. Judged from the municipality.",
+   "box_km": [
+    591.6,
+    1028.9
+   ]
+  },
+  {
+   "id": "tld-6890-vp",
+   "provider": "Green Bay Metro",
+   "subdivision": "Wisconsin",
+   "url": "https://gbm.cadavl.com:4435/ProfilGtfsRt2_0RSProducer-GBM/VehiclePosition.pb",
+   "reason": "no box, excluded by hand",
+   "detail": "Green Bay Metro, Green Bay WI: northeast Wisconsin, well short of the Michigan line. Judged from the municipality."
+  },
+  {
+   "id": "tld-6891-vp",
+   "provider": "Jefferson Parish Transit",
+   "subdivision": "Louisiana",
+   "url": "https://jetapp.jptransit.org/gtfsrt/vehicles",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "22"
+   ],
+   "box_km": [
+    24.9,
+    22.6
+   ]
+  },
+  {
+   "id": "tld-6896-vp",
+   "provider": "NCSU Wolfline",
+   "subdivision": "North Carolina",
+   "url": "https://passio3.com/ncstateuni/passioTransit/gtfs/realtime/vehiclePositions",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "37"
+   ],
+   "box_km": [
+    5.2,
+    4.0
+   ]
+  },
+  {
+   "id": "tld-6903-vp",
+   "provider": "Bryce Canyon National Park Shuttle",
+   "subdivision": "Utah",
+   "url": "https://brycecanyonshuttle.com/subscriptions/gtfsrt/vehicles.ashx",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "49"
+   ],
+   "box_km": [
+    1.6,
+    7.8
+   ]
+  },
+  {
+   "id": "tld-7024-vp",
+   "provider": "Lower Anthracite Transit System",
+   "subdivision": "Pennsylvania",
+   "url": "https://lats.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    41.6,
+    11.3
+   ]
+  },
+  {
+   "id": "tld-7026-vp",
+   "provider": "Pottstown Area Rapid Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://part.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    9.9,
+    11.7
+   ]
+  },
+  {
+   "id": "tld-7028-vp",
+   "provider": "Fayette Area Coordinated Transportation",
+   "subdivision": "Pennsylvania",
+   "url": "https://fact.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    41.1,
+    72.3
+   ]
+  },
+  {
+   "id": "tld-7029-vp",
+   "provider": "Freedom Transit",
+   "subdivision": "Pennsylvania",
+   "url": "https://freedom.rideralerts.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "one state: no discontinuity inside the service area",
+   "states": [
+    "42"
+   ],
+   "box_km": [
+    30.3,
+    32.2
+   ]
+  },
+  {
+   "id": "tld-7044-vp",
+   "provider": "Lexington Transit Authority",
+   "subdivision": "Kentucky",
+   "url": "https://mystop.lextran.com/InfoPoint/GTFS-Realtime.ashx?Type=VehiclePosition",
+   "reason": "no box, excluded by hand",
+   "detail": "Lexington Transit Authority, Lexington KY: central Kentucky, far from any state line. Judged from the municipality."
+  }
+ ]
+}
