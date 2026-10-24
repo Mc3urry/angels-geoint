@@ -21,11 +21,13 @@ that changed the shape of its own memory and reported the forgetting as a
 finding. The catalogue ran out of letters and continues at AA. Forty-three
 arrived the same evening, while syncing a stale copy of this project: a second
 instance of X, and the second credential exposure of the week. Forty-four,
-2026-10-23: a test that passed by measuring how fast its machine was.*
+2026-10-23: a test that passed by measuring how fast its machine was.
+Forty-five and forty-six the same night, both in the first border selection,
+both caught by reading its forty-two lines instead of counting them.*
 
-Over the course of this project, **forty-four** separate faults were found
+Over the course of this project, **forty-six** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, forty-four
+this pipeline computes, it computed correctly. What failed, forty-six
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -74,7 +76,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **forty-four**. A few logged
+The running count in the worklog reached **forty-six**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -342,6 +344,18 @@ diagnosed as dead and **confidently attributed to the wrong process**. It had
 been created by this project's own "read-only" `git status`, which takes the
 lock whatever `GIT_OPTIONAL_LOCKS` says.
 
+**A third, 2026-10-23, written into a committed-candidate artefact.** The first
+real G2b selection printed "5 selected feed(s) touch four or more states. Those
+are regional aggregators" -- and two of the five were nothing of the kind. One
+was a campus shuttle in Rochester NY whose catalogue box was 1,029 km tall; the
+other an agency in San Angelo, Texas whose box was 1,512 km wide and reached
+Georgia. Each box had been stretched by a stray stop coordinate. "Touches four
+or more states" was true. "Regional aggregator" was the inference, and it
+turned a data defect into a respectable category -- the most dangerous thing an
+inference can do, because it removes the reason to look. Sighting 45. Boxes
+larger than a ceiling taken from the measured gap -- 333 km legitimate, 1,029 km
+impossible -- are now treated as missing and decided by a person.
+
 ### N. A guard written for a class, defeated by the next instance of it
 
 `describe_sla` was written specifically to stop a wrong file being accepted as
@@ -494,6 +508,18 @@ so it does not fire on an ordinary run.
 The estimator never used the field. It was descriptive, and wrong by an order
 of magnitude, which is the kind of error that costs no result and all of the
 credibility.
+
+**Another, 2026-10-23: "42 feeds will be polled".** The first G2b selection
+counted catalogue rows and called them feeds. Two pairs among them were the
+same vehicles published twice -- Virginia Railway Express from an old host and
+a new one, Pioneer Valley from two vendors -- under different ids AND different
+URLs, so a de-duplication keyed on the URL found zero. Polling all 42 would
+have counted every VRE train and every Pioneer Valley bus twice, which halves
+every inter-report gap and doubles every count without a single error -- the
+two-maritime-collectors failure of September, arriving through a catalogue
+instead of a scheduler. Sighting 46. Same-agency pairs are now decided in code,
+and where it is unclear ONE is kept, because a missed source shows as fewer
+vehicles while a doubled one shows as nothing at all.
 
 ### V. A fix that makes a wrong answer unreachable instead of correcting it
 
@@ -1034,7 +1060,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Forty-four** were found,
+The defence is not that no mistakes were made. **Forty-six** were found,
 two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
