@@ -44,7 +44,8 @@ param(
                  "logs", "clear-locks", "windows", "install-all")]
     [string]$Action = "status",
 
-    [ValidateSet("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx")]
+    [ValidateSet("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx",
+                 "roads-vehicles")]
     [string]$Aoi = "air",
 
     # 0 means "use the AOI's own default" -- 30 s for air, 600 s for conus.
@@ -176,6 +177,25 @@ $Footprints = @{
                Credits = 0;  Flush = 0;
                Script = "scripts\fetch_wzdx.py";
                ArgTemplate = '"{script}" --interval {interval} --log-file "{log}"' }
+
+    # THE LAND DOMAIN'S OBSERVED LAYER, G2c. Same argument shape as
+    # roads-wzdx and for the same reason: no --aoi, because its 38 feeds come
+    # from G2b's border-feeds.json and not from a box. --flush-every is left
+    # to the script's default, ten polls, five minutes at 30 s.
+    #
+    # Interval = 30, the plan's figure; WMATA's positions were a median 5 s
+    # old when measured, so 30 s is not re-reading stale fixes. The first
+    # hours of its ledger (bytes_received, n_repeat) say whether 30 stays.
+    # Storage is NOT yet measured for these 38 feeds; read the first hour
+    # before leaving it running for a week.
+    'roads-vehicles' = @{
+               Task = "ANGELS Collector ROADS VEHICLES";
+               Dataset = "roads/vehicles";
+               Log  = "collector-roads-vehicles.log"; Interval = 30;
+               Label = "Transit vehicles, 38 border feeds";
+               Credits = 0;  Flush = 0;
+               Script = "scripts\fetch_vehicles.py";
+               ArgTemplate = '"{script}" --interval {interval} --log-file "{log}"' }
 }
 
 # ONE ordered list of footprints, used by status, process detection,
@@ -184,7 +204,8 @@ $Footprints = @{
 # 2026-09-25 would have had to find every one of them, and missing the
 # process-detection copy would have made the new collector invisible to
 # `status` and killable by `install-all` without ever appearing in a list.
-$Order = @("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx")
+$Order = @("air", "conus", "sea", "sea-conus", "air-indep", "roads-wzdx",
+           "roads-vehicles")
 
 $AoiWasGiven = $PSBoundParameters.ContainsKey("Aoi")
 
