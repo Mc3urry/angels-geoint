@@ -786,14 +786,41 @@ def decorative_update_date(rows: list[dict[str, Any]],
     transit header stamped at generation, and the same defect, one level up,
     as the unverified self-reporting this whole project is about. The freshest
     thing in the feed is the claim about its own freshness.
+
+    `rows` are ledger rows in the order they were written.
+
+    THE DEFECT THIS LOOP EXISTS FOR, 2026-10-24 (sighting 47).
+
+    The first version counted every stored body as a real change -- including
+    the first answer each feed gave inside the window. That answer is compared
+    with whatever the archive held BEFORE the window opened, seventeen days
+    earlier on the night it was found, so storing it says the roads changed at
+    some point since then. It says nothing about the window. In a populated
+    archive every feed stores its opening body, so every feed was
+    disqualified, and over 30 cycles the function returned nothing when the
+    answer was `stcharlesco_v4`. The tests had only ever handed it rows from
+    a world that began empty: mechanism AA, one level up.
+
+    So each feed's first answered row is its baseline and counts on neither
+    side. A row that did not answer (no body to compare) cannot be a baseline.
+    And a body stored because there was nothing to compare it with -- a first
+    sighting, or a sidecar we could not read -- is not a change of road
+    events either.
     """
     envelope: dict[str, int] = {}
     real: dict[str, int] = {}
+    baselined: set[str] = set()
     for r in rows:
         name = r.get("feed")
+        if "envelope_only" not in r and "stored_as" not in r:
+            continue
+        if name not in baselined:
+            baselined.add(name)
+            continue
         if r.get("envelope_only"):
             envelope[name] = envelope.get(name, 0) + 1
-        elif r.get("stored_as"):
+        elif (r.get("stored_as") and not r.get("first_sighting")
+              and not r.get("sidecar_unreadable")):
             real[name] = real.get(name, 0) + 1
     return {name: n for name, n in envelope.items()
             if n >= min_cycles and not real.get(name)}

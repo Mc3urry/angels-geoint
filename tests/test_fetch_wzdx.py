@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import gzip
 import json
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -571,12 +572,15 @@ def test_a_feed_whose_update_date_is_decorative_is_named_across_cycles() -> None
     `feed_info.update_date` as "how current is this declaration", these feeds
     answer "seconds old" and mean nothing by it -- an unverified self-report
     about the self-report's own freshness, which is this project's whole
-    subject one level up."""
+    subject one level up.
+
+    Each feed's first answered row is its baseline, so modot's four
+    envelope-only rows count as three (sighting 47)."""
     rows = ([{"feed": "modot", "envelope_only": True} for _ in range(4)]
             + [{"feed": "mcdot", "envelope_only": True}]
             + [{"feed": "mcdot", "stored_as": "x.json.gz"}]
             + [{"feed": "njdot", "stored_as": "y.json.gz"} for _ in range(3)])
-    assert decorative_update_date(rows) == {"modot": 4}, (
+    assert decorative_update_date(rows) == {"modot": 3}, (
         "mcdot had one real change so its update_date is earning its place; "
         "njdot never moved an envelope at all")
 
@@ -584,6 +588,64 @@ def test_a_feed_whose_update_date_is_decorative_is_named_across_cycles() -> None
 def test_one_envelope_only_cycle_is_not_enough_to_call_it_decorative() -> None:
     rows = [{"feed": "modot", "envelope_only": True}]
     assert decorative_update_date(rows) == {}
+
+
+def test_decorative_is_found_in_an_archive_that_did_not_start_empty(
+        tmp_path) -> None:
+    """THE DEFECT OF 2026-10-24, sighting 47. Rules 25 and 26.
+
+    The archive already holds a body from before the window, as the real one
+    did after a seventeen-day gap. Each feed's first answer in the window
+    differs from it and is stored. The first version counted that as a road
+    change inside the window, disqualified every feed, and returned nothing
+    over 30 real cycles when the answer was one feed.
+
+    Rows are built the way the collector builds them, from `store_body`, so
+    this walks the second code path rather than describing it."""
+    t0 = datetime(2026, 10, 6, 19, 0, tzinfo=timezone.utc)
+    store(tmp_path, "stc", wzdx(ids=["a"]), t0)
+    store(tmp_path, "busy", wzdx(ids=["a"]), t0)
+
+    def cycle(feed: str, body: bytes, k: int) -> dict:
+        st = store(tmp_path, feed, body,
+                   datetime(2026, 10, 23, 20, 0, tzinfo=timezone.utc)
+                   + timedelta(minutes=10 * k))
+        rec = {"feed": feed, "first_sighting": st["first_sighting"],
+               "envelope_only": st["envelope_only"]}
+        if st["digest_is_new"]:
+            rec["stored_as"] = st["path"].name
+        return rec
+
+    rows = []
+    for k in range(5):
+        stamp = f"2026-10-23T20:{10 * k:02d}:00Z"
+        rows.append(cycle("stc", wzdx(ids=["a", "b"], update=stamp), k))
+        rows.append(cycle("busy", wzdx(ids=["a", f"e{k}"], update=stamp), k))
+
+    assert rows[0]["stored_as"] and not rows[0]["first_sighting"], (
+        "precondition: the opening body is stored because the archive was "
+        "NOT empty -- the case the first version got wrong")
+    assert decorative_update_date(rows) == {"stc": 4}, (
+        "stc's roads changed once, before the window; inside it only the "
+        "envelope moved. busy changed road events every cycle")
+
+
+def test_a_row_that_did_not_answer_is_not_the_baseline() -> None:
+    """A failed fetch has no body, so nothing was compared. If it took the
+    baseline slot, the real opening body would count as a change again."""
+    rows = ([{"feed": "x", "outcome": HTTP_ERROR}]
+            + [{"feed": "x", "stored_as": "opening.json.gz"}]
+            + [{"feed": "x", "envelope_only": True} for _ in range(3)])
+    assert decorative_update_date(rows) == {"x": 3}
+
+
+def test_a_body_stored_for_want_of_a_comparison_is_not_a_road_change() -> None:
+    """An unreadable sidecar forces a store without any evidence the roads
+    moved. Counting it would hide a decorative feed behind our own fault."""
+    rows = ([{"feed": "x", "envelope_only": True} for _ in range(4)]
+            + [{"feed": "x", "stored_as": "again.json.gz",
+                "sidecar_unreadable": True}])
+    assert decorative_update_date(rows) == {"x": 3}
 
 
 def test_a_changed_feed_and_a_written_file_are_separate_facts(tmp_path) -> None:
