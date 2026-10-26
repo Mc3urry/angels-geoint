@@ -23,11 +23,14 @@ arrived the same evening, while syncing a stale copy of this project: a second
 instance of X, and the second credential exposure of the week. Forty-four,
 2026-10-23: a test that passed by measuring how fast its machine was.
 Forty-five and forty-six the same night, both in the first border selection,
-both caught by reading its forty-two lines instead of counting them.*
+both caught by reading its forty-two lines instead of counting them.
+Forty-seven, 2026-10-24: a function that read the first night of a
+populated archive as if the archive had been empty. Forty-eight, 2026-10-26:
+a file reported as written that landed as its previous version.*
 
-Over the course of this project, **forty-six** separate faults were found
+Over the course of this project, **forty-eight** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, forty-six
+this pipeline computes, it computed correctly. What failed, forty-eight
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -76,7 +79,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **forty-six**. A few logged
+The running count in the worklog reached **forty-eight**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -742,6 +745,20 @@ repository whose history was rewritten for a real reason, is a worse entry in
 the record than the long line it would remove. The line stays. This section
 is the reason, which is the trade the whole document argues for.
 
+**A SECOND INSTANCE, 2026-10-26, one layer down: the transfer itself.** New
+files reach the working tree from the agent's environment by a copy tool that
+answers with the paths it wrote. A test file was corrected and copied again
+to the same path. The tool answered `written`, and the file that landed was
+the version from before the correction. The tool reported the write, and
+there was a write. What was false was which bytes went. It was caught
+because the corrected test still failed with the old assertion's message,
+and then confirmed by comparing checksums on both sides. The repair is the
+rule this section already states, applied to files rather than commands:
+**a copy is checked by a checksum taken where it landed**, and a corrected
+file goes to the target under a fresh source name. Commit `6f40a3a` records
+the same hazard from the other side: a stale copy committed over a newer one,
+and caught by the tests within a minute. Sighting 48.
+
 ### AA. State written by an earlier version, read as if it were absent
 
 The catalogue runs out of letters here. That is worth a sentence of its own:
@@ -817,6 +834,25 @@ made from **what the project tracks** -- which is a list the project already
 maintains and can be read straight out of `.git/index` -- rather than from
 what happens to be in the directory. That is how the 2026-10-06 sync was done,
 and it is why that sync could not have carried the file.
+
+**A THIRD INSTANCE, 2026-10-24, in the function written to report the
+finding.** `decorative_update_date` names feeds whose envelope keeps moving
+while their road events never do. Over the first 30 scheduled cycles it named
+none; read by hand, the ledger said one, `stcharlesco_v4`, envelope-only on
+every answered cycle. The function counted every stored body as a road change,
+including each feed's first answer of the window -- and in an archive last
+written seventeen days earlier, every feed's first answer differs from what
+was held and is stored. That body records that the roads changed at some
+point in seventeen days, not that they changed tonight. Every feed was
+disqualified by its own opening row.
+
+The tests had handed the function rows from a world that began empty, so the
+opening row never differed from anything. Rule 25 was written for sidecars;
+this is the same rule applied to a reader of the ledger rather than a writer
+of state. The opening row is now a baseline that counts on neither side, a
+body stored for want of a comparison is not a change, and the regression test
+builds its rows from `store_body` over an archive that already holds a body.
+Sighting 47.
 
 ## 4. What actually caught them
 
@@ -1060,7 +1096,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Forty-six** were found,
+The defence is not that no mistakes were made. **Forty-eight** were found,
 two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
