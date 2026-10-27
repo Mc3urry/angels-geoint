@@ -20,11 +20,14 @@ Seen before writing this:
 - the 38 border transit feeds and the states each touches (G2b, 2026-10-24);
 - three days of WZDx ledger: storage, cadence, decorative `update_date`,
   blind feeds;
-- about a day of vehicle positions: counts, storage and blind feeds, with no
-  speed computed.
+- about a day of vehicle positions: counts, storage and blind feeds;
+- **added 2026-10-27, G4's plausibility check:** per-FEED speed medians and
+  90th percentiles, and the exclusion counts, over one day (2026-10-27).
+  Nothing per cell, nothing per hour, and nothing by distance to any line.
 
-**Not seen:** any segment speed, any slowdown, any comparison of the declared
-layer with the observed one, and anything about either side of any border.
+**Not seen:** any cell's speed, any slowdown, any anomaly count, any
+comparison of the declared layer with the observed one, and anything about
+either side of any border.
 Nothing in the framing below was chosen after looking at a land result,
 because no land result exists.
 
@@ -115,9 +118,25 @@ to look like:
 - **The mask (G3):** where independent observation exists at all. CHART
   cameras and the traffic-count segments; a segment outside it is excluded
   and counted, not read as quiet.
-- **The anomaly (G4):** what counts as "vehicles slowed here", in units and
-  thresholds fixed before G6 runs. G4 de-duplicates fixes on (feed_id,
-  vehicle_key, vehicle_ts).
+- **The anomaly (G4): PROPOSED 2026-10-27, not yet registered.** Built in
+  `scripts/road_speeds.py`, where `anomalies()` is tested and not run.
+  - *Speed:* two consecutive fixes of one vehicle on the vehicle's own
+    clock, 15 to 120 s apart, at most 60 m/s, assigned to the ~250 m cell of
+    the midpoint, by local date and local hour. Excluded and counted: no
+    vehicle timestamp, an entity id in place of a vehicle id, duplicate,
+    out of order, too close, gap, impossible, and parked (no trip at either
+    end and under 5 m moved).
+  - *Anomaly:* a cell-hour whose median speed is under **0.5 x** the same
+    cell's median at the same local hour on the same kind of day (weekday or
+    weekend), counted only with **5 pairs from 2 vehicles**, against a
+    baseline built from **at least 5 days**.
+  - Every number in this rule is open until registration. None may be
+    changed after any border figure is seen.
+- **The mask, revised by what G3 found:** the AADT layer is stations, not
+  segments, so the unit is the vehicles' own cells. A cell is in the mask
+  when it has a baseline under the rule above. Cameras and AADT are context
+  (where the state can see, how busy the road is), not the denominator.
+  PROPOSED.
 - **The unit:** segment, hour of day and day; and the border distance bands.
   Any border threshold is at most 2,000 m, the buffer G2b selected on.
 - **The statistic, the nulls and the decision rule:** the step in the

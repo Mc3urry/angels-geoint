@@ -1,0 +1,104 @@
+{
+ "_what": "G3 mask inputs: Maryland CHART cameras and AADT stations",
+ "_fetched_at_utc": "2026-10-27T19:50:33+00:00",
+ "_partial": false,
+ "layers": {
+  "aadt": {
+   "service": "https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_AnnualAverageDailyTraffic/FeatureServer/0",
+   "what": "AADT count stations: exposure, every vehicle, as numbers",
+   "file": "aadt.geojson",
+   "bytes": 21466199,
+   "sha256": "0707af5fe3bf6b10cf346c2c051e484573468d41a9bbeb66545894bdc6dbbfcb",
+   "dropped_fields": {
+    "LINK": "a link out of the layer; not needed for the mask"
+   },
+   "n": 8773,
+   "geometry_types": {
+    "Point": 8773
+   },
+   "without_usable_point": 0,
+   "extent": [
+    -79.48182801366738,
+    37.971828055379426,
+    -75.05252937974124,
+    39.72188728373105
+   ],
+   "nulls_by_field": {
+    "AADT_2010": 3108,
+    "AADT_2011": 2160,
+    "AADT_2012": 717,
+    "AADT_2013": 492,
+    "AADT_2014": 295,
+    "AADT_2015": 233,
+    "AADT_2016": 228,
+    "AADT_2017": 23,
+    "AADT_2018": 2,
+    "AAWDT_2010": 3108,
+    "AAWDT_2011": 2160,
+    "AAWDT_2012": 756,
+    "AAWDT_2013": 495,
+    "AAWDT_2014": 295,
+    "AAWDT_2015": 233,
+    "AAWDT_2016": 228,
+    "AAWDT_2017": 23,
+    "AAWDT_2018": 2,
+    "BUS_AADT": 6078,
+    "BUS_AADT_PCT_OVERALL": 6078,
+    "CAR_AADT": 6078,
+    "CAR_AADT_PCT_OVERALL": 6078,
+    "COMBINATION_UNIT_AADT": 6077,
+    "CUTRUCK_AADT_PCT_OVERALL": 6077,
+    "CUTRUCK__AADT_PCT_TRUCK": 7840,
+    "LIGHT_TRUCK_AADT": 6078,
+    "LIGHT_TRUCK_AADT_PCT_OVERALL": 6078,
+    "MCYCLE_AADT_PCT_OVERALL": 6078,
+    "MOTORCYCLE_AADT": 6078,
+    "NORTH_EAST_SPLIT": 1,
+    "SINGLE_UNIT_AADT": 6076,
+    "SOUTH_WEST_SPLIT": 2,
+    "SUTRUCK_AADT_PCT_OVERALL": 6076,
+    "SUTRUCK_AADT_PCT_TRUCK": 7840,
+    "TRUCK_AADT": 6077,
+    "TRUCK_AADT_PCT_OVERALL": 6077
+   },
+   "aadt_years": {
+    "year_columns": [
+     "AADT_2010",
+     "AADT_2011",
+     "AADT_2012",
+     "AADT_2013",
+     "AADT_2014",
+     "AADT_2015",
+     "AADT_2016",
+     "AADT_2017",
+     "AADT_2018"
+    ],
+    "bare_column": "AADT",
+    "bare_column_year": "NOT INFERRED: the layer does not state it"
+   }
+  },
+  "cameras": {
+   "service": "https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0",
+   "what": "CHART traffic cameras: where the state can see the road",
+   "file": "cameras.geojson",
+   "bytes": 125223,
+   "sha256": "423f3f1b773ccc7952db463f5c1ece5c3ff1c3a7c2a9438cf20de183e79a2e1e",
+   "dropped_fields": {
+    "url": "a third party's stream link; not needed for the mask",
+    "iframe": "a third party's embed markup; not needed"
+   },
+   "n": 451,
+   "geometry_types": {
+    "Point": 451
+   },
+   "without_usable_point": 0,
+   "extent": [
+    -79.4625200004463,
+    38.064311999822735,
+    -75.06814599986421,
+    39.71774999968561
+   ],
+   "nulls_by_field": {}
+  }
+ }
+}

@@ -123,6 +123,13 @@ data/reference/roads/*
 # data. The polygons it was made from (states-generalised/) stay ignored:
 # they are refetchable, and the artefact records their manifest's digest.
 !data/reference/roads/border-feeds.json
+# G3, 2026-10-27. The manifest (with each layer's sha256) and the cameras
+# (125 KB) are tracked. AADT is 20.5 MiB and refetchable; the manifest's
+# sha256 is how a refetch is compared with the one this project used.
+!data/reference/roads/g3/
+data/reference/roads/g3/*
+!data/reference/roads/g3/manifest.json
+!data/reference/roads/g3/cameras.geojson
 
 # The corrected nulls. See the EXCEPTION note above: a multi-hour run, not a
 # seconds-long rebuild.
