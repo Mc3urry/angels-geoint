@@ -1,0 +1,230 @@
+{
+ "what": "non-cooperative aviation share across the ADS-B obligation boundary, 14 CFR 91.225(d)",
+ "prereg": "docs/phase-f-prereg.md",
+ "independent_types": [
+  "mlat",
+  "mode_s"
+ ],
+ "tisb_types_excluded": [
+  "tisb_icao",
+  "tisb_trackfile",
+  "tisb_other"
+ ],
+ "tisb_exclusion_reason": "AMENDMENT 1: TIS-B presence rises with cooperative density faster than MLAT's, so it is correlated with the denominator",
+ "cooperative_types": [
+  "adsb_icao",
+  "adsb_other",
+  "adsr_icao",
+  "adsr_other"
+ ],
+ "cell_deg": 0.05,
+ "veil_nm": 30.0,
+ "split_ft": 10000,
+ "max_gap_s": 360.0,
+ "airports_eff_date": "2026/10/01",
+ "n_airports": 37,
+ "days": [
+  "20260925",
+  "20260926",
+  "20260927",
+  "20260928",
+  "20260929",
+  "20260930",
+  "20261001",
+  "20261002",
+  "20261003",
+  "20261004",
+  "20261005",
+  "20261006",
+  "20261007",
+  "20261008",
+  "20261009",
+  "20261010",
+  "20261011",
+  "20261012",
+  "20261013",
+  "20261014",
+  "20261015",
+  "20261016",
+  "20261017",
+  "20261018",
+  "20261019",
+  "20261020",
+  "20261021",
+  "20261022",
+  "20261023",
+  "20261024",
+  "20261025",
+  "20261026",
+  "20261027"
+ ],
+ "n_partition_files": 7998,
+ "time": {
+  "collector": "aviation-independent",
+  "heartbeat_source": "data/raw/collector/heartbeat-<date>.jsonl via angels.core.uptime",
+  "span_first_hour_utc": "2026092520",
+  "span_last_hour_utc": "2026102718",
+  "hours_in_span": 767,
+  "hours_with_data": 726,
+  "hours_looked_all_failed": 29,
+  "hours_rows_in_adjacent_partition": 3,
+  "hours_not_looking": 9,
+  "hours_unknown_no_heartbeat_file": 0,
+  "not_looking_hours": [
+   "2026092909",
+   "2026092910",
+   "2026092911",
+   "2026092912",
+   "2026092913",
+   "2026092914",
+   "2026092915",
+   "2026092916",
+   "2026100622"
+  ],
+  "looked_all_failed_hours": [
+   "2026092821",
+   "2026092921",
+   "2026092922",
+   "2026093016",
+   "2026093020",
+   "2026093021",
+   "2026093022",
+   "2026100121",
+   "2026100122",
+   "2026100522",
+   "2026100621",
+   "2026100721",
+   "2026100822",
+   "2026100823",
+   "2026100900",
+   "2026101322",
+   "2026101323",
+   "2026101400",
+   "2026101401",
+   "2026101521",
+   "2026101522",
+   "2026101523",
+   "2026101621",
+   "2026101622",
+   "2026102023",
+   "2026102213",
+   "2026102221",
+   "2026102222",
+   "2026102223"
+  ],
+  "rows_in_adjacent_partition_hours": [
+   "2026100221",
+   "2026100521",
+   "2026101316"
+  ],
+  "unknown_hours": [],
+  "polls_attempted": 89694,
+  "polls_returned": 80011,
+  "polls_failed": 9683,
+  "failure_reasons": {
+   "ConnectError: [Errno 11001] getaddrinfo failed": 9603,
+   "ConnectError: [WinError 10051] A socket operation was attempted to an unreachable network": 24,
+   "ConnectError: [WinError 10065] A socket operation was attempted to an unreachable host": 22,
+   "ConnectError: [WinError 10054] An existing connection was forcibly closed by the remote host": 11,
+   "ReadTimeout: The read operation timed out": 9,
+   "ConnectTimeout: _ssl.c:993: The handshake operation timed out": 7,
+   "RemoteProtocolError: Server disconnected without sending a response.": 2,
+   "ConnectError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: EE certificate key too weak (_ssl.c:1010)": 1,
+   "RemoteProtocolError: peer closed connection without sending complete message body (incomplete chunked read)": 1,
+   "ConnectTimeout: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond": 1,
+   "HTTPStatusError: Server error '521 <none>' for url 'https://opendata.adsb.fi/api/v2/lat/38.95/lon/-76.85/dist/70'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/521": 1,
+   "HTTPStatusError: Server error '522 <none>' for url 'https://opendata.adsb.fi/api/v2/lat/38.95/lon/-76.85/dist/70'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/522": 1
+  },
+  "file_poll_agreement": null
+ },
+ "_corrections": {
+  "n_polls": "REMOVED 2026-10-05. Every version of this artefact before that date carried a field called `n_polls` holding len(files) -- parquet partition files, not polls. Polling runs at 30 s and flushes every 5 minutes, so a file holds ten polls; the published 1,659 stood against 19,329 polls attempted over the same window, understating it by 11.7. The field is renamed to what it holds and the true counts are under `time`. The estimator never used it: it was descriptive, and wrong by an order of magnitude in public for three days."
+ },
+ "fixes": {
+  "cooperative": 6540649,
+  "independent": 40791,
+  "tisb_not_pooled": 64862
+ },
+ "mask": {
+  "cells_with_cooperative": 2306,
+  "direct": 2196,
+  "inferred_by_continuity": 25,
+  "in_mask": 2221,
+  "blind_excluded": 85
+ },
+ "primary": {
+  "floor": 200,
+  "by_group": {
+   "<10k": {
+    "inside": 0.003586,
+    "outside": 0.001639,
+    "step": -0.001947,
+    "pooled_inside": 0.003192,
+    "pooled_outside": 0.001441
+   },
+   ">=10k": {
+    "inside": 0.001626,
+    "outside": 0.001099,
+    "step": -0.000527,
+    "pooled_inside": 0.001578,
+    "pooled_outside": 0.001066
+   }
+  },
+  "n_units": {
+   "<10k": {
+    "inside": 2438,
+    "outside": 379
+   },
+   ">=10k": {
+    "inside": 437,
+    "outside": 544
+   }
+  },
+  "did": -0.00142,
+  "treatment_step": -0.001947,
+  "control_step": -0.000527
+ },
+ "sensitivity_day_collapsed": {
+  "floor": 200,
+  "by_group": {
+   "<10k": {
+    "inside": 0.01427,
+    "outside": 0.009757,
+    "step": -0.004513,
+    "pooled_inside": 0.008535,
+    "pooled_outside": 0.007843
+   },
+   ">=10k": {
+    "inside": 0.004518,
+    "outside": 0.005624,
+    "step": 0.001105,
+    "pooled_inside": 0.003489,
+    "pooled_outside": 0.003647
+   }
+  },
+  "n_units": {
+   "<10k": {
+    "inside": 833,
+    "outside": 1156
+   },
+   ">=10k": {
+    "inside": 800,
+    "outside": 1204
+   }
+  },
+  "did": -0.005618,
+  "treatment_step": -0.004513,
+  "control_step": 0.001105
+ },
+ "nulls": {
+  "observed": -0.00142,
+  "trials": 2000,
+  "shift_trials": 400,
+  "seed": 20261002,
+  "scattered_k": 248,
+  "scattered_p": 0.12443778110944528,
+  "shift_k": 246,
+  "shift_p": 0.6159600997506235
+ },
+ "verdict": "REFUTED: the difference is not positive"
+}

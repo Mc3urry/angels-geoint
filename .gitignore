@@ -79,6 +79,9 @@ data/**
 #                             AT A WINDOW: re-running tomorrow answers a
 #                             different question, because there is more data.
 !data/events/air-bands.json
+# The same analysis at 33 days, 2026-10-27. A second file and not an
+# overwrite, because the first is what was said at eight days.
+!data/events/air-bands-2026-10-27.json
 
 # The airspace geometry the aviation result is about.
 #

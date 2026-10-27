@@ -377,6 +377,8 @@ MSL, and at and above 10,000 ft everywhere in the 48 states. So below
 obligation applies on both sides — a treatment and a control over the same
 receivers, the same distance gradient and the same days.
 
+**At eight days (2026-10-02),** the first run:
+
 | | inside | outside | step |
 |---|---:|---:|---:|
 | below 10,000 ft — obligation changes | 0.00241 | 0.00206 | −0.00035 |
@@ -403,10 +405,58 @@ coverage mask excludes **555 of 2,296 cells** with no evidence MLAT can see
 them, which is the aviation unheard water; and the window is **eight days and
 7,756 independent fixes**, which is thin. The collectors keep running.
 
+### At 33 days (2026-10-27): the same verdict, on firmer ground
+
+The pre-registration says the plan does not change when the window grows,
+and it did not. Same script, same floor of 200, same seed. 2026-09-25 to
+2026-10-27, **40,791 independent fixes** (5.3 times the first run) against
+6.54 million cooperative ones.
+[`data/events/air-bands-2026-10-27.json`](data/events/air-bands-2026-10-27.json).
+
+| | inside | outside | step |
+|---|---:|---:|---:|
+| below 10,000 ft — obligation changes | 0.00359 | 0.00164 | −0.00195 |
+| at/above 10,000 ft — control | 0.00163 | 0.00110 | −0.00053 |
+| **difference in differences** | | | **−0.00142** |
+
+**Refuted, now by the first clause of the decision rule.** Support needed a
+positive difference that survived the shift null. At eight days the difference
+was positive and a displaced boundary reproduced it. At 33 days it is
+negative, so the shift null is not needed (it gives 246 of 400, p = 0.616).
+The day-collapsed sensitivity agrees in sign: −0.00562.
+
+What the extra data changed:
+
+- **The mask** now holds 2,221 of 2,306 cells (96.3 per cent), up from 1,741
+  of 2,296. Direct MLAT or Mode S evidence covers more ground, so track
+  continuity is needed for 25 cells instead of 101.
+- **The thinnest group grew tenfold.** Below 10,000 ft outside the veil there
+  were 35 units; there are now 379.
+- **Coverage is accounted for hour by hour.** 726 of 767 hours carry data.
+  9 hours are real downtime. 29 are hours in which every poll was attempted
+  and failed (local DNS). 3 hours' polls landed in a neighbouring partition.
+
+The direction is the opposite of the hypothesis. Below 10,000 ft, the
+independent share is **higher inside** the veil, where the obligation
+applies, than outside it. That is not evidence that obliged aircraft hide.
+The likelier reading, **stated and not tested**, is receiver geometry. MLAT at
+low altitude needs receivers close by, and receivers cluster around the metro
+airports that define the veil. The above-10,000 ft control removes coverage
+that does not depend on altitude. It cannot remove coverage that falls off
+faster at low altitude, so a step that is purely about where the receivers
+are survives the subtraction. Under random side assignment, 248 of 2,000 trials
+give a difference at least this large in either direction (p = 0.124). That
+is not significant, and its sign is the wrong one for the hypothesis anyway.
+
+The eight-day artefact, `air-bands.json`, is kept as it was: it is what this
+project said on 2026-10-02.
+
 The analysis plan was committed before any statistic existed, with its prior
 exposure declared, in
 [`docs/phase-f-prereg.md`](docs/phase-f-prereg.md). Reproduce with
-`python scripts/air_discrepancy.py`.
+`python scripts/air_discrepancy.py --out data/events/air-bands-<date>.json`.
+Name the output: the default path is the tracked eight-day result, and
+re-running over a longer window answers a different question.
 
 ## Scope
 
