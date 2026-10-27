@@ -12,14 +12,14 @@
     <h1>ANGELS</h1>
     <span class="gloss">radar returns with no attributable source</span>
 
-    <!-- Domain filter. Land is present and disabled on purpose: an absent
-         control implies the domain was never considered, a disabled one with
-         a reason says it was considered and is blocked on sourcing. -->
+    <!-- Domain filter. Land was present and disabled until 2026-10-27, when
+         the road collectors had data to show: an absent control would have
+         implied the domain was never considered. -->
     <div id="domains">
       <button data-domain="air" class="on">Air</button>
       <button data-domain="sea">Sea</button>
-      <button data-domain="land" disabled
-              title="Transit and public-fleet GTFS-Realtime. Scoped, not yet built.">Land</button>
+      <button data-domain="land"
+              title="Transit vehicles on 38 border feeds, declared work zones and the state lines. Cooperative only; the comparison is not built yet.">Land</button>
     </div>
 
     <!-- The other evidence class, kept in its own control rather than

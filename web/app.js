@@ -26,6 +26,9 @@ import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
          setGroups, setSeaAoi, setWake, wakeStats, GROUPS, SUBTYPE_LABEL,
          HULL_PATH }
   from "./views/vessels.js";
+import { addLand, startLand, setVisible as setLandVisible, setLandAoi,
+         refreshLand, landInfo } from "./views/land.js";
+import { esc } from "./views/popup.js";
 import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
          setVisible as setObsVisible, coverageAt, coverageSummary }
   from "./views/discrepancy.js";
@@ -47,7 +50,7 @@ map.addControl(new maplibregl.ScaleControl({ unit: "nautical" }));
 
 const el = (id) => document.getElementById(id);
 let trailHours = 2;
-const on = { air: true, sea: false };
+const on = { air: true, sea: false, land: false };
 let groupFilter = null;             // null = every vessel group
 let observed = false;               // the SAR discrepancy layer
 // OFF BY DEFAULT, and nothing is fetched while it is off. Trails read the
@@ -76,7 +79,28 @@ function relTime(ms) {
 
 // Every failure gets its own page, because the fixes are completely
 // different and "/live 503" tells you none of them.
+// LAND FAILS IN ITS OWN WORDS. Its data is files the road collectors write,
+// so a 503 means a collector has written nothing, not a missing credential,
+// and telling someone to fix OpenSky keys for it would be the wrong-diagnosis
+// failure this project keeps undoing.
+function landErrorPanel(err) {
+  if (err.kind === "offline") {
+    return `
+      <div class="livebar off"><span class="dot"></span>API offline</div>
+      <h2 class="errh">Cannot reach the API</h2>
+      <pre class="cmd">cd C:\\Users\\mccul\\angels-geoint
+uvicorn angels.api.main:app --reload</pre>`;
+  }
+  return `
+    <div class="livebar off"><span class="dot"></span>Land: nothing to show</div>
+    <h2 class="errh">The road collectors have not written this yet</h2>
+    <p class="meta">${esc(err.detail || err.message || "")}</p>
+    <pre class="cmd">.\\collector.ps1 status</pre>
+    <p class="empty">This is a collector that has not run, not an empty road.</p>`;
+}
+
 function errorPanel(err) {
+  if (err.domain === "land") return landErrorPanel(err);
   const sea = err.domain === "sea";
 
   if (err.kind === "offline") {
@@ -605,7 +629,7 @@ function seaBlock() {
 // hiding a healthy sea feed behind a message about aircraft. A failure is now
 // shown full-page only when EVERY domain that is switched on has failed;
 // otherwise the working domain renders and the failing one gets a line.
-const errors = { air: null, sea: null };
+const errors = { air: null, sea: null, land: null };
 
 function renderStatus() {
   const active = Object.keys(on).filter((d) => on[d]);
@@ -623,8 +647,10 @@ function renderStatus() {
   const sea = vesselInfo();
   const ageMs = on.air && air.lastPoll ? Date.now() - air.lastPoll
               : on.sea && sea.lastPoll ? Date.now() - sea.lastPoll
+              : on.land && landInfo().lastPoll ? Date.now() - landInfo().lastPoll
               : null;
-  const fresh = ageMs !== null && ageMs < 20000;
+  // Land is read every 30 s, so "fresh" there is a longer window.
+  const fresh = ageMs !== null && ageMs < (on.air || on.sea ? 20000 : 45000);
   const verts = trails?.features.reduce((a, f) => a + f.properties.n_vertices, 0) ?? 0;
 
   el("panel").innerHTML = `
@@ -634,7 +660,7 @@ function renderStatus() {
         ? "Live feeds down &mdash; the observed layer below is unaffected"
         : ageMs === null ? "Connecting…" : `Live &middot; ${relTime(ageMs)}`}
     </div>
-    ${failing.map((d) => `<p class="err">${d === "air" ? "Air" : "Sea"} feed
+    ${failing.map((d) => `<p class="err">${{ air: "Air", sea: "Sea", land: "Land" }[d]} feed
       failed: ${errors[d].detail || errors[d].message || "unreachable"}.
       Showing the other domain; switch it off and back on to see details.</p>`).join("")}
 
@@ -652,6 +678,8 @@ function renderStatus() {
     ${on.air ? fixAgeBlock() : ""}
 
     ${on.sea ? seaBlock() : ""}
+
+    ${on.land ? landBlock() : ""}
 
     ${observed ? observedBlock() : ""}
 
@@ -708,6 +736,15 @@ function renderStatus() {
         last looked at.</p>`}
     </div>
 
+    ${on.land ? `<div class="evidence">
+      <span class="lt">Land &middot; evidence class</span>
+      <p>Cooperative only. Vehicles report their own positions, and work
+        zones are agencies' own declarations. The dashed lines are the state
+        boundaries the land question is about.</p>
+      <p>The land finding is the <em>gap</em> between the first two:
+        slowdowns the vehicles show that no agency declared. That comparison
+        is not on this map yet.</p></div>` : ""}
+
     ${on.air && trails_on && trails && !trails.features.length ? `<p class="empty">
       No trails in this window. That layer reads the
       ${liveAoi() === "conus" ? "national" : "DC"} archive
@@ -719,6 +756,37 @@ function renderStatus() {
   el("panel").querySelectorAll(".vrow").forEach((b) => {
     b.onclick = () => toggleGroup(b.dataset.group);
   });
+}
+
+// --- land -----------------------------------------------------------------
+
+function landBlock() {
+  const L = landInfo();
+  const v = L.vehicles?.properties, s = L.status, z = L.zones?.properties;
+  const down = s ? s.vehicles.filter((r) => r.outcome !== "ok") : [];
+  const lag = v?.archive_lag_s;
+  return `
+    <div class="stat"><span class="n">${v ? v.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l">Transit vehicles that moved &middot; last 15 min${
+        v ? ` &middot; ${v.n_feeds} agencies` : ""}</span></div>
+    <p class="meta">${s ? `${s.n_answered} of ${s.n_feeds} border feeds answered at
+      the collector's last poll` : "Reading feed status&hellip;"}${lag != null
+      ? ` &middot; the archive is ${Math.round(lag / 60)} min behind the collector,
+        which writes every 5 min` : ""}</p>
+    ${down.length ? `<p class="meta">Not answering, in the collector's own words:
+      ${down.map((r) => `${esc(r.provider || r.feed)} (${esc(r.outcome)}${
+        r.status ? " " + esc(r.status) : ""})`).join(", ")}</p>` : ""}
+    <div class="stat"><span class="n">${z ? z.n_in_view.toLocaleString() : "&mdash;"}</span>
+      <span class="l">Declared work zones in view${z?.truncated
+        ? ` &middot; showing ${z.n_shown.toLocaleString()}` : ""}</span></div>
+    ${z ? `<p class="meta">${z.feeds_in_view.length
+      ? `From: ${z.feeds_in_view.map(esc).join(", ")}.`
+      : "No feed declares a work zone in this view."} A state with none on
+      this map usually publishes none, or only behind a key. That is the
+      publication regime this project studies, not an empty road.</p>` : ""}
+    <p class="meta">A vehicle drops off the map after 15 minutes standing
+      still, because the archive keeps a fix only when it changes. Its agency
+      may still be reporting it.</p>`;
 }
 
 // --- filters --------------------------------------------------------------
@@ -738,6 +806,17 @@ function toggleGroup(key) {
 function setDomain(name, want) {
   on[name] = want;
   if (name === "air") setAirVisible(map, want);
+  if (name === "land") {
+    setLandVisible(map, want);
+    if (want) {
+      refreshLand(map, () => { errors.land = null; renderStatus(); },
+                       (err) => { errors.land = err; renderStatus(); });
+      map.fitBounds(liveAoi() === "conus" ? AOI_CONUS : AOI_AIR,
+                    { padding: 40, duration: 900 });
+    } else {
+      errors.land = null;
+    }
+  }
   if (name === "sea") {
     setSeaVisible(map, want);
     // Fit to whichever domain was just switched on, once, so turning the sea
@@ -828,6 +907,8 @@ map.on("load", async () => {
   addLive(map);       // added after tracks so aircraft draw above the trails
   addVessels(map);
   setSeaVisible(map, false);
+  addLand(map);
+  setLandVisible(map, false);
 
   // The probe is armed only while the observed layer is on. Clicking water on
   // a purely cooperative map and being told about radar coverage would be an
@@ -844,6 +925,11 @@ map.on("load", async () => {
   startVessels(map,
     () => { errors.sea = null; renderStatus(); },
     (err)  => { errors.sea = err; renderStatus(); });
+
+  // Polls only while Land is switched on; see views/land.js.
+  startLand(map,
+    () => { errors.land = null; renderStatus(); },
+    (err)  => { errors.land = err; renderStatus(); });
 
   setTrailsVisible(false);          // the layers exist; they start hidden
   setInterval(() => renderStatus(), 1000);
@@ -873,6 +959,7 @@ map.on("load", async () => {
       // once -- which is the single thing the cross-domain comparison
       // cannot survive.
       setSeaAoi(map, want);
+      setLandAoi(map, want);
       // The wake was just cleared with the box, so the clock that says how
       // long it represents restarts with it. Left alone it would claim
       // minutes of watching over a line thirty seconds old.
