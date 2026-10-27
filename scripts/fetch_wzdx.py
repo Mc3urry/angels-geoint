@@ -75,12 +75,14 @@ Everything that decides anything is a pure function of bytes and status codes:
 from __future__ import annotations
 
 import argparse
+import copy
 import gzip
 import hashlib
 import json
 import logging
 import logging.handlers
 import os
+import re
 import signal
 import statistics
 import sys
@@ -418,6 +420,61 @@ def digest(body: bytes) -> str:
     return hashlib.sha256(body).hexdigest()
 
 
+# THE CONTENT DIGEST, VERSION 2. 2026-10-27, decided by Joshua (A + B).
+#
+# Version 1 hashed every feature exactly as sent. Three days of ledger showed
+# two ways that reports change where no road did:
+#
+#   A. CivicLink CrewCast regenerates every feature id on every request:
+#      `crewcast-event-756-1793039706`, then `...-1793040313`. With the ids set
+#      aside, consecutive bodies were identical. All 361 of its "real changes"
+#      were false, and the archive held 388 copies of the same work zones.
+#   B. mndot moves `core_details.update_date` inside each feature on every
+#      cycle, the envelope defect one level down.
+#
+# So version 2 removes a trailing generation timestamp from an id, and drops a
+# feature's own `core_details.update_date`. Nothing else changes. The stored
+# bodies are untouched: this is what "did the claim change" MEANS, not what is
+# kept. Every sidecar written under version 1 is recomputed from the body it
+# names (see `last_seen`), and each ledger row says which version produced
+# its digest, so the ledger before and after the change can be told apart.
+CONTENT_DIGEST_VERSION = 2
+
+# Separator, then ten digits that read as a Unix time between 2017 and 2049.
+# Narrow on purpose: an id like `event-12` or a ten-digit number with no
+# separator is left alone, and stripping an id that merely LOOKS like this
+# costs nothing but a sort key -- the feature still counts, because the
+# digest is over a list and not a set.
+_ID_GENERATION_STAMP = re.compile(r"^(?P<stem>.+?)[-_:.](?P<ts>\d{10})$")
+_STAMP_RANGE = (1_500_000_000, 2_500_000_000)
+
+
+def stable_id(value: Any) -> Any:
+    """An id with a trailing generation timestamp removed, if it has one."""
+    if not isinstance(value, str):
+        return value
+    m = _ID_GENERATION_STAMP.match(value)
+    if m and _STAMP_RANGE[0] <= int(m.group("ts")) <= _STAMP_RANGE[1]:
+        return m.group("stem")
+    return value
+
+
+def claim_of(feature: Any) -> Any:
+    """A feature as a claim about a road: version 2's two exclusions applied
+    to a copy, never to the feature itself."""
+    if not isinstance(feature, dict):
+        return feature
+    f = copy.deepcopy(feature)
+    if "id" in f:
+        f["id"] = stable_id(f["id"])
+    props = f.get("properties")
+    if isinstance(props, dict):
+        core = props.get("core_details")
+        if isinstance(core, dict):
+            core.pop("update_date", None)
+    return f
+
+
 def content_digest(obj: Any) -> str | None:
     """Of the road events alone, insensitive to order and to the envelope.
 
@@ -459,10 +516,11 @@ def content_digest(obj: Any) -> str | None:
     feats = obj.get("features")
     if not isinstance(feats, list):
         return None
+    claims = [claim_of(f) for f in feats]
     canonical = json.dumps(
-        sorted(feats, key=lambda f: (str(f.get("id") if isinstance(f, dict)
-                                         else f),
-                                     json.dumps(f, sort_keys=True))),
+        sorted(claims, key=lambda f: (str(f.get("id") if isinstance(f, dict)
+                                          else f),
+                                      json.dumps(f, sort_keys=True))),
         sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -511,6 +569,10 @@ def feed_record(feed: dict[str, Any], *, status: int | None,
         # `update_date` over identical road events.
         "sha256": digest(body) if body else None,
         "content_sha256": content_digest(obj),
+        # Which definition produced it. Version 1 before 2026-10-27; see
+        # CONTENT_DIGEST_VERSION. A reader comparing rows across the change
+        # needs this, and nothing else in the row would say.
+        "content_digest_version": CONTENT_DIGEST_VERSION,
         "n_events": n_events,
         # The raw strings from both sides, and the canonical form beside them.
         # Keeping only the canonical form would hide that a registry row and a
@@ -826,6 +888,47 @@ def decorative_update_date(rows: list[dict[str, Any]],
             if n >= min_cycles and not real.get(name)}
 
 
+def envelope_only_rate(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per feed: how often the envelope moved while the roads did not.
+
+    `decorative_update_date` asks "never anything else", and over 2.6 days
+    that rule named nobody while eight feeds were envelope-only on 86 to 99
+    per cent of their cycles. A rule that needs perfection reports the
+    imperfect as healthy. This reports the share instead, with the same
+    baseline rule (each feed's first answered row counts on neither side)
+    and the same exclusion of bodies stored for want of a comparison.
+
+    rate = envelope_only / (envelope_only + real + unchanged), over the
+    answered, non-baseline rows. `unchanged` is a row whose bytes did not
+    move at all: the feed answered and said exactly what it said before.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    baselined: set[str] = set()
+    for r in rows:
+        name = r.get("feed")
+        if "envelope_only" not in r and "stored_as" not in r:
+            continue
+        if name not in baselined:
+            baselined.add(name)
+            continue
+        c = out.setdefault(name, {"envelope_only": 0, "real": 0,
+                                  "unchanged": 0, "not_compared": 0})
+        if r.get("envelope_only"):
+            c["envelope_only"] += 1
+        elif r.get("stored_as"):
+            if r.get("first_sighting") or r.get("sidecar_unreadable"):
+                c["not_compared"] += 1
+            else:
+                c["real"] += 1
+        else:
+            c["unchanged"] += 1
+    for c in out.values():
+        n = c["envelope_only"] + c["real"] + c["unchanged"]
+        c["answered"] = n
+        c["rate"] = round(c["envelope_only"] / n, 4) if n else None
+    return out
+
+
 # --------------------------------------------------------------------------
 # storage
 # --------------------------------------------------------------------------
@@ -940,8 +1043,14 @@ def last_seen(root: Path, feed: str) -> dict[str, Any]:
         return {}
     if not isinstance(got, dict):
         return {}
-    if got.get("content_sha256"):
+    if (got.get("content_sha256")
+            and got.get("content_version") == CONTENT_DIGEST_VERSION):
         return got
+    # Either no content digest at all (written before 2026-10-06), or one made
+    # under an earlier definition (before 2026-10-27). Both are recomputed
+    # from the body the sidecar names, the same way and for the same reason:
+    # comparing a version-2 digest with a version-1 one would report every
+    # feed as changed on the first cycle after the upgrade.
 
     body = _stored_body(root, str(got.get("path", "")))
     if body is None:
@@ -1078,6 +1187,7 @@ def _write_sidecar(root: Path, feed: str, sha: str, content_sha: str,
     side.write_text(json.dumps({
         "sha256": sha,                 # the last bytes we saw
         "content_sha256": content_sha,  # the last road events we saw
+        "content_version": CONTENT_DIGEST_VERSION,
         "iso": when.isoformat(),
         "path": name,                  # the body that holds those events
     }), encoding="utf-8")

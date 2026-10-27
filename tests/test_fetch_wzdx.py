@@ -56,6 +56,7 @@ from scripts.fetch_wzdx import (HTTP_ERROR, KNOWN_SPEC_VERSIONS,
                                 canonical_version, classify, content_digest,
                                 cycle_flags, cycle_health, cycle_sentence,
                                 cycle_summary, decorative_update_date,
+                                envelope_only_rate, stable_id,
                                 declared_version, digest, event_count,
                                 feed_record, feeds_from, last_digest,
                                 looks_like_html, store_body, version_verdict)
@@ -1045,3 +1046,125 @@ def test_every_selected_feed_has_the_fields_g1_reads() -> None:
                           error="not fetched")
         assert rec["feed"] and rec["version_registry"]
         assert rec["returned"] is False
+
+
+# -- the content digest, version 2 (2026-10-27) -----------------------------
+
+def crewcast(stamp: int, n: int = 3, end: str = "2026-10-30T23:00:00Z") -> bytes:
+    """Ids regenerated on every request, the way CivicLink CrewCast sends them."""
+    return json.dumps({
+        "feed_info": {"version": "4.2", "update_date": f"t{stamp}"},
+        "type": "FeatureCollection",
+        "features": [{"type": "Feature", "id": f"crewcast-event-{i}-{stamp}",
+                      "properties": {"core_details": {
+                          "update_date": f"u{stamp}", "description": f"e{i}"},
+                          "end_date": end}}
+                     for i in range(n)]}).encode()
+
+
+def test_a_regenerated_id_is_the_same_claim() -> None:
+    """A. All 730 CrewCast ids changed between two cycles and nothing else did.
+    Version 1 called that 730 removals and 730 additions, every cycle."""
+    assert content_digest(json.loads(crewcast(1793039706))) == \
+        content_digest(json.loads(crewcast(1793040313)))
+
+
+def test_a_moving_per_feature_update_date_is_the_same_claim() -> None:
+    """B. mndot's `core_details.update_date`, the envelope defect inside each
+    feature. Same ids, same events, a newer stamp."""
+    a = json.loads(crewcast(1793039706))
+    b = json.loads(crewcast(1793039706))
+    for f in b["features"]:
+        f["properties"]["core_details"]["update_date"] = "later"
+    assert content_digest(a) == content_digest(b)
+
+
+def test_a_real_change_still_moves_the_digest() -> None:
+    """The exclusions are exactly two. An end date, an extra event, a
+    different event number: each is a change of claim."""
+    base = content_digest(json.loads(crewcast(1793039706)))
+    assert content_digest(json.loads(crewcast(1793039706,
+                                              end="2026-11-02T23:00:00Z"))) != base
+    assert content_digest(json.loads(crewcast(1793039706, n=4))) != base
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("crewcast-event-756-1793039706", "crewcast-event-756"),
+    ("abc_1793039706", "abc"),
+    ("event-12", "event-12"),                  # not a timestamp
+    ("1793039706", "1793039706"),              # no stem, no separator
+    ("event-0000000001", "event-0000000001"),  # ten digits, not a time
+    ("event-9999999999", "event-9999999999"),  # ten digits, year 2286
+    (17, 17),                                  # not a string
+])
+def test_only_a_trailing_generation_stamp_is_removed(raw, expected) -> None:
+    assert stable_id(raw) == expected
+
+
+def test_the_feature_itself_is_never_modified() -> None:
+    """The digest reads a copy. The stored body must be what arrived."""
+    obj = json.loads(crewcast(1793039706))
+    before = json.dumps(obj, sort_keys=True)
+    content_digest(obj)
+    assert json.dumps(obj, sort_keys=True) == before
+
+
+def v1_sidecar(root, feed: str, body: bytes, name: str) -> None:
+    """A sidecar exactly as version 1 wrote it: a content digest, no version."""
+    p = root / "roads" / "wzdx" / "_last" / f"{feed}.json"
+    p.write_text(json.dumps({"sha256": digest(body),
+                             "content_sha256": "version-one-digest",
+                             "iso": "2026-10-26T12:00:00+00:00",
+                             "path": name}), encoding="utf-8")
+
+
+def test_a_version_one_sidecar_is_recomputed_not_compared(tmp_path) -> None:
+    """Rule 26, and mechanism AA in advance. The archive holds a CrewCast body
+    and a version-1 sidecar for it. The next cycle brings the same events
+    under fresh ids. Comparing a version-2 digest with the version-1 one would
+    store the body again and call it a change; the sidecar is recomputed from
+    the body it names instead, and the upgrade says so."""
+    first = store(tmp_path, "CivicLink_CrewCast", crewcast(1793039706))
+    v1_sidecar(tmp_path, "CivicLink_CrewCast", crewcast(1793039706),
+               first["path"].name)
+
+    st = store(tmp_path, "CivicLink_CrewCast", crewcast(1793040313))
+    assert st["sidecar_migrated"] is True
+    assert st["digest_is_new"] is False and st["bytes_stored"] == 0
+    assert st["envelope_only"] is True, "the bytes moved; the claim did not"
+
+    side = json.loads((tmp_path / "roads" / "wzdx" / "_last" /
+                       "CivicLink_CrewCast.json").read_text(encoding="utf-8"))
+    assert side["content_version"] == 2
+    again = store(tmp_path, "CivicLink_CrewCast", crewcast(1793040913))
+    assert again["sidecar_migrated"] is False, "upgraded once, not every cycle"
+
+
+def test_every_ledger_row_says_which_digest_it_carries() -> None:
+    rec = feed_record(FEED, status=200, body=wzdx(n=2), elapsed_s=0.1)
+    assert rec["content_digest_version"] == 2
+
+
+# -- the envelope-only share (2026-10-27) -----------------------------------
+
+def test_the_share_is_reported_where_never_would_name_nobody() -> None:
+    """Thirty envelope-only cycles and one real change: `decorative_update_date`
+    calls this feed fine. The share says 30 of 32."""
+    rows = ([{"feed": "stc", "stored_as": "opening.json.gz"}]
+            + [{"feed": "stc", "envelope_only": True} for _ in range(30)]
+            + [{"feed": "stc", "stored_as": "real.json.gz", "envelope_only": False}]
+            + [{"feed": "stc", "envelope_only": False}])
+    assert decorative_update_date(rows) == {}
+    r = envelope_only_rate(rows)["stc"]
+    assert (r["envelope_only"], r["real"], r["unchanged"], r["answered"]) == \
+        (30, 1, 1, 32)
+    assert r["rate"] == round(30 / 32, 4)
+
+
+def test_the_share_uses_the_same_baseline_and_exclusions() -> None:
+    rows = ([{"feed": "x", "outcome": HTTP_ERROR}]
+            + [{"feed": "x", "envelope_only": True}]          # baseline
+            + [{"feed": "x", "stored_as": "s.json.gz", "sidecar_unreadable": True}]
+            + [{"feed": "x", "envelope_only": True}])
+    r = envelope_only_rate(rows)["x"]
+    assert r["not_compared"] == 1 and r["answered"] == 1 and r["rate"] == 1.0
