@@ -190,12 +190,18 @@ SAME_AGENCY: dict[tuple[str, ...], tuple[str, str]] = {
         "VehiclePositionFeed: almost certainly the same trains twice. Kept: "
         "the agency's https host. The http one answered HTTP 403 when tried on "
         "2026-10-23, which is a fact about that request and not yet a reason. "
-        "PROVISIONAL until vehicle ids are compared."),
+        "CONFIRMED 2026-10-26: polled at the same moment, both feeds carried "
+        "the same 6 vehicle ids, the same labels and positions 0 m apart, in "
+        "2 of 3 rounds; in the third the http host returned a body that is not "
+        "GTFS-Realtime. data/reference/roads/same-agency-2026-10-26T200344Z.json."),
     ("mdb-2670", "tld-4679-vp"): (
         "keep:tld-4679-vp",
         "Pioneer Valley published twice, by Swiftly and by Avail InfoPoint: "
         "the same buses from two vendors. Kept: the agency's own host over the "
-        "third-party one. PROVISIONAL until vehicle ids are compared."),
+        "third-party one. PROVISIONAL until vehicle ids are compared. Tried "
+        "2026-10-26: the Swiftly feed refused with an HTTP error in all 3 rounds "
+        "(it is a keyed vendor API), so it cannot be compared, and it cannot be "
+        "polled either -- which is also why keeping one cannot double-count."),
 }
 
 R_DUPLICATE = "same agency as another selected feed: one kept, see SAME_AGENCY"

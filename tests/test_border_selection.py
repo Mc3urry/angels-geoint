@@ -304,6 +304,19 @@ def test_a_duplicate_pair_keeps_one_and_says_why() -> None:
          sel("tld-1127-vp", "Virginia Railway Express")], [])
     assert [k["id"] for k in kept] == ["tld-1127-vp"]
     assert exc[0]["id"] == "mdb-1734" and exc[0]["reason"] == R_DUPLICATE
+    # Settled by the vehicles, not by the metadata: the comparison of
+    # 2026-10-26 is named in the reason so the claim can be checked.
+    assert "CONFIRMED 2026-10-26" in exc[0]["detail"]
+    assert "same-agency-2026-10-26T200344Z.json" in exc[0]["detail"]
+
+
+def test_a_pair_that_could_not_be_compared_stays_provisional() -> None:
+    """Pioneer Valley's second feed refused every round. Undecided is not
+    the same as decided, and the reason must keep saying so."""
+    _, exc = resolve_same_agency(
+        [sel("mdb-2670", "Pioneer Valley Transit Authority"),
+         sel("tld-4679-vp", "Pioneer Valley Transit Authority")], [])
+    assert exc[0]["id"] == "mdb-2670"
     assert "PROVISIONAL" in exc[0]["detail"]
 
 
