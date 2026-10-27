@@ -204,6 +204,46 @@ SAME_AGENCY: dict[tuple[str, ...], tuple[str, str]] = {
         "polled either -- which is also why keeping one cannot double-count."),
 }
 
+# A CATALOGUE URL THAT IS WRONG, CORRECTED HERE AND NOT IN THE CATALOGUE.
+#
+# The registry is a recording of the Mobility Database and stays one: editing
+# it would make it a recording of nothing. So a correction is a row in this
+# table, applied to the SELECTION, with the catalogue's own URL kept beside the
+# polled one in the artefact. Each entry names the exact catalogue URL it
+# corrects, and the build REFUSES if the catalogue now says something else --
+# a correction reapplied to a URL it was never tested against is a guess.
+URL_CORRECTIONS: dict[str, tuple[str, str, str]] = {
+    "mdb-1921": (
+        "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePostions",
+        "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePositions",
+        "C-TRAN. The catalogue spells the path 'VehiclePostions'. That URL "
+        "answered HTTP 404 on all 2,516 polls from 2026-10-26 20:05 to "
+        "2026-10-27 17:04 UTC. On 2026-10-27 the same URL spelled "
+        "'VehiclePositions' answered HTTP 200 with 5,235 bytes, from the "
+        "collecting machine. Whether that body parses is the poller's to say."),
+}
+
+
+def apply_url_corrections(rows: list[dict[str, Any]],
+                          table: dict[str, tuple[str, str, str]] | None = None
+                          ) -> list[dict[str, Any]]:
+    """Rows with any correction applied; the catalogue URL is kept, never lost."""
+    table = URL_CORRECTIONS if table is None else table
+    out = []
+    for r in rows:
+        fix = table.get(r.get("id"))
+        if fix is not None:
+            catalogue, polled, why = fix
+            if r.get("url") != catalogue:
+                raise RegistryRefused(
+                    f"URL_CORRECTIONS[{r['id']}] corrects {catalogue!r}, but the "
+                    f"catalogue now says {r.get('url')!r}. Re-decide it rather "
+                    f"than reapply it.")
+            r = dict(r, url=polled, url_in_catalogue=catalogue,
+                     url_corrected=why)
+        out.append(r)
+    return out
+
 R_DUPLICATE = "same agency as another selected feed: one kept, see SAME_AGENCY"
 
 R_ONE_STATE = "one state: no discontinuity inside the service area"
@@ -589,6 +629,7 @@ def build(registry: Path, boundaries: Path, buffer_m: float) -> dict[str, Any]:
                for f, e in (manifest.get("skipped_extents") or {}).items()}
     selected, excluded = select(rows, states, buffer_m + tol_m, skipped)
     selected, excluded = resolve_same_agency(selected, excluded)
+    selected = apply_url_corrections(selected)
 
     by_reason: dict[str, int] = {}
     for e in excluded:
@@ -619,6 +660,9 @@ def build(registry: Path, boundaries: Path, buffer_m: float) -> dict[str, Any]:
             "max_box_km": MAX_BOX_KM,
             "same_agency": {" + ".join(k): {"decision": v[0], "reason": v[1]}
                             for k, v in sorted(SAME_AGENCY.items())},
+            "url_corrections": {k: {"catalogue": v[0], "polled": v[1],
+                                    "reason": v[2]}
+                                for k, v in sorted(URL_CORRECTIONS.items())},
             "states_in_set": len(states),
         },
         "rows_read": len(rows),

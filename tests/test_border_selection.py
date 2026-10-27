@@ -442,3 +442,34 @@ def test_a_feed_in_no_state_is_called_out_not_filed_as_inland() -> None:
     s = summary_sentence({"_rules": {"buffer_m": 2000.0}, "rows_read": 9,
                           "n_selected": 3, "excluded_by_reason": {R_NO_STATE: 2}})
     assert "overlap NO state" in s and "look at them" in s
+
+
+# -- a catalogue URL that is wrong ------------------------------------------
+
+def test_a_url_correction_keeps_the_catalogue_url_beside_the_polled_one() -> None:
+    from scripts.select_border_feeds import apply_url_corrections
+    table = {"x-1": ("http://h/VehiclePostions", "http://h/VehiclePositions",
+                     "spelling")}
+    out = apply_url_corrections([{"id": "x-1", "url": "http://h/VehiclePostions"},
+                                 {"id": "y-2", "url": "http://k/vp"}], table)
+    assert out[0]["url"] == "http://h/VehiclePositions"
+    assert out[0]["url_in_catalogue"] == "http://h/VehiclePostions"
+    assert out[0]["url_corrected"] == "spelling"
+    assert out[1] == {"id": "y-2", "url": "http://k/vp"}
+
+
+def test_a_correction_is_refused_when_the_catalogue_has_moved() -> None:
+    """If the catalogue fixes its own URL, or changes it to something else,
+    the correction was tested against a URL that no longer exists."""
+    from scripts.select_border_feeds import apply_url_corrections
+    table = {"x-1": ("http://h/old", "http://h/new", "why")}
+    with pytest.raises(RegistryRefused, match="Re-decide"):
+        apply_url_corrections([{"id": "x-1", "url": "http://h/other"}], table)
+
+
+def test_the_c_tran_correction_is_exact() -> None:
+    from scripts.select_border_feeds import URL_CORRECTIONS
+    old, new, why = URL_CORRECTIONS["mdb-1921"]
+    assert old.endswith("/VehiclePostions") and new.endswith("/VehiclePositions")
+    assert old.rsplit("/", 1)[0] == new.rsplit("/", 1)[0], "only the path's last part"
+    assert "404" in why and "200" in why

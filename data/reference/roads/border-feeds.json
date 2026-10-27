@@ -1,6 +1,6 @@
 {
  "_what": "G2b: transit feeds whose service area straddles or abuts a state line, and every feed that does not, with the reason",
- "_built_at_utc": "2026-10-27T17:06:25+00:00",
+ "_built_at_utc": "2026-10-27T19:08:40+00:00",
  "_inputs": {
   "transit_registry": "transit-registry.json",
   "transit_registry_sha256": "fe7df0eed06d315114e4a3776e2fc05e8cf11eb74d58e9566e674d6e912ca5a0",
@@ -69,6 +69,13 @@
    "mdb-3060 + mdb-3063": {
     "decision": "both",
     "reason": "SEPTA rail and bus: the URLs name the mode (septarail, septa), and trains and buses are different vehicles."
+   }
+  },
+  "url_corrections": {
+   "mdb-1921": {
+    "catalogue": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePostions",
+    "polled": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePositions",
+    "reason": "C-TRAN. The catalogue spells the path 'VehiclePostions'. That URL answered HTTP 404 on all 2,516 polls from 2026-10-26 20:05 to 2026-10-27 17:04 UTC. On 2026-10-27 the same URL spelled 'VehiclePositions' answered HTTP 200 with 5,235 bytes, from the collecting machine. Whether that body parses is the poller's to say."
    }
   },
   "states_in_set": 49
@@ -303,7 +310,7 @@
    "id": "mdb-1921",
    "provider": "C-TRAN",
    "subdivision": "Oregon",
-   "url": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePostions",
+   "url": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePositions",
    "how": "geometry",
    "states": [
     "41",
@@ -316,7 +323,9 @@
    "box_km": [
     30.1,
     41.2
-   ]
+   ],
+   "url_in_catalogue": "http://gtfs-rt.c-tran.org/gtfsrealtime/VehiclePostions",
+   "url_corrected": "C-TRAN. The catalogue spells the path 'VehiclePostions'. That URL answered HTTP 404 on all 2,516 polls from 2026-10-26 20:05 to 2026-10-27 17:04 UTC. On 2026-10-27 the same URL spelled 'VehiclePositions' answered HTTP 200 with 5,235 bytes, from the collecting machine. Whether that body parses is the poller's to say."
   },
   {
    "id": "mdb-2422",
