@@ -26,11 +26,13 @@ Forty-five and forty-six the same night, both in the first border selection,
 both caught by reading its forty-two lines instead of counting them.
 Forty-seven, 2026-10-24: a function that read the first night of a
 populated archive as if the archive had been empty. Forty-eight, 2026-10-26:
-a file reported as written that landed as its previous version.*
+a file reported as written that landed as its previous version. Forty-nine,
+2026-10-27: four weeks of outages blamed on a DNS resolver, while the laptop
+was in a car.*
 
-Over the course of this project, **forty-eight** separate faults were found
+Over the course of this project, **forty-nine** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, forty-eight
+this pipeline computes, it computed correctly. What failed, forty-nine
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -79,7 +81,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **forty-eight**. A few logged
+The running count in the worklog reached **forty-nine**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -358,6 +360,25 @@ turned a data defect into a respectable category -- the most dangerous thing an
 inference can do, because it removes the reason to look. Sighting 45. Boxes
 larger than a ceiling taken from the measured gap -- 333 km legitimate, 1,029 km
 impossible -- are now treated as missing and decided by a person.
+
+**A fourth, 2026-10-27, and the longest-lived.** From 2026-09-29 every
+all-feeds failure carried `[Errno 11001] getaddrinfo failed`, and from that
+message the project wrote "the local DNS resolver". It went into FINDINGS,
+STATUS and the backlog as an operational fault. It was costed ("nine hours of
+archive a week") and called "the largest loss in the project". On
+2026-10-27 it was about to become a change to the machine's DNS servers. The
+message was true. Name lookup is the first network step a request takes, so
+it is the first to fail on a machine with no network at all. The cause
+was that the collecting machine is a laptop that commutes. It runs out of
+battery, or sits in a bag in a car between work, school and home. Joshua said
+so in one sentence. The code had it right: it records the error class and
+writes `NOT INFERRED`. The prose around it did not, for four weeks, and
+rule 9 was written for exactly this. Sighting 49.
+
+What it changes is bigger than a label. **The holes are not random in time.**
+They fall where a commute falls, and rush hour is when roads carry the traffic
+G4 measures. Coverage has to be reported by hour of day, and comparisons made
+like hour against like hour, before any land statistic is read.
 
 ### N. A guard written for a class, defeated by the next instance of it
 
@@ -1096,7 +1117,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Forty-eight** were found,
+The defence is not that no mistakes were made. **Forty-nine** were found,
 two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved

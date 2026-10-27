@@ -434,7 +434,9 @@ What the extra data changed:
   were 35 units; there are now 379.
 - **Coverage is accounted for hour by hour.** 726 of 767 hours carry data.
   9 hours are real downtime. 29 are hours in which every poll was attempted
-  and failed (local DNS). 3 hours' polls landed in a neighbouring partition.
+  and failed because the collecting laptop had no connection: it travels,
+  and spends some of each day in a bag. 3 hours' polls landed in a
+  neighbouring partition.
 
 The direction is the opposite of the hypothesis. Below 10,000 ft, the
 independent share is **higher inside** the veil, where the obligation

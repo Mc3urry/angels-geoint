@@ -409,7 +409,7 @@ def cycle_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 def cycle_health(s: dict[str, Any]) -> tuple[bool, str | None]:
     """Our outage or their silence. Every feed we asked failing at once is
-    ours (the 70 DNS minutes of 2026-10-23 looked exactly like that); one
+    ours (the 70 offline minutes of 2026-10-23 looked exactly like that); one
     feed failing is a fact about that feed and the cycle is still a
     measurement."""
     if s["n_asked"] == 0:
