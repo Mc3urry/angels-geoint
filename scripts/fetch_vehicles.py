@@ -83,6 +83,7 @@ import hashlib
 import json
 import logging
 import logging.handlers
+import math
 import os
 import signal
 import statistics
@@ -102,7 +103,7 @@ except ModuleNotFoundError as _e:          # pragma: no cover - import plumbing
     if _e.name != "_bootstrap":
         raise
 
-from angels.config import RAW, REFERENCE, WMATA_API_KEY, WMATA_KEY_HEADER
+from angels.config import LIVE, RAW, REFERENCE, WMATA_API_KEY, WMATA_KEY_HEADER
 from angels.core.uptime import AlreadyRunning, CollectorLock, HeartbeatLog
 
 log = logging.getLogger("vehicles")
@@ -326,10 +327,13 @@ def new_fixes(rows: list[dict], previous: dict[str, tuple] | None
 def feed_row(feed: dict[str, Any], *, status: int | None, body: bytes | None,
              elapsed_s: float, error: str | None, truncated: bool,
              fetched_at: int, previous: dict[str, tuple] | None,
-             pb2=None, key_missing: bool = False
+             pb2=None, key_missing: bool = False,
+             all_rows: list[dict] | None = None
              ) -> tuple[dict[str, Any], list[dict], dict[str, tuple] | None]:
     """(ledger row, rows to store, new comparison state). Pure: no network,
-    no clock -- `fetched_at` is passed in."""
+    no clock -- `fetched_at` is passed in. `all_rows`, if given, receives
+    every positioned vehicle, new or not: the live snapshot wants the whole
+    fleet, the archive only what changed."""
     base: dict[str, Any] = {
         "t": fetched_at,
         "iso": datetime.fromtimestamp(fetched_at, timezone.utc).isoformat(),
@@ -361,6 +365,8 @@ def feed_row(feed: dict[str, Any], *, status: int | None, body: bytes | None,
         # is compared with the last good one, not treated as a baseline.
         return base, [], previous
 
+    if all_rows is not None:
+        all_rows.extend(rows)
     fresh, state = new_fixes(rows, previous)
     ages = [r["header_ts"] - r["vehicle_ts"] for r in rows
             if r["header_ts"] is not None and r["vehicle_ts"] is not None]
@@ -487,6 +493,90 @@ def write_positions(rows: list[dict], root: Path, when: datetime) -> Path:
     return path
 
 
+SNAPSHOT_COLS = ("feed_id", "vehicle_key", "label", "route_id", "lat", "lon",
+                 "bearing", "speed", "vehicle_ts", "in_service", "motion")
+
+
+def derive_motion(rows: list[dict], previous: dict[str, tuple] | None
+                  ) -> dict[str, tuple[float, float]]:
+    """(speed m/s, bearing deg) per vehicle_key, from the previous poll, for
+    vehicles whose feed sent no speed or no bearing.
+
+    For the live map only, so that WMATA rail (no speed in its feed) moves
+    between polls like everything else instead of jumping every 30 s. It is
+    labelled `derived` in the snapshot and never enters the archive. G4
+    computes its own speeds from the archive and does not read this."""
+    out: dict[str, tuple[float, float]] = {}
+    if not previous:
+        return out
+    for r in rows:
+        if r["speed"] is not None and r["bearing"] is not None:
+            continue
+        p = previous.get(r["vehicle_key"])
+        if p is None or r["vehicle_ts"] is None or p[0] is None:
+            continue
+        dt = r["vehicle_ts"] - p[0]
+        if not 0 < dt <= 120:
+            continue
+        lat1, lon1, lat2, lon2 = map(math.radians, (p[1], p[2], r["lat"], r["lon"]))
+        a = (math.sin((lat2 - lat1) / 2) ** 2 + math.cos(lat1) * math.cos(lat2)
+             * math.sin((lon2 - lon1) / 2) ** 2)
+        dist = 2 * 6_371_008.8 * math.asin(math.sqrt(min(1.0, a)))
+        y = math.sin(lon2 - lon1) * math.cos(lat2)
+        x = (math.cos(lat1) * math.sin(lat2)
+             - math.sin(lat1) * math.cos(lat2) * math.cos(lon2 - lon1))
+        out[r["vehicle_key"]] = (dist / dt, (math.degrees(math.atan2(y, x)) + 360) % 360)
+    return out
+
+
+def snapshot_doc(rows: list[dict], fetched_at: int,
+                 records: list[dict[str, Any]],
+                 derived: dict[tuple[str, str], tuple[float, float]] | None = None
+                 ) -> dict[str, Any]:
+    """The whole fleet as of this poll, for the viewer: compact rows, plus
+    each feed's outcome so the map can say who is missing and why.
+
+    `in_service` is whether the vehicle carries a trip. A bus without one is
+    usually parked in a depot (SEPTA, 2026-10-27), and the map dims it rather
+    than hiding it: it is still a report the agency made."""
+    return {
+        "time": fetched_at,
+        "cols": list(SNAPSHOT_COLS),
+        "vehicles": [_snap_row(r, (derived or {}).get((r["feed_id"], r["vehicle_key"])))
+                     for r in rows],
+        "feeds": {r["feed"]: r["outcome"] for r in records},
+    }
+
+
+def _snap_row(r: dict, d: tuple[float, float] | None) -> list:
+    speed, bearing, motion = r["speed"], r["bearing"], "feed"
+    if speed is None or bearing is None:
+        if d is not None:
+            speed = speed if speed is not None else round(d[0], 2)
+            bearing = bearing if bearing is not None else round(d[1], 1)
+            motion = "derived"
+        else:
+            motion = "none"
+    return [r["feed_id"], r["vehicle_key"], r["label"], r["route_id"],
+            round(r["lat"], 6), round(r["lon"], 6), bearing, speed,
+            r["vehicle_ts"], bool(r["trip_id"]), motion]
+
+
+def write_snapshot(path: Path, doc: dict[str, Any]) -> bool:
+    """Atomically, and a failure costs one snapshot, never the collector.
+    The same pattern and reason as the air collector's (opensky.write_snapshot):
+    on Windows the swap can fail while a reader holds the file open."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps({**doc, "written": time.time()},
+                                  separators=(",", ":")), encoding="utf-8")
+        os.replace(tmp, path)
+        return True
+    except OSError:
+        return False
+
+
 # --------------------------------------------------------------------------
 # the network, the only impure part
 # --------------------------------------------------------------------------
@@ -519,12 +609,15 @@ def fetch(url: str, key: tuple[str, str] | None
 class Poller:
     def __init__(self, feeds: list[dict[str, Any]], root: Path,
                  interval: float, flush_every: int, *,
-                 selection_sha: str = "") -> None:
+                 selection_sha: str = "", snapshot: Path | None = None) -> None:
         self.feeds = feeds
         self.root = Path(root)
         self.interval = interval
         self.flush_every = max(1, flush_every)
         self.selection_sha = selection_sha
+        # Optional, so tests and one-off runs write nothing outside their own
+        # archive (the air collector's rule). main() passes the live path.
+        self.snapshot = snapshot
         self.pb2 = need_bindings()
         self.state: dict[str, dict[str, tuple] | None] = {
             f["id"]: None for f in feeds}
@@ -538,17 +631,19 @@ class Poller:
 
     def _one(self, feed: dict[str, Any], fetched_at: int):
         key = key_for(feed["url"])
+        rows: list[dict] = []
         if key == ("", ""):
-            return feed_row(feed, status=None, body=None, elapsed_s=0.0,
-                            error=None, truncated=False,
-                            fetched_at=fetched_at,
-                            previous=self.state[feed["id"]], pb2=self.pb2,
-                            key_missing=True)
+            return (*feed_row(feed, status=None, body=None, elapsed_s=0.0,
+                              error=None, truncated=False,
+                              fetched_at=fetched_at,
+                              previous=self.state[feed["id"]], pb2=self.pb2,
+                              key_missing=True), rows)
         status, body, elapsed, error, truncated = fetch(feed["url"], key)
-        return feed_row(feed, status=status, body=body, elapsed_s=elapsed,
-                        error=error, truncated=truncated,
-                        fetched_at=fetched_at,
-                        previous=self.state[feed["id"]], pb2=self.pb2)
+        return (*feed_row(feed, status=status, body=body, elapsed_s=elapsed,
+                          error=error, truncated=truncated,
+                          fetched_at=fetched_at,
+                          previous=self.state[feed["id"]], pb2=self.pb2,
+                          all_rows=rows), rows)
 
     def cycle(self) -> dict[str, Any]:
         when = datetime.now(timezone.utc)
@@ -557,12 +652,20 @@ class Poller:
             results = list(pool.map(lambda f: self._one(f, fetched_at),
                                     self.feeds))
         records = []
-        for feed, (rec, fresh, state) in zip(self.feeds, results):
+        fleet: list[dict] = []
+        derived: dict[tuple[str, str], tuple[float, float]] = {}
+        for feed, (rec, fresh, state, rows) in zip(self.feeds, results):
             rec["selection_sha256"] = self.selection_sha
+            for k, m in derive_motion(rows, self.state[feed["id"]]).items():
+                derived[(feed["id"], k)] = m
             self.state[feed["id"]] = state
             self.buffer.extend(fresh)
+            fleet.extend(rows)
             records.append(rec)
         append_ledger(self.root, records, when)
+        if self.snapshot is not None:
+            write_snapshot(self.snapshot,
+                           snapshot_doc(fleet, fetched_at, records, derived))
         self.cycles += 1
         if self.cycles % self.flush_every == 0:
             self.flush()
@@ -692,7 +795,7 @@ def main(argv: list[str] | None = None) -> int:
     log.info("selection %s, sha256 %s", args.selection.name, sha[:12])
 
     poller = Poller(feeds, args.root, args.interval, args.flush_every,
-                    selection_sha=sha)
+                    selection_sha=sha, snapshot=LIVE / "roads-vehicles.json")
     max_cycles = 1 if args.once else None
     if args.minutes:
         max_cycles = max(1, int(args.minutes * 60 / args.interval))

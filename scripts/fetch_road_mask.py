@@ -34,10 +34,30 @@ quiet road.
 **Somebody else's links.** The camera layer carries a stream `url` and an
 `iframe` per camera. The mask needs where a camera is, not how to watch it,
 and a third party's stream links are not this project's to republish
-(mechanism X: the payload is the surface). They are dropped by name, and
-every byte that is written is scanned with the project's body-credential
-patterns before it is written. A match refuses the write and reports the
+(mechanism X: the payload is the surface). They are dropped by name from the
+TRACKED file, and every byte written is scanned with the project's
+body-credential patterns first. A match refuses the write and reports the
 pattern name, never the match.
+
+**The layer's links are dead (2026-10-28).** All 451 point at
+`chart.maryland.gov/video/video.php?feed=...`, which answers 404. CHART moved
+its player and the state's GIS layer did not follow. Of the layer's 451
+cameras, 358 are in CHART's own live list and 93 are not, and CHART lists 195
+the layer does not. So the viewer's links now come from CHART's own feed,
+`DataFeeds/GetCamerasJson` (553 cameras, each with a `publicVideoURL`). The
+layer stays the mask's record, and every run probes one of the layer's old
+links and records the answer. A self-published record that nobody checks is
+this project's subject; here it is the state's own map of its own cameras.
+
+**But the viewer can watch them, from CHART (2026-10-27, Joshua).** The Land
+tab has a Cameras sub-tab that plays a camera in CHART's own player, from
+CHART's servers. So the links are also written to `camera-streams.json`,
+which `.gitignore` leaves untracked. It stays on this machine and is never
+published. A link is kept only if it points at a Maryland government host
+(ALLOWED_STREAM_HOSTS); any other host is counted by name and dropped. The
+layer ships an `iframe` field, embed markup made by the publisher, so
+embedding is what it offers. Only the `src` is taken from that markup. The
+markup itself is never placed in a page.
 
 **A year nobody stated.** The AADT layer has `AADT_2010` to `AADT_2018` and
 a bare `AADT`. Which year the bare column is, the layer does not say
@@ -51,6 +71,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sys
 import time
 import urllib.error
@@ -58,7 +79,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 try:
     import _bootstrap  # noqa: F401  (must precede the angels imports)
@@ -91,6 +112,131 @@ LAYERS: dict[str, dict[str, Any]] = {
         "what": "AADT count stations: exposure, every vehicle, as numbers",
     },
 }
+
+
+# A stream link is kept only if its host ends in one of these.
+ALLOWED_STREAM_HOSTS = (".maryland.gov", ".md.gov")
+_SRC = re.compile(r"""\bsrc\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+
+
+def stream_link(url: Any) -> tuple[str | None, str | None]:
+    """(url, None) if it is an http(s) link to an allowed host, else
+    (None, the host or reason it was refused)."""
+    if not isinstance(url, str) or not url.strip():
+        return None, "empty"
+    p = urlparse(url.strip())
+    if p.scheme not in ("http", "https"):
+        return None, f"scheme:{p.scheme or 'none'}"
+    host = (p.hostname or "").lower()
+    if not any(host == h.lstrip(".") or host.endswith(h) for h in ALLOWED_STREAM_HOSTS):
+        return None, host or "no host"
+    return url.strip(), None
+
+
+def iframe_src(markup: Any) -> str | None:
+    """The `src` of the publisher's embed markup, and nothing else from it."""
+    if not isinstance(markup, str):
+        return None
+    m = _SRC.search(markup)
+    return m.group(1) if m else None
+
+
+def camera_streams(features: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """({OBJECTID: {"embed": url|None, "page": url|None}}, a report)."""
+    streams: dict[str, Any] = {}
+    refused: dict[str, int] = {}
+    n_embed = n_page = 0
+    for f in features:
+        props = f.get("properties") or {}
+        oid = props.get("OBJECTID", f.get("id"))
+        embed, why_e = stream_link(iframe_src(props.get("iframe")))
+        page, why_p = stream_link(props.get("url"))
+        for why in (why_e, why_p):
+            if why and why != "empty":
+                refused[why] = refused.get(why, 0) + 1
+        if embed or page:
+            streams[str(oid)] = {"embed": embed, "page": page}
+            n_embed += bool(embed)
+            n_page += bool(page)
+    return streams, {"n_cameras": len(features), "n_with_stream": len(streams),
+                     "n_embed": n_embed, "n_page": n_page,
+                     "refused_by_host": dict(sorted(refused.items())),
+                     "allowed_hosts": list(ALLOWED_STREAM_HOSTS)}
+
+
+CHART_FEED = "https://chart.maryland.gov/DataFeeds/GetCamerasJson"
+
+
+def parse_chart_feed(doc: Any) -> list[dict[str, Any]]:
+    """CHART's camera list, refused unless every row has an id and a point."""
+    if not isinstance(doc, list) or not doc:
+        raise MaskRefused("the CHART camera feed is not a non-empty list")
+    bad = [i for i, c in enumerate(doc) if not (
+        isinstance(c, dict) and c.get("id")
+        and isinstance(c.get("lat"), (int, float))
+        and isinstance(c.get("lon"), (int, float)))]
+    if bad:
+        raise MaskRefused(f"{len(bad)} CHART camera row(s) lack an id or a point")
+    return doc
+
+
+def chart_streams(items: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """({CHART id: what the viewer needs}, a report). Links are kept only on
+    an allowed host, exactly as for the layer."""
+    streams: dict[str, Any] = {}
+    refused: dict[str, int] = {}
+    for c in items:
+        url, why = stream_link(c.get("publicVideoURL"))
+        if why and why != "empty":
+            refused[why] = refused.get(why, 0) + 1
+        streams[str(c["id"])] = {
+            "embed": url, "page": url,
+            "name": str(c.get("name") or c.get("description") or ""),
+            "description": str(c.get("description") or ""),
+            "category": ", ".join(c.get("cameraCategories") or []),
+            "lat": c["lat"], "lon": c["lon"],
+            "op_status": c.get("opStatus"), "comm_mode": c.get("commMode"),
+        }
+    ops: dict[str, int] = {}
+    for s in streams.values():
+        ops[str(s["op_status"])] = ops.get(str(s["op_status"]), 0) + 1
+    return streams, {"n_cameras": len(items),
+                     "n_with_link": sum(1 for s in streams.values() if s["embed"]),
+                     "op_status": dict(sorted(ops.items())),
+                     "refused_by_host": dict(sorted(refused.items()))}
+
+
+def cross_check(layer_feats: list[dict[str, Any]], items: list[dict[str, Any]]) -> dict[str, int]:
+    """The state's GIS layer against CHART's own list, matched on the feed id."""
+    layer = {str((f.get("properties") or {}).get("feedID")) for f in layer_feats}
+    chart = {str(c["id"]) for c in items}
+    return {"layer": len(layer), "chart": len(chart), "both": len(layer & chart),
+            "layer_only": len(layer - chart), "chart_only": len(chart - layer)}
+
+
+def frame_policy(headers: Any) -> dict[str, Any]:
+    """Whether CHART's player page may be shown inside another page."""
+    get = (lambda k: headers.get(k)) if hasattr(headers, "get") else (lambda k: None)
+    xfo = (get("X-Frame-Options") or "").strip()
+    csp = get("Content-Security-Policy") or ""
+    anc = next((d.strip() for d in csp.split(";")
+                if d.strip().lower().startswith("frame-ancestors")), "")
+    blocked = xfo.upper() in ("DENY", "SAMEORIGIN") or (
+        anc and "*" not in anc and "localhost" not in anc)
+    return {"x_frame_options": xfo or None, "frame_ancestors": anc or None,
+            "embeddable": not blocked}
+
+
+def head_status(url: str) -> tuple[int | None, Any]:
+    """(status, headers) of one GET, body unread. Errors are a status too."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT_S) as r:
+            return r.status, r.headers
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.headers
+    except (urllib.error.URLError, TimeoutError):
+        return None, None
 
 
 class MaskRefused(RuntimeError):
@@ -217,6 +363,20 @@ def refuse_credentials(raw: bytes, layer: str) -> None:
 # the network
 # --------------------------------------------------------------------------
 
+def merge_manifest(old: dict[str, Any] | None, new: dict[str, Any]) -> dict[str, Any]:
+    """A one-layer fetch replaces THAT layer's entry and keeps the others.
+
+    Found 2026-10-27, before it bit: `--layer cameras` wrote a manifest with
+    only the cameras in it, so refreshing one layer would have erased the
+    other's record, sha256 and all, from the tracked file. Each layer keeps
+    its own `fetched_at_utc`, so a merged manifest says when each was taken."""
+    layers = dict((old or {}).get("layers") or {})
+    layers.update(new["layers"])
+    out = {**new, "layers": layers}
+    out["_partial"] = set(layers) != set(LAYERS)
+    return out
+
+
 def get_json(url: str) -> Any:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=TIMEOUT_S) as r:
@@ -265,8 +425,11 @@ def main(argv: list[str] | None = None) -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for name in names:
         spec = LAYERS[name]
+        streams = None
         try:
             feats = fetch_layer(name, spec, args.page_size)
+            if name == "cameras":
+                streams = camera_streams(feats)
             kept = [without(f, spec["drop"]) for f in feats]
             raw = serialise(kept)
             refuse_credentials(raw, name)
@@ -282,11 +445,61 @@ def main(argv: list[str] | None = None) -> int:
                  "dropped_fields": spec["drop"], **describe(kept)}
         if name == "aadt":
             entry["aadt_years"] = year_columns(kept)
+        if streams is not None:
+            links, srep = streams
+            # The layer's own links, checked rather than trusted: one probe.
+            first = next((v.get("page") or v.get("embed") for v in links.values()), None)
+            status, _ = head_status(first) if first else (None, None)
+            entry["layer_links"] = {**srep, "probe_url_path": "/video/video.php",
+                                    "probe_status": status,
+                                    "used_by_viewer": False}
+            print(f"  the layer's own camera links: one probed, HTTP {status}")
+            try:
+                chart = parse_chart_feed(get_json(CHART_FEED))
+            except (urllib.error.URLError, MaskRefused, json.JSONDecodeError,
+                    TimeoutError) as exc:
+                print(f"  CHART camera feed REFUSED: {exc}; no stream file written")
+                chart = None
+            if chart is not None:
+                cams, crep = chart_streams(chart)
+                sample = next((s["embed"] for s in cams.values() if s["embed"]), None)
+                vstatus, vheaders = head_status(sample) if sample else (None, None)
+                policy = {**frame_policy(vheaders), "probe_status": vstatus}
+                raw_s = json.dumps({
+                    "_what": "CHART cameras and player links, LOCAL ONLY: "
+                             "untracked by .gitignore and never published. "
+                             "The viewer plays them from CHART's servers.",
+                    "_source": CHART_FEED,
+                    "_fetched_at_utc": manifest["_fetched_at_utc"],
+                    **crep, "frame_policy": policy,
+                    "streams": cams}, indent=1).encode("utf-8")
+                hit = body_credential(raw_s)
+                if hit:
+                    crep = {**crep, "written": False,
+                            "why": f"carries something shaped like a {hit}"}
+                    print(f"  camera streams NOT written: {crep['why']}")
+                else:
+                    (args.out_dir / "camera-streams.json").write_bytes(raw_s)
+                    crep = {**crep, "written": True, "file": "camera-streams.json"}
+                    print(f"  CHART's own camera feed: {crep['n_cameras']} cameras, "
+                          f"{crep['n_with_link']} with a player link; status "
+                          f"{crep['op_status']}; one player probed, HTTP {vstatus}, "
+                          f"embeddable: {policy['embeddable']}")
+                entry["chart_feed"] = {**crep, "source": CHART_FEED,
+                                       "frame_policy": policy,
+                                       "vs_layer": cross_check(feats, chart)}
+                print(f"  layer against CHART: {entry['chart_feed']['vs_layer']}")
+        entry["fetched_at_utc"] = manifest["_fetched_at_utc"]
         manifest["layers"][name] = entry
         print(f"  {name}: {entry['n']:,} written, {len(raw) / 2**20:.1f} MiB, "
               f"{entry['without_usable_point']} without a usable point")
-    (args.out_dir / "manifest.json").write_text(
-        json.dumps(manifest, indent=1), encoding="utf-8")
+    mpath = args.out_dir / "manifest.json"
+    try:
+        old = json.loads(mpath.read_text(encoding="utf-8")) if args.layer else None
+    except (OSError, ValueError):
+        old = None
+    manifest = merge_manifest(old, manifest)
+    mpath.write_text(json.dumps(manifest, indent=1), encoding="utf-8")
     print(f"  wrote {args.out_dir / 'manifest.json'}")
     return 0
 

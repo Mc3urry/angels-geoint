@@ -352,3 +352,57 @@ def test_two_cycles_leave_a_ledger_a_heartbeat_and_one_file(
     events = [b["event"] for b in beats if b.get("collector") == fv.COLLECTOR_NAME]
     assert events[0] == "start" and events[-1] == "stop"
     assert events.count("poll") == 2
+
+
+# -- the live snapshot (2026-10-27) -------------------------------------------
+
+def test_the_snapshot_holds_the_whole_fleet_not_only_new_fixes(tmp_path) -> None:
+    """The archive stores what changed; the map needs everything the agency
+    reported this poll, including a bus that has not moved."""
+    from scripts.fetch_vehicles import snapshot_doc, write_snapshot
+    body = feed_message([{"id": "a", "ts": T}, {"id": "b", "ts": T}])
+    _, _, state = poll(body)
+    rows: list = []
+    rec, fresh, _ = feed_row(FEED, status=200, body=body, elapsed_s=0.1,
+                             error=None, truncated=False, fetched_at=T + 5,
+                             previous=state, pb2=pb2, all_rows=rows)
+    assert fresh == [] and len(rows) == 2, "nothing new, everything reported"
+    doc = snapshot_doc(rows, T + 5, [rec])
+    assert doc["cols"][-2:] == ["in_service", "motion"] and len(doc["vehicles"]) == 2
+    assert doc["feeds"] == {FEED["id"]: OK}
+    path = tmp_path / "live" / "roads-vehicles.json"
+    assert write_snapshot(path, doc) is True
+    assert json.loads(path.read_text())["time"] == T + 5
+
+
+def test_a_poller_without_a_snapshot_path_writes_none(tmp_path, monkeypatch) -> None:
+    import scripts.fetch_vehicles as fv
+    monkeypatch.setattr(fv, "fetch", lambda url, key: (
+        200, feed_message([{"id": "a", "ts": T}]), 0.1, None, False))
+    p = fv.Poller([FEED], tmp_path, interval=0.01, flush_every=10)
+    p.cycle()
+    assert not list(tmp_path.rglob("roads-vehicles.json"))
+    snap = tmp_path / "snap.json"
+    p2 = fv.Poller([FEED], tmp_path, interval=0.01, flush_every=10, snapshot=snap)
+    p2.cycle()
+    assert len(json.loads(snap.read_text())["vehicles"]) == 1
+
+
+def test_motion_is_derived_only_where_the_feed_sent_none() -> None:
+    """WMATA rail sends no speed, so it jumped every 30 s on the live map.
+    Speed and bearing come from the previous poll, labelled `derived`."""
+    from scripts.fetch_vehicles import derive_motion, snapshot_doc
+    _, _, state = poll(feed_message([{"id": "r", "ts": T, "lat": 38.9}]))
+    rows: list = []
+    rec, _, _ = feed_row(FEED, status=200,
+                         body=feed_message([{"id": "r", "ts": T + 30, "lat": 38.9027},
+                                            {"id": "s", "ts": T + 30, "bearing": 90.0}]),
+                         elapsed_s=0.1, error=None, truncated=False,
+                         fetched_at=T + 31, previous=state, pb2=pb2, all_rows=rows)
+    d = derive_motion(rows, state)
+    assert set(d) == {"r"}, "s has no previous fix to derive from"
+    speed, bearing = d["r"]
+    assert speed == pytest.approx(10.0, rel=0.02) and bearing == pytest.approx(0.0, abs=1)
+    doc = snapshot_doc(rows, T + 31, [rec], {(FEED["id"], k): v for k, v in d.items()})
+    by = {v[1]: dict(zip(doc["cols"], v)) for v in doc["vehicles"]}
+    assert by["r"]["motion"] == "derived" and by["s"]["motion"] == "none"

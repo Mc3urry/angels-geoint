@@ -1,6 +1,6 @@
 {
  "_what": "G3 mask inputs: Maryland CHART cameras and AADT stations",
- "_fetched_at_utc": "2026-10-27T19:50:33+00:00",
+ "_fetched_at_utc": "2026-10-28T17:49:43+00:00",
  "_partial": false,
  "layers": {
   "aadt": {
@@ -75,7 +75,8 @@
     ],
     "bare_column": "AADT",
     "bare_column_year": "NOT INFERRED: the layer does not state it"
-   }
+   },
+   "fetched_at_utc": "2026-10-28T17:49:43+00:00"
   },
   "cameras": {
    "service": "https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0",
@@ -98,7 +99,48 @@
     -75.06814599986421,
     39.71774999968561
    ],
-   "nulls_by_field": {}
+   "nulls_by_field": {},
+   "layer_links": {
+    "n_cameras": 451,
+    "n_with_stream": 451,
+    "n_embed": 451,
+    "n_page": 451,
+    "refused_by_host": {},
+    "allowed_hosts": [
+     ".maryland.gov",
+     ".md.gov"
+    ],
+    "probe_url_path": "/video/video.php",
+    "probe_status": 404,
+    "used_by_viewer": false
+   },
+   "chart_feed": {
+    "n_cameras": 553,
+    "n_with_link": 553,
+    "op_status": {
+     "COMM_FAILURE": 37,
+     "COMM_MARGINAL": 20,
+     "OK": 496
+    },
+    "refused_by_host": {},
+    "written": true,
+    "file": "camera-streams.json",
+    "source": "https://chart.maryland.gov/DataFeeds/GetCamerasJson",
+    "frame_policy": {
+     "x_frame_options": null,
+     "frame_ancestors": null,
+     "embeddable": true,
+     "probe_status": 200
+    },
+    "vs_layer": {
+     "layer": 451,
+     "chart": 553,
+     "both": 358,
+     "layer_only": 93,
+     "chart_only": 195
+    }
+   },
+   "fetched_at_utc": "2026-10-28T17:49:43+00:00"
   }
  }
 }
