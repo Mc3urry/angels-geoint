@@ -1,0 +1,181 @@
+/* The 3D view, in the 2D viewer's clothes.
+
+   style.css is loaded first and supplies everything the two views share:
+   the tokens, the header, h1 and gloss, the card (.pcard and friends), the
+   stat and meta type. This file only lays out what is different -- the
+   layer list on the left, the globe, the card's place -- and copies the 2D
+   control style onto the controls the 2D header does not have. */
+
+body.ops {
+  grid-template-columns: 236px 1fr;
+  grid-template-areas: "head head" "side map";
+  overflow: hidden;
+}
+body.ops.collapsed { grid-template-columns: 0 1fr; }
+body.ops.collapsed #side { display: none; }
+
+body.ops header { align-items: center; }
+
+/* The 2D viewer's segmented control (#boxes), as a class. */
+.seg { display: flex; margin-left: 10px; }
+.seg button {
+  font: 12px/16px var(--sans); padding: 4px 10px;
+  border: 1px solid var(--rule); background: #fff; color: var(--ink-2); cursor: pointer;
+}
+.seg button + button { border-left: none; }
+.seg button:first-child { border-radius: 2px 0 0 2px; }
+.seg button:last-child { border-radius: 0 2px 2px 0; }
+.seg button:hover { border-color: var(--ink-3); }
+.seg button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+#search { position: relative; margin-left: auto; }
+#search input {
+  width: 230px; font: 12px var(--sans); padding: 5px 9px; color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 2px; background: #fff;
+}
+#search input:focus { outline: none; border-color: var(--ink-3); }
+#hits {
+  position: absolute; right: 0; top: 30px; z-index: 20; width: 300px;
+  margin: 0; padding: 4px 0; list-style: none; background: #fff;
+  border: 1px solid var(--rule); border-radius: 3px; box-shadow: 0 4px 18px rgba(14,26,36,.18);
+}
+#hits li { display: flex; align-items: center; gap: 8px; padding: 5px 10px;
+  font: 11px var(--mono); color: var(--ink); cursor: pointer; }
+#hits li:hover { background: var(--paper); }
+#hits li small { margin-left: auto; color: var(--ink-3); }
+#hits img { width: 16px; height: 16px; }
+
+#to-2d { font: 500 12px var(--sans); color: var(--ink-2); text-decoration: none;
+  padding: 4px 8px; border-radius: 2px; white-space: nowrap; }
+#to-2d:hover { color: var(--ink); background: var(--paper); }
+
+/* -- the layer list ---------------------------------------------------------
+   One row per layer: its symbol, its name, how many are drawn. A layer that
+   is off is a faded row, not a switch widget; a layer's key appears only
+   while it is on; a status is a dot whose words are in its tooltip, and only
+   a failure gets a line of text. That is the whole panel. */
+
+#side {
+  grid-area: side; overflow-y: auto; background: #fff;
+  border-right: 1px solid var(--rule); padding: 10px 0 12px;
+  display: flex; flex-direction: column;
+}
+.sec {
+  display: flex; align-items: baseline; gap: 6px; padding: 16px 14px 4px;
+  font: 600 12px/16px var(--sans); color: var(--ink-2);
+}
+.sec:first-child { padding-top: 4px; }
+.sec > span { font-weight: 400; color: var(--ink-3); }
+.sec .hide { margin-left: auto; border: 0; background: none; cursor: pointer;
+  font: 14px/1 var(--mono); color: var(--ink-3); padding: 0 2px; }
+.sec .hide:hover { color: var(--ink); }
+
+.lyr {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 5px 14px 5px 11px; border: 0; border-left: 3px solid transparent;
+  background: none; text-align: left; cursor: pointer; color: var(--ink-3);
+  font: 13px/1.25 var(--sans);
+}
+.lyr:hover { background: var(--paper); }
+.lyr img, .lyr .gl { width: 20px; height: 20px; flex: none; opacity: .35; filter: grayscale(1); }
+.lyr.on { color: var(--ink); border-left-color: var(--ink); font-weight: 600; }
+.lyr.on img, .lyr.on .gl { opacity: 1; filter: none; }
+.lyr .ct { margin-left: auto; font: 11px var(--mono); color: var(--ink-2); font-weight: 400;
+  font-variant-numeric: tabular-nums; }
+.lyr .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: transparent; }
+.lyr .dot.ok { background: #10635f; }
+.lyr .dot.warn { background: #9a5b12; }
+.lyr .dot.err { background: var(--accent); }
+.gl { display: grid; place-items: center; }
+.gl i { display: block; }
+
+.err1 { margin: 0 14px 4px 42px; font: 12px/16px var(--sans); color: var(--accent); }
+
+.key { display: flex; flex-wrap: wrap; gap: 3px 9px; margin: 1px 14px 6px 42px;
+  font: 12px/16px var(--sans); color: var(--ink-2); }
+.key span { display: inline-flex; align-items: center; gap: 3px; }
+.key img { width: 13px; height: 13px; }
+.key .btn { cursor: pointer; }
+.key .btn.off { opacity: .35; text-decoration: line-through; }
+.key .ramp { width: 100%; height: 5px; border-radius: 2px; margin: 3px 0 0;
+  background: linear-gradient(90deg,#a8175c 0%,#c2703f 12%,#9a8f2a 33%,#3d8f6a 66%,#10635f 100%); }
+.key .ends { width: 100%; display: flex; justify-content: space-between; color: var(--ink-3); }
+
+.foot { margin-top: auto; padding: 12px 14px 0; border-top: 1px solid var(--rule); }
+.foot .seg { margin: 0 0 8px; }
+.foot p { margin: 0; font: 12px/18px var(--sans); color: var(--ink-3); }
+
+#show-side { position: fixed; left: 10px; top: 56px; z-index: 6;
+  font: 12px var(--sans); padding: 4px 10px; background: #fff; color: var(--ink-2);
+  border: 1px solid var(--rule); border-radius: 2px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(14,26,36,.12); }
+
+/* -- the globe ----------------------------------------------------------------- */
+
+#map { grid-area: map; position: relative; min-width: 0; min-height: 0; }
+#map .cesium-viewer, #map .cesium-widget { width: 100%; height: 100%; }
+.cesium-viewer-bottom { opacity: .75; }
+.cesium-widget-credits { font: 11px var(--sans) !important; }
+.cesium-credit-logoContainer { display: none !important; }
+
+/* -- the pinned card: the 2D card, in the map's top-right corner ---------------- */
+
+#card {
+  position: fixed; top: 56px; right: 12px; z-index: 6; width: 300px;
+  max-height: calc(100vh - 80px); overflow-y: auto; background: #fff;
+  border-radius: 3px; box-shadow: 0 6px 26px rgba(14,26,36,.34);
+}
+#card .pcard { width: auto; border-left-width: 4px; }
+#card .ph { padding-right: 32px; position: relative; }
+#card .x { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0;
+  font: 16px/22px var(--mono); color: #93a5b2; background: transparent; border: 0; cursor: pointer; }
+#card .x:hover { color: #fff; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px 10px;
+  border-top: 1px solid var(--rule); border-left: 4px solid var(--chip, transparent); }
+.acts button, .acts a {
+  font: 12px var(--sans); padding: 4px 10px; border: 1px solid var(--rule); background: #fff;
+  color: var(--ink-2); border-radius: 2px; cursor: pointer; text-decoration: none;
+}
+.acts button:hover, .acts a:hover { border-color: var(--ink-3); color: var(--ink); }
+.acts button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* The hover card: the 2D card's header only, beside the cursor. */
+#tip { position: fixed; z-index: 7; pointer-events: none; width: 260px;
+  border-radius: 3px; overflow: hidden; box-shadow: 0 4px 18px rgba(14,26,36,.22); background: #fff; }
+#tip .pcard { width: auto; }
+
+#readout { position: fixed; left: 248px; bottom: 8px; z-index: 5; pointer-events: none;
+  font: 11px var(--mono); color: var(--ink-2); background: rgba(255,255,255,.85);
+  padding: 2px 7px; border-radius: 2px; }
+body.collapsed #readout { left: 12px; }
+
+#toast { position: fixed; left: 50%; top: 56px; transform: translateX(-50%); z-index: 8;
+  font: 12px/16px var(--sans); padding: 8px 12px; border-radius: 4px; background: #f7ebda; color: #9a5b12; }
+
+#video { position: fixed; right: 12px; bottom: 28px; z-index: 7; width: 440px; background: #fff;
+  border-radius: 3px; overflow: hidden; box-shadow: 0 6px 26px rgba(14,26,36,.34); border-left-width: 4px;
+  --chip: #1f6fe5; }
+#video .ph { position: relative; padding-right: 32px; }
+#video .ph button { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0;
+  border: 0; background: none; color: #93a5b2; font: 16px/22px var(--mono); cursor: pointer; }
+#vbody { aspect-ratio: 16 / 9; background: #0e1a24; display: grid; place-items: center;
+  font: 13px/20px var(--sans); color: #8fa3b1; text-align: center; padding: 0; }
+#vbody iframe, #vbody video { width: 100%; height: 100%; border: 0; background: #000; }
+#vbody img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+#video .psub { display: flex; gap: 8px; }
+#video .psub a { margin-left: auto; color: #cfe0ff; }
+
+@media (max-width: 900px) {
+  body.ops { grid-template-columns: 200px 1fr; }
+  #search input { width: 140px; }
+  #card, #video { width: calc(100vw - 24px); }
+  .gloss { display: none; }
+}
+
+/* -- 2026-11-01, the unslop pass: one ease, visible focus ------------------ */
+.lyr, .seg button, #to-2d, .acts button, .acts a, #hits li {
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+}
+.lyr:focus-visible, .seg button:focus-visible, .acts button:focus-visible, #search input:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: -2px;
+}

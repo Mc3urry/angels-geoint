@@ -44,12 +44,17 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from angels.config import RAW, REFERENCE
+from angels.config import LIVE, RAW, REFERENCE
 
 VEHICLES = RAW / "roads" / "vehicles"
 WZDX = RAW / "roads" / "wzdx"
 SELECTION = REFERENCE / "roads" / "border-feeds.json"
 STATES = REFERENCE / "roads" / "states-generalised"
+CAMERAS = REFERENCE / "roads" / "g3" / "cameras.geojson"
+STREAMS = REFERENCE / "roads" / "g3" / "camera-streams.json"   # local, untracked
+SNAPSHOT = LIVE / "roads-vehicles.json"
+SNAPSHOT_MAX_AGE_S = 120        # four missed polls; older means the collector stopped
+POINTS_OVER_DEG2 = 16.0         # a view wider than ~4 x 4 degrees gets points
 
 DEFAULT_WINDOW_S = 900
 MAX_WORKZONES = 4000
@@ -189,6 +194,64 @@ def recent_vehicles(root: Path | None = None, *, now_s: float,
         }}
 
 
+def live_vehicles(path: Path | None = None, *, now_s: float,
+                  max_age_s: float = SNAPSHOT_MAX_AGE_S,
+                  index: dict[str, dict[str, Any]] | None = None
+                  ) -> dict[str, Any] | None:
+    """The collector's latest poll, every vehicle it reported, or None.
+
+    Added 2026-10-27 because the archive cannot be watched: it keeps only
+    changed fixes and is written every five minutes, so vehicles appeared in
+    jumps and a bus at a stop vanished. The air view has read the collector's
+    snapshot since the 2026-09-19 credit loss, and so does this one now.
+    None when the snapshot is missing, unreadable or older than `max_age_s`:
+    a fleet frozen at the moment the collector stopped is not a live map."""
+    path = Path(path) if path is not None else SNAPSHOT
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    t = doc.get("time")
+    if not isinstance(t, (int, float)) or now_s - t > max_age_s:
+        return None
+    index = index if index is not None else selection_index()
+    cols = doc.get("cols") or []
+    feats = []
+    for v in doc.get("vehicles") or []:
+        r = dict(zip(cols, v))
+        fix_t = r.get("vehicle_ts") or t
+        feats.append({
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [r["lon"], r["lat"]]},
+            "properties": {
+                "feed_id": r["feed_id"],
+                # The agency's own vehicle key, so a view can follow one bus
+                # from poll to poll. A fleet identifier, never a person.
+                "vehicle_key": str(r.get("vehicle_key") or ""),
+                "provider": index.get(r["feed_id"], {}).get("provider", ""),
+                "label": r.get("label") or "", "route_id": r.get("route_id") or "",
+                "bearing": r.get("bearing"), "speed_mps": r.get("speed"),
+                "fix_t": fix_t,
+                "age_s": max(0, int(now_s - fix_t)),
+                "age_from": "vehicle" if r.get("vehicle_ts") else "poll",
+                "in_service": bool(r.get("in_service")),
+                # Where the speed and heading came from: the vehicle's own
+                # report, or the collector's previous poll (`derived`).
+                "motion": r.get("motion") or "feed",
+            }})
+    return {"type": "FeatureCollection", "features": feats,
+            "properties": {
+                "evidence": "cooperative", "source": "collector-live",
+                "n": len(feats),
+                "n_in_service": sum(1 for f in feats if f["properties"]["in_service"]),
+                "n_feeds": len({f["properties"]["feed_id"] for f in feats}),
+                "poll_age_s": int(now_s - t),
+                "feeds": doc.get("feeds") or {},
+                "means": ("every vehicle the agencies reported at the "
+                          "collector's last poll, moving or not; a vehicle "
+                          "with no trip is drawn faint, usually parked")}}
+
+
 # --------------------------------------------------------------------------
 # ledgers
 # --------------------------------------------------------------------------
@@ -312,9 +375,26 @@ def _zones_of(root: Path, feed: str, side: Path) -> list[tuple[Box, dict[str, An
     return zones
 
 
+def first_point(geom: dict[str, Any] | None) -> list[float] | None:
+    c = (geom or {}).get("coordinates")
+    while isinstance(c, list) and c and isinstance(c[0], list):
+        c = c[0]
+    return c[:2] if isinstance(c, list) and len(c) >= 2 else None
+
+
 def workzones(root: Path | None = None, *, bbox: Box,
               limit: int = MAX_WORKZONES) -> dict[str, Any]:
+    """Declared work zones in a box.
+
+    A WIDE VIEW GETS EVERY ZONE AS A POINT, NOT SOME ZONES AS LINES. The first
+    version cut the country at 4,000 lines in feed-name order, so the first
+    few feeds filled the map and later states showed nothing at all. A cut by
+    alphabet drawn as a map reads as geography. That is a page taken for the
+    layer, the defect G3 refuses, made by this file. Now a view wider than
+    POINTS_OVER_DEG2 square degrees draws every zone as one point, with no
+    cut. A narrow view keeps lines, and a cut there is stated."""
     root = Path(root) if root is not None else WZDX
+    points = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) > POINTS_OVER_DEG2
     feats: list[dict[str, Any]] = []
     n_in_view = 0
     feeds_in_view: set[str] = set()
@@ -324,12 +404,19 @@ def workzones(root: Path | None = None, *, bbox: Box,
             if overlaps(b, bbox):
                 n_in_view += 1
                 feeds_in_view.add(feed)
-                if len(feats) < limit:
+                if points:
+                    p = first_point(f["geometry"])
+                    if p is not None:
+                        feats.append({"type": "Feature",
+                                      "geometry": {"type": "Point", "coordinates": p},
+                                      "properties": f["properties"]})
+                elif len(feats) < limit:
                     feats.append(f)
     return {"type": "FeatureCollection", "features": feats,
             "properties": {"evidence": "cooperative (declared by agencies)",
                            "n_in_view": n_in_view, "n_shown": len(feats),
                            "truncated": n_in_view > len(feats),
+                           "as_points": points,
                            "feeds_in_view": sorted(feeds_in_view),
                            "means": ("work zones agencies DECLARE; a place "
                                      "with none is often a place whose "
@@ -365,6 +452,88 @@ def states_in(directory: Path | None = None, *, bbox: Box | None) -> dict[str, A
             "properties": {"source": manifest.get("_service"),
                            "generalised_m": manifest.get(
                                "generalise_m_upper_bound")}}
+
+
+def _stream_doc(path: Path | None = None) -> dict[str, Any]:
+    try:
+        return json.loads(Path(path or STREAMS).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def _streams(path: Path | None = None) -> dict[str, Any]:
+    return _stream_doc(path).get("streams") or {}
+
+
+def camera_stream(object_id: str, path: Path | None = None) -> dict[str, Any] | None:
+    """CHART's own player link for one camera, or None. Read from the local,
+    untracked file G3 writes; validated to a Maryland government host there."""
+    doc = _stream_doc(path)
+    s = (doc.get("streams") or {}).get(str(object_id))
+    if not s or not (s.get("embed") or s.get("page")):
+        return None
+    policy = doc.get("frame_policy") or {}
+    return {"id": str(object_id), "embed": s.get("embed"), "page": s.get("page"),
+            # Read from CHART's own headers at fetch time, not assumed.
+            "embeddable": policy.get("embeddable", True),
+            "op_status": s.get("op_status"),
+            "source": "Maryland CHART, played from CHART's servers",
+            "note": "not recorded, stored or republished by this project"}
+
+
+def cameras(path: Path | None = None, streams: Path | None = None) -> dict[str, Any]:
+    """CHART cameras from G3: where the state itself can see the road.
+
+    Locations in the tracked file; whether CHART offers a stream for each
+    comes from the local stream file (see camera_stream)."""
+    path = Path(path) if path is not None else CAMERAS
+    links = _streams(streams)
+    # CHART's own list when G3 has fetched it: 553 cameras with live links,
+    # where the GIS layer has 451 with dead ones (FINDINGS 2026-10-28).
+    if links and all("lat" in s for s in links.values()):
+        feats = [{"type": "Feature",
+                  "geometry": {"type": "Point", "coordinates": [s["lon"], s["lat"]]},
+                  # CHART's `name` is often a bare code ("710002"); its
+                  # description is the place ("I-70 East of I-270").
+                  "properties": {"id": cid,
+                                 "location": s.get("description") or s.get("name", ""),
+                                 "code": s.get("name", ""),
+                                 "county": s.get("category", ""),
+                                 "status": s.get("op_status") or "",
+                                 "has_stream": bool(s.get("embed") or s.get("page"))}}
+                 for cid, s in links.items()]
+        return {"type": "FeatureCollection", "features": feats,
+                "properties": {"n": len(feats), "source": "CHART's own camera feed",
+                               "evidence": "the state's own observation points",
+                               "n_with_stream": sum(1 for f in feats
+                                                    if f["properties"]["has_stream"]),
+                               "streams": "played from CHART's servers; links local only"}}
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"type": "FeatureCollection", "features": [],
+                "properties": {"error": "no G3 camera layer: "
+                               "python scripts/fetch_road_mask.py"}}
+    feats = []
+    for f in doc.get("features") or []:
+        if not f.get("geometry"):
+            continue
+        p = f.get("properties") or {}
+        oid = str(p.get("OBJECTID", ""))
+        feats.append({"type": "Feature", "geometry": f["geometry"],
+                      "properties": {"id": oid,
+                                     "location": p.get("location", ""),
+                                     "county": p.get("county", ""),
+                                     "has_stream": oid in links}})
+    return {"type": "FeatureCollection", "features": feats,
+            "properties": {"n": len(feats), "source": "CHART via iMAP (G3)",
+                           "evidence": "the state's own observation points",
+                           "n_with_stream": sum(1 for f in feats
+                                                if f["properties"]["has_stream"]),
+                           "streams": ("played from CHART's servers; links "
+                                       "local only" if links else
+                                       "no local stream file: python "
+                                       "scripts/fetch_road_mask.py --layer cameras")}}
 
 
 def now() -> float:

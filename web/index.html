@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ANGELS</title>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,6 +29,14 @@
          alongside Air/Sea. Air and Sea are DOMAINS of the same cooperative
          feed; this is a different kind of knowing, and putting it in the same
          row of buttons would say the opposite. -->
+    <!-- LAND'S TWO LAYERS, shown only while Land is on, each toggled on or
+         off on its own: Vehicles (with work zones), and Cameras (Maryland's
+         CHART cameras, with a browser and CHART's own player). -->
+    <div id="landtabs" hidden>
+      <button data-landtab="vehicles" class="on">Vehicles</button>
+      <button data-landtab="cameras">Cameras</button>
+    </div>
+
     <div id="layers">
       <button data-layer="observed"
               title="Sentinel-1 radar returns no AIS report explained. Retrospective: hours to days old, twelve days between passes.">Observed &middot; SAR</button>
@@ -54,6 +65,10 @@
       <button data-hours="6" disabled>6h</button>
       <button data-hours="24" disabled>24h</button>
     </div>
+
+    <!-- The 3D ops view: the same API on a globe, with tracking, sensor
+         looks and context layers (2026-10-28). -->
+    <a id="to-ops" href="ops.html" title="Globe, click-to-track, sensor styles, context layers">3D view &#8599;</a>
   </header>
 
   <div id="map"></div>

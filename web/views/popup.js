@@ -290,13 +290,55 @@ export const ageShort = (seconds) => {
 
 const PIN_HINT = "Click to keep this open";
 
+// ONE CURSOR FOR EVERY HOVERABLE LAYER, 2026-10-28.
+//
+// Each layer set used to write the cursor itself: "pointer" on its own
+// mousemove, "" on its own mouseleave. With vehicles, work zones, cameras,
+// aircraft and vessels on one map, one layer's leave cleared the pointer
+// while the cursor sat on another layer's feature, so the pointer flickered
+// off over things that could be hovered. Now each wiring says whether it is
+// hovering, and the cursor is the OR of all of them.
+const HOVERING = new Set();
+function setHovering(map, who, yes) {
+  if (yes) HOVERING.add(who); else HOVERING.delete(who);
+  map.getCanvas().style.cursor = HOVERING.size ? "pointer" : "";
+}
+
+// WHERE A CARD GOES, 2026-10-28.
+//
+// MapLibre's default puts the card above the point, centred, until it hits
+// an edge. Here that meant cards covering the contact they described, cards
+// clipped at the bottom of the map, and cards spilling toward the side
+// panel. Now the card opens on the side of the point that faces the middle
+// of the map, a fixed gap away: a contact in the lower right gets a card up
+// and to its left. It is never clipped, never on top of its own dot, and
+// close enough to read without hunting for it.
+const CARD_GAP = 14;
+export function placeAt(map, popup, lngLat) {
+  const p = map.project(lngLat);
+  const c = map.getContainer();
+  const v = p.y > c.clientHeight / 2 ? "bottom" : "top";
+  const h = p.x > c.clientWidth / 2 ? "right" : "left";
+  popup.options.anchor = `${v}-${h}`;
+  popup.setOffset(CARD_GAP);
+  return popup.setLngLat(lngLat);
+}
+
 /** Wire hover + click-to-pin for one set of layers.
  *
  *  html(properties, { others }) builds the card. `others` is how many OTHER
  *  distinct contacts are under the same cursor position, so the card can say
  *  so rather than pretending it was the only one.
  */
-export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
+export function attachHover(map, { layers, html, key, cursor = "pointer",
+                                    tolerance = 0, onClick = null }) {
+  // tolerance > 0: listen on the MAP and look in a box that many pixels
+  // around the cursor, for layers of small dots with no fat hit layer of
+  // their own (Land). It also means leaving one of the set's layers for
+  // another is not a leave at all. onClick replaces pinning, for a layer
+  // whose click does something else (a camera opens its player).
+  const who = {};
+  void cursor;
   const hover = new maplibregl.Popup({
     closeButton: false, closeOnClick: false,
     className: "track-popup", maxWidth: "none",
@@ -320,8 +362,15 @@ export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
       ? c : e.lngLat;
   };
 
+  const live = () => layers.filter((id) => map.getLayer(id));
+  const where = (e) => (tolerance > 0
+    ? [[e.point.x - tolerance, e.point.y - tolerance],
+       [e.point.x + tolerance, e.point.y + tolerance]]
+    : e.point);
   const render = (e) => {
-    const here = map.queryRenderedFeatures(e.point, { layers })
+    const ids = live();
+    if (!ids.length) return null;
+    const here = map.queryRenderedFeatures(where(e), { layers: ids })
       .filter((f) => f && f.properties);
     if (!here.length) return null;
 
@@ -340,17 +389,16 @@ export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
   };
 
   const move = (e) => {
-    map.getCanvas().style.cursor = cursor;
-    if (isPinned) return;
     const hit = render(e);
-    if (!hit) return;
+    setHovering(map, who, !!hit);
+    if (isPinned || !hit) return;
     // Rebuilding identical HTML sixty times a second would defeat the
     // throttling everywhere else; only the contact CHANGING is a new card.
-    if (hit.k != null && hit.k === shownKey) { hover.setLngLat(at(hit.f, e)); return; }
+    if (hit.k != null && hit.k === shownKey) { placeAt(map, hover, at(hit.f, e)); return; }
     shownKey = hit.k;
-    hover.setLngLat(at(hit.f, e))
+    placeAt(map, hover, at(hit.f, e))
          .setHTML(html(hit.f.properties, { others: hit.others, layer: hit.layer,
-                                           pinnable: true }))
+                                           pinnable: !onClick }))
          .addTo(map);
   };
 
@@ -368,8 +416,9 @@ export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
     // aircraft showed the card appear at 0px and disappear at 17px, inside
     // a hit radius of 18. The first version of this function had the
     // failure it carried a comment about avoiding.
-    if (e && e.point && map.queryRenderedFeatures(e.point, { layers }).length) return;
-    map.getCanvas().style.cursor = "";
+    if (e && e.point && live().length
+        && map.queryRenderedFeatures(where(e), { layers: live() }).length) return;
+    setHovering(map, who, false);
     if (!isPinned) { shownKey = null; hover.remove(); }
   };
 
@@ -387,10 +436,11 @@ export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
   const pin = (e) => {
     const hit = render(e);
     if (!hit) return;
+    if (onClick) { onClick(hit.f.properties, hit.f); return; }
     hover.remove();
     shownKey = null;
     closingToReopen = true;
-    pinned.setLngLat(at(hit.f, e))
+    placeAt(map, pinned, at(hit.f, e))
           .setHTML(html(hit.f.properties, { others: hit.others, layer: hit.layer,
                                             pinnable: false }))
           .addTo(map);
@@ -401,10 +451,22 @@ export function attachHover(map, { layers, html, key, cursor = "pointer" }) {
   // Only a close the USER asked for un-pins. addTo's internal remove does not.
   pinned.on("close", () => { if (!closingToReopen) isPinned = false; });
 
-  for (const id of layers) {
-    map.on("mousemove", id, move);
-    map.on("mouseleave", id, leave);
-    map.on("click", id, pin);
+  if (tolerance > 0) {
+    let busy = false;
+    map.on("mousemove", (e) => {
+      if (busy) return;               // one query per frame is plenty
+      busy = true;
+      requestAnimationFrame(() => { busy = false; });
+      if (render(e)) move(e); else leave(e);
+    });
+    map.on("mouseout", () => leave(null));
+    map.on("click", (e) => { if (render(e)) pin(e); });
+  } else {
+    for (const id of layers) {
+      map.on("mousemove", id, move);
+      map.on("mouseleave", id, leave);
+      map.on("click", id, pin);
+    }
   }
 
   // Escape closes a pinned card without hunting for its ×.

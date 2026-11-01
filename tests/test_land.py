@@ -152,6 +152,7 @@ def test_the_routes_answer_and_say_cooperative(tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(land, "VEHICLES", tmp_path / "v")
     monkeypatch.setattr(land, "WZDX", tmp_path / "w")
+    monkeypatch.setattr(land, "SNAPSHOT", tmp_path / "no-snapshot.json")
     app = FastAPI()
     app.include_router(route.router)
     c = TestClient(app)
@@ -159,3 +160,106 @@ def test_the_routes_answer_and_say_cooperative(tmp_path, monkeypatch) -> None:
     assert c.get("/land/workzones", params={"bbox": "1,2,3"}).status_code == 422
     s = c.get("/land/status").json()
     assert s["evidence"] == "cooperative" and "no cause" in s["note"]
+
+
+# -- the live snapshot, wide views and cameras (2026-10-27) -----------------
+
+def test_a_fresh_snapshot_is_the_whole_fleet(tmp_path) -> None:
+    snap = tmp_path / "roads-vehicles.json"
+    snap.write_text(json.dumps({
+        "time": NOW - 20,
+        "cols": ["feed_id", "vehicle_key", "label", "route_id", "lat", "lon",
+                 "bearing", "speed", "vehicle_ts", "in_service"],
+        "vehicles": [["mdb-1850", "v1", "7001", "X2", 38.9, -77.0, 90.0, 8.0,
+                      NOW - 25, True],
+                     ["mdb-1850", "v2", "", "", 38.8, -77.1, None, None,
+                      NOW - 400, False]],
+        "feeds": {"mdb-1850": "ok"}}))
+    fc = land.live_vehicles(snap, now_s=NOW, index=INDEX)
+    assert fc["properties"]["source"] == "collector-live"
+    assert (fc["properties"]["n"], fc["properties"]["n_in_service"]) == (2, 1)
+    p = fc["features"][0]["properties"]
+    assert p["speed_mps"] == 8.0 and p["bearing"] == 90.0 and p["age_s"] == 25
+    assert p["vehicle_key"] == "v1", "a view following one bus needs its key"
+
+
+def test_a_stale_or_missing_snapshot_is_not_served(tmp_path) -> None:
+    snap = tmp_path / "roads-vehicles.json"
+    assert land.live_vehicles(snap, now_s=NOW) is None
+    snap.write_text(json.dumps({"time": NOW - 600, "cols": [], "vehicles": []}))
+    assert land.live_vehicles(snap, now_s=NOW) is None, (
+        "a fleet frozen when the collector stopped is not a live map")
+
+
+def test_a_wide_view_gets_every_zone_as_a_point_not_a_cut(tmp_path) -> None:
+    """The first version cut the country at 4,000 in feed-name order, so the
+    alphabet decided which states looked empty."""
+    land._ZONE_CACHE.clear()
+    wzdx_archive(tmp_path, "aaa", [zone(-76.6 + i * 0.01, 39.3) for i in range(5)])
+    wzdx_archive(tmp_path, "zzz", [zone(-90.0, 45.0)])
+    fc = land.workzones(tmp_path, bbox=(-125.0, 24.0, -66.5, 49.5), limit=2)
+    assert fc["properties"]["as_points"] is True
+    assert fc["properties"]["n_shown"] == 6 and fc["properties"]["truncated"] is False
+    assert {f["geometry"]["type"] for f in fc["features"]} == {"Point"}
+    assert "zzz" in fc["properties"]["feeds_in_view"]
+
+
+def test_cameras_are_locations_only(tmp_path) -> None:
+    cam = tmp_path / "cameras.geojson"
+    cam.write_text(json.dumps({"features": [{
+        "geometry": {"type": "Point", "coordinates": [-76.7, 39.2]},
+        "properties": {"OBJECTID": 1, "location": "I-95 at MD 32",
+                       "county": "Howard", "feedID": "abc"}}]}))
+    fc = land.cameras(cam, streams=tmp_path / "none.json")
+    assert fc["properties"]["n"] == 1
+    assert fc["features"][0]["properties"] == {
+        "id": "1", "location": "I-95 at MD 32", "county": "Howard",
+        "has_stream": False}
+    # The stream file is named too. Left to its default this read the REAL
+    # camera-streams.json, and passed only until G3 had fetched CHART's list
+    # on the machine running it (sighting 50).
+    assert land.cameras(tmp_path / "missing.geojson",
+                        streams=tmp_path / "none.json")["features"] == []
+
+
+def test_a_camera_stream_comes_from_the_local_file_only(tmp_path) -> None:
+    cam = tmp_path / "cameras.geojson"
+    cam.write_text(json.dumps({"features": [
+        {"geometry": {"type": "Point", "coordinates": [-76.7, 39.2]},
+         "properties": {"OBJECTID": 7, "location": "I-695"}}]}))
+    st = tmp_path / "camera-streams.json"
+    st.write_text(json.dumps({"streams": {"7": {
+        "embed": "https://chart.maryland.gov/e/7", "page": None}}}))
+    assert land.cameras(cam, streams=st)["features"][0]["properties"]["has_stream"]
+    s = land.camera_stream("7", st)
+    assert s["embed"] == "https://chart.maryland.gov/e/7"
+    assert "not recorded" in s["note"]
+    assert land.camera_stream("8", st) is None
+
+
+def test_chart_s_own_list_is_preferred_when_g3_has_it(tmp_path) -> None:
+    st = tmp_path / "camera-streams.json"
+    st.write_text(json.dumps({"frame_policy": {"embeddable": False}, "streams": {
+        "7a00": {"embed": "https://chart.maryland.gov/Video/GetVideo/7a00",
+                 "page": "https://chart.maryland.gov/Video/GetVideo/7a00",
+                 "name": "I-270 & MD 109", "category": "Wash. DC",
+                 "lat": 39.27, "lon": -77.32, "op_status": "COMM_FAILURE"}}}))
+    fc = land.cameras(tmp_path / "unused.geojson", streams=st)
+    assert fc["properties"]["source"] == "CHART's own camera feed"
+    p = fc["features"][0]["properties"]
+    assert (p["id"], p["location"], p["status"], p["has_stream"]) == (
+        "7a00", "I-270 & MD 109", "COMM_FAILURE", True)
+    s = land.camera_stream("7a00", st)
+    assert s["embeddable"] is False and s["op_status"] == "COMM_FAILURE"
+
+
+def test_a_camera_is_named_by_its_place_not_its_code(tmp_path) -> None:
+    """CHART names 251 of its 553 cameras with a bare code ("710002") and
+    puts the place in the description. A card reading "710002" says nothing."""
+    st = tmp_path / "camera-streams.json"
+    st.write_text(json.dumps({"streams": {"9201": {
+        "page": "https://chart.maryland.gov/Video/GetVideo/9201",
+        "name": "710002", "description": "I-70 East of I-270",
+        "lat": 39.39, "lon": -77.42}}}))
+    p = land.cameras(tmp_path / "unused.geojson", streams=st)["features"][0]["properties"]
+    assert (p["location"], p["code"]) == ("I-70 East of I-270", "710002")

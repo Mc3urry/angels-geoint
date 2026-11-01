@@ -31,7 +31,10 @@ export function project(lat, lon, bearingDeg, distM) {
 // a vessel under way arrives every 2-10s but from one at anchor only every 3
 // minutes, and an anchored vessel is not going anywhere, so a longer horizon
 // costs nothing and stops the harbour flickering.
-export const HORIZON_S = { air: 120, sea: 300 };
+// Land, added 2026-10-27: a bus turns at the next corner, so a projection
+// is worth a minute and a half at most. Past that the dot is drawn faint
+// where it was last heard.
+export const HORIZON_S = { air: 120, sea: 300, land: 90 };
 
 // WHEN PROJECTING IS THE WRONG ANSWER
 //

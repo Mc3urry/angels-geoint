@@ -486,6 +486,60 @@ cameras into a movement history. Institutional vehicles are treated
 differently on purpose -- a bus carries a route number and is meant to be
 identified.
 
+### Viewer-only exception (amended 2026-10-28)
+
+The 3D view (`web/ops.html`) shows things the rest of the project does not:
+
+- **every aircraft in the OpenSky feed**, private light aircraft included,
+  by its broadcast call sign;
+- **the mapped locations of licence-plate (ALPR) cameras** across the US,
+  from OpenStreetMap;
+- **traffic cameras across the US**, from state DOT and 511 feeds (some
+  behind free developer keys);
+- **every vehicle fleet that publishes its own positions**: transit from
+  every US GTFS-Realtime feed in the registry (keyed ones when a key is in
+  `.env`), intercity trains (Amtrak, VIA, Brightline), and state DOT
+  snowplows;
+- **live road speeds** on every road, from TomTom's traffic-flow layer.
+
+Private cars are not on this list, and the exception does not extend to
+them. A private car does not broadcast its position as an aircraft or a
+ship does, and following one would be exactly the individuation the
+paragraph above rules out. Road speeds are how the whole road network is
+shown instead: an aggregate per segment, with no vehicle in it.
+
+All of it is shown because a reader orienting on the map is better served
+by the whole picture than by one with holes cut in it. All of it is
+already public: a transponder broadcast is the aircraft's own, an OSM node
+is a volunteer's mapped fact, and a DOT camera or a bus position is
+published by the agency for anyone to see.
+
+The exception is for the viewer's display and nothing else. It does not
+widen any analysis:
+
+- No artefact names a person or a private aircraft. The Phase F
+  pre-registration and its aggregate-only constraint are unchanged.
+- The ALPR layer shows where a camera is mapped, never what it read. The
+  US list is fetched once a day and kept in one overwritten cache file
+  (`data/interim/context/alpr-us.json`, untracked). No ANGELS script reads
+  it.
+- Traffic cameras are shown as locations. A camera's picture is played
+  from its publisher, in the browser, while its card is open; no frame is
+  recorded, stored or re-served. The one exception is TxDOT, whose frames
+  the API decodes in memory because TxDOT sends them as base64 in JSON.
+- National transit is polled by the API only while the 3D view asks, and
+  the last poll is held in memory. The land question's evidence stays the
+  38 border feeds the research collector archives (G2b). Nothing from the
+  national layer enters it.
+- The 3D view keeps nothing. No track, trail or click is written to disk,
+  and the trail behind a followed contact is gone when the tab is closed.
+- The context layers (satellites, ALPR) are labelled "context, not
+  evidence" in every payload.
+- Every key these layers use is read from `.env` by the API and added on
+  the server. None is ever sent to the browser.
+
+The 2D research viewer (`web/index.html`) is unchanged by this amendment.
+
 ## License
 
 MIT.

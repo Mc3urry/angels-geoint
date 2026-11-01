@@ -194,9 +194,15 @@ export function addLive(map) {
     type: "circle",
     source: "live",
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 9, 12, 16],
+      // 2026-10-28: a solid disc with a white rim. At 0.4 opacity the ramp
+      // washed out to five pastels that could not be told apart, and the
+      // white plane on a pale disc had no edge.
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 7, 7, 10, 12, 17],
       "circle-color": ALT_COLOR,
-      "circle-opacity": ["case", ["get", "stale"], 0.15, 0.4],
+      "circle-opacity": ["case", ["get", "stale"], 0.25, 0.9],
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": 1.2,
+      "circle-stroke-opacity": ["case", ["get", "stale"], 0.3, 0.9],
     },
   });
 
@@ -206,7 +212,7 @@ export function addLive(map) {
     source: "live",
     layout: {
       "icon-image": "plane",
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 7, 0.5, 12, 0.95],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 7, 0.68, 12, 1.15],
       "icon-rotate": ["coalesce", ["get", "heading"], 0],
       "icon-rotation-alignment": "map",
       "icon-allow-overlap": true,
@@ -473,9 +479,9 @@ function applyMode(map) {
   }
   map.setPaintProperty("live-halo", "circle-radius",
     rings ? ["interpolate", ["linear"], ["zoom"], 3, 2.2, 9, 7]
-          : ["interpolate", ["linear"], ["zoom"], 7, 9, 12, 16]);
+          : ["interpolate", ["linear"], ["zoom"], 4, 7, 7, 10, 12, 17]);
   map.setPaintProperty("live-halo", "circle-opacity",
-    rings ? 0.85 : ["case", ["get", "stale"], 0.15, 0.4]);
+    rings ? 0.85 : ["case", ["get", "stale"], 0.25, 0.9]);
 }
 
 export function startLive(map, onUpdate, onError) {

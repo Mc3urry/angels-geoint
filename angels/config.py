@@ -313,6 +313,12 @@ CDSE_PASSWORD = os.getenv("CDSE_PASSWORD", "")
 WMATA_API_KEY = os.getenv("WMATA_API_KEY", "")
 WMATA_KEY_HEADER = "api_key"
 
+# CARTO Basemaps, for the 3D view's light basemap only; no analysis reads a
+# basemap. CARTO takes its key only as a query parameter, so the browser
+# never builds the URL: angels/api/routes/basemap.py adds the key on the
+# server. Unset, the 3D view uses Esri's keyless light grey instead.
+CARTO_BASEMAPS_KEY = os.getenv("CARTO_BASEMAPS_KEY", "")
+
 OPENSKY_TOKEN_URL = (
     "https://auth.opensky-network.org/auth/realms/opensky-network/"
     "protocol/openid-connect/token"

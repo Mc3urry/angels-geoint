@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ANGELS · 3D</title>
+  <!-- The 3D view, beside the 2D research viewer (index.html), on the same
+       API and in the same interface: the 2D stylesheet is loaded first and
+       ops.css only lays out what is different. After God's Eye View
+       (github.com/bilawalsidhu/gods-eye-view): a globe, click to follow,
+       context layers. Keyless apart from an optional CARTO key; no Cesium ion assets.
+       Shows private aircraft and ALPR locations under the viewer-only scope
+       exception (README, "Scope"). -->
+  <script>window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.121.0/Build/Cesium/";</script>
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.121.0/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.121.0/Build/Cesium/Widgets/widgets.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ops/ops.css">
+</head>
+<body class="ops">
+  <header>
+    <h1>ANGELS</h1>
+    <span class="gloss">3D view</span>
+
+    <!-- Which box the fleets are polled for. Same two as the 2D viewer, at
+         the same cadences. Choosing one flies there; nothing else moves the
+         camera without being asked. -->
+    <div class="seg" id="regions">
+      <button data-region="air" class="on" title="DC-Baltimore, polled every 10 s; positions projected between polls">DC</button>
+      <button data-region="conus" title="Continental US, polled every minute; positions shown where last heard">CONUS</button>
+    </div>
+    <div class="seg" id="basemaps">
+      <button data-base="map" class="on">Map</button>
+      <button data-base="imagery">Imagery</button>
+    </div>
+
+    <div id="search">
+      <input type="search" placeholder="find call sign, vessel, route" autocomplete="off" spellcheck="false">
+      <ul id="hits" hidden></ul>
+    </div>
+    <a id="to-2d" href="index.html" title="The 2D research viewer">2D view &#8599;</a>
+  </header>
+
+  <aside id="side" aria-label="Layers"></aside>
+  <button id="show-side" hidden title="Show the layer list">Layers &#8250;</button>
+
+  <div id="map"></div>
+
+  <div id="card" hidden></div>
+  <div id="tip" hidden></div>
+  <div id="readout"></div>
+  <div id="toast" hidden></div>
+
+  <section id="video" class="pcard" hidden>
+    <div class="ph"><strong id="vtitle">Camera</strong>
+      <button id="vclose" title="Close (Esc)">&times;</button></div>
+    <div class="psub"><span id="vsrc"></span>
+      <a id="vlink" target="_blank" rel="noopener noreferrer">publisher's page &#8599;</a></div>
+    <div id="vbody"></div>
+    <p class="pe">Played from the publisher's own servers. Not recorded or stored.</p>
+  </section>
+
+  <script type="module" src="ops/main.js"></script>
+</body>
+</html>

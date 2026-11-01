@@ -27,7 +27,8 @@ import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
          HULL_PATH }
   from "./views/vessels.js";
 import { addLand, startLand, setVisible as setLandVisible, setLandAoi,
-         refreshLand, landInfo } from "./views/land.js";
+         refreshLand, landInfo, setLandSub, ensureInView } from "./views/land.js";
+import * as G from "./ops/icons.js";
 import { esc } from "./views/popup.js";
 import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
          setVisible as setObsVisible, coverageAt, coverageSummary }
@@ -689,7 +690,7 @@ function renderStatus() {
         liveAoi() === "conus" ? "continental US" : "DC-Baltimore"}</span></div>` : ""}
     ${on.sea && trails_on ? wakeBlock() : ""}
 
-    <p class="meta">
+    <p class="meta" ${on.air || on.sea ? "" : "hidden"}>
       ${on.air && trails_on && verts ? verts.toLocaleString() + " track vertices<br>" : ""}
       ${[on.air ? `air every ${Math.round(
            (liveMeta()?.dead_reckon === false ? NATIONAL_POLL_MS : POLL_MS)
@@ -711,7 +712,7 @@ function renderStatus() {
          self-reported positions is visually indistinguishable from a map of
          reality, and that confusion is the thing this project exists to
          take apart. -->
-    <div class="evidence">
+    <div class="evidence" ${on.air || on.sea || observed ? "" : "hidden"}>
       <span class="lt">Evidence class${observed ? "es \u00b7 two, mixed" : ""}</span>
       <p>${observed ? "<strong>Cooperative</strong> \u2014 filled symbols. " : ""}Cooperative reporting${
         observed ? ":" : " only."} everything ${observed ? "filled" : "here"} chose to
@@ -764,29 +765,47 @@ function landBlock() {
   const L = landInfo();
   const v = L.vehicles?.properties, s = L.status, z = L.zones?.properties;
   const down = s ? s.vehicles.filter((r) => r.outcome !== "ok") : [];
-  const lag = v?.archive_lag_s;
+  const live = v?.source === "collector-live";
   return `
     <div class="stat"><span class="n">${v ? v.n.toLocaleString() : "&mdash;"}</span>
-      <span class="l">Transit vehicles that moved &middot; last 15 min${
+      <span class="l">${live
+        ? `Transit vehicles reported &middot; ${v.n_in_service.toLocaleString()} in service`
+        : "Transit vehicles that moved &middot; last 15 min"}${
         v ? ` &middot; ${v.n_feeds} agencies` : ""}</span></div>
+    <div class="keyrow">${Object.values(G.MODES).map((m) =>
+      `<span><img src="${G.tinted(m.glyph(), m.color)}" alt="">${m.label}</span>`).join("")}
+      <span><img src="${G.tinted(G.bus(), G.NO_TRIP)}" alt="">no trip</span>
+      <span><img src="${G.tinted(G.workzone(), G.COL.workzone)}" alt="">work zone</span>
+      <span><img src="${G.tinted(G.camera(), G.COL.camStream)}" alt="">camera</span></div>
+    <p class="meta">${live
+      ? `The collector's last poll, ${v.poll_age_s} s ago, projected along each
+         vehicle's own heading and speed for up to 90 s. Grey badges carry
+         no trip, and are usually parked.`
+      : v ? `<strong>Not live:</strong> the collector's snapshot is missing or
+         stale, so this is the archive, ${v.archive_lag_s != null
+           ? Math.round(v.archive_lag_s / 60) + " min" : "some minutes"} behind
+         and holding only vehicles that moved. Is roads-vehicles running?` : ""}</p>
     <p class="meta">${s ? `${s.n_answered} of ${s.n_feeds} border feeds answered at
-      the collector's last poll` : "Reading feed status&hellip;"}${lag != null
-      ? ` &middot; the archive is ${Math.round(lag / 60)} min behind the collector,
-        which writes every 5 min` : ""}</p>
+      the collector's last poll. These are the 38 agencies whose service area
+      crosses a state line (G2b); the rest of the country is not polled, by
+      design, which is why most of the map is empty.` : "Reading feed status&hellip;"}</p>
     ${down.length ? `<p class="meta">Not answering, in the collector's own words:
       ${down.map((r) => `${esc(r.provider || r.feed)} (${esc(r.outcome)}${
         r.status ? " " + esc(r.status) : ""})`).join(", ")}</p>` : ""}
     <div class="stat"><span class="n">${z ? z.n_in_view.toLocaleString() : "&mdash;"}</span>
-      <span class="l">Declared work zones in view${z?.truncated
+      <span class="l">Declared work zones in view${z?.as_points
+        ? " &middot; one dot each at this scale" : z?.truncated
         ? ` &middot; showing ${z.n_shown.toLocaleString()}` : ""}</span></div>
     ${z ? `<p class="meta">${z.feeds_in_view.length
       ? `From: ${z.feeds_in_view.map(esc).join(", ")}.`
       : "No feed declares a work zone in this view."} A state with none on
       this map usually publishes none, or only behind a key. That is the
       publication regime this project studies, not an empty road.</p>` : ""}
-    <p class="meta">A vehicle drops off the map after 15 minutes standing
-      still, because the archive keeps a fix only when it changes. Its agency
-      may still be reporting it.</p>`;
+    <div class="stat"><span class="n">${L.cams ? L.cams.properties.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l">CHART cameras &middot; Maryland</span></div>
+    <p class="meta">Where Maryland itself can see the road. They are their own
+      layer: switch on <strong>Cameras</strong> beside Vehicles to show them,
+      on their own or with the vehicles, and watch one in CHART's own player.</p>`;
 }
 
 // --- filters --------------------------------------------------------------
@@ -805,25 +824,30 @@ function toggleGroup(key) {
 
 function setDomain(name, want) {
   on[name] = want;
-  if (name === "air") setAirVisible(map, want);
+  if (name === "air") {
+    setAirVisible(map, want);
+    if (want) ensureInView(map, liveAoi() === "conus" ? AOI_CONUS : AOI_AIR);
+  }
   if (name === "land") {
     setLandVisible(map, want);
+    el("landtabs").hidden = !want;
+    if (!want) setLandSub(map, "cameras", false, { force: true });
     if (want) {
       refreshLand(map, () => { errors.land = null; renderStatus(); },
                        (err) => { errors.land = err; renderStatus(); });
-      map.fitBounds(liveAoi() === "conus" ? AOI_CONUS : AOI_AIR,
-                    { padding: 40, duration: 900 });
+      ensureInView(map, liveAoi() === "conus" ? AOI_CONUS : AOI_AIR);
     } else {
       errors.land = null;
     }
   }
   if (name === "sea") {
     setSeaVisible(map, want);
-    // Fit to whichever domain was just switched on, once, so turning the sea
-    // on does not leave the user staring at Baltimore while four hundred
-    // vessels sit off Virginia.
-    if (want) map.fitBounds(AOI_SEA, { padding: 40, duration: 900 });
-    else if (on.air) map.fitBounds(AOI_AIR, { padding: 40, duration: 900 });
+    // ONLY IF NONE OF IT IS IN VIEW, 2026-10-28. Switching a domain on used
+    // to fly the map every time, and switching one off flew it back, which
+    // threw away whatever view had been chosen. Now the sea moves the map
+    // only when no part of the sea box is on screen, and switching it off
+    // never moves the map.
+    if (want) ensureInView(map, liveAoi() === "conus" ? AOI_CONUS : AOI_SEA);
   }
   setTrailsVisible(trails_on && on.air);
   renderStatus();
@@ -891,7 +915,7 @@ async function setObserved(want) {
   observed = want;
   setObsVisible(map, want);
   if (!want) { probe = null; renderStatus(); return; }
-  map.fitBounds(AOI_SEA, { padding: 40, duration: 900 });
+  ensureInView(map, AOI_SEA);
   renderStatus();                       // show "loading" before the wait
   if (!discrepancyInfo().loaded) {
     covSummary = covSummary || await coverageSummary();
@@ -944,6 +968,11 @@ map.on("load", async () => {
       b.classList.toggle("on", want);
       setDomain(b.dataset.domain, want);
     };
+  });
+
+  // Vehicles and Cameras toggle independently: either or both.
+  document.querySelectorAll("#landtabs button").forEach((b) => {
+    b.onclick = () => setLandSub(map, b.dataset.landtab, !b.classList.contains("on"));
   });
 
   document.querySelectorAll("#boxes button").forEach((b) => {

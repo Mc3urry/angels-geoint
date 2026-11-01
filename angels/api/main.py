@@ -19,8 +19,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from angels import __version__
-from angels.api.routes import (coverage, dossier, events, labels, land,
-                                live, tracks)
+from angels.api.routes import (basemap, cameras, context, coverage, dossier,
+                                events, labels, land, live, tracks, traffic,
+                                vehicles)
 from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME, ROOT
 
 app = FastAPI(
@@ -62,6 +63,16 @@ app.include_router(events.router)
 app.include_router(labels.router)
 app.include_router(dossier.router)
 app.include_router(land.router)
+# Context for the 3D ops view (web/ops.html): satellites, earthquakes, fires,
+# radar, ALPR locations. Not evidence; no analysis reads it.
+app.include_router(context.router)
+# The 3D view's basemap tiles, with the CARTO key added server-side.
+app.include_router(basemap.router)
+# The 3D view's national layers: traffic cameras and transit across the US.
+# Viewer only (README, "Viewer-only exception"); nothing is stored.
+app.include_router(cameras.router)
+app.include_router(vehicles.router)
+app.include_router(traffic.router)
 
 class RevalidatingStatic(StaticFiles):
     """Static files that the browser must check before reusing.
