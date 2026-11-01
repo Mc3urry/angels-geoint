@@ -28,11 +28,12 @@ Forty-seven, 2026-10-24: a function that read the first night of a
 populated archive as if the archive had been empty. Forty-eight, 2026-10-26:
 a file reported as written that landed as its previous version. Forty-nine,
 2026-10-27: four weeks of outages blamed on a DNS resolver, while the laptop
-was in a car.*
+was in a car. Fifty, 2026-10-28: a test that passed until the machine running it
+had fetched a file.*
 
-Over the course of this project, **forty-nine** separate faults were found
+Over the course of this project, **fifty** separate faults were found
 that share a single shape. Almost none was an arithmetic error. Every quantity
-this pipeline computes, it computed correctly. What failed, forty-nine
+this pipeline computes, it computed correctly. What failed, fifty
 times, was **what a program said about what it had done.**
 
 That is not a curiosity. It is the most reusable thing the project produced,
@@ -81,7 +82,7 @@ unless the category is present."
 
 ## 3. The catalogue, by mechanism
 
-The running count in the worklog reached **forty-nine**. A few logged
+The running count in the worklog reached **fifty**. A few logged
 entries contained more than one instance, so the grouping below has more rows
 than that; the count is of sightings, not of lines of code.
 
@@ -156,6 +157,15 @@ second at all, so the guard against the overwrite of 2026-10-06 was silently
 not testing it. The failing one announced itself; the passing one would never
 have. `store_body` always took a `when` argument. The tests just did not use
 it, and both now check their own precondition before checking the result.
+
+**A second, 2026-10-28: a test that read the machine's own data.**
+`land.cameras()` falls back to the real `camera-streams.json` when no stream
+file is named, and one test named the cameras file but not the stream file. It
+passed on the VM, where the real stream file still held the layer's format.
+It failed on Windows the moment G3 had fetched CHART's own list there, because
+the function then returned CHART's 553 cameras instead of nothing. The test
+was asserting the state of the archive on the machine running it, and not the
+behaviour of the function. Every path is now passed in. Sighting 50.
 
 ### C. The verifier only checks what it generated
 
@@ -1117,7 +1127,7 @@ A project of this kind asks to be believed about something invisible: vessels
 that are present and not reporting. The natural objection is that the analyst
 found what he was looking for.
 
-The defence is not that no mistakes were made. **Forty-nine** were found,
+The defence is not that no mistakes were made. **Fifty** were found,
 two of them credential exposures and one published and withdrawn. The defence is that **the mistakes were
 found by the project's own machinery, they were recorded rather than tidied
 away, and the result did not depend on any of them.** Every correction moved
