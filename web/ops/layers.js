@@ -9,7 +9,7 @@
 //   rail       /vehicles/amtrak          Amtrak, VIA, Brightline
 //   states     /land/states?bbox=…       the discontinuity the land question is about
 
-import { Fleet } from "./fleet.js";
+import { Fleet, StaticPoints } from "./fleet.js";
 import * as I from "./icons.js";
 import { get, esc } from "./api.js";
 import { ageShort, freshness } from "../views/popup.js";
@@ -39,7 +39,7 @@ const SQUAWK = { 7500: "unlawful interference", 7600: "radio failure", 7700: "em
 
 export function makeAir(viewer) {
   const f = new Fleet(viewer, {
-    key: "air", domain: "air", px: 32, labelRange: 170e3,
+    key: "air", domain: "air", px: 32, labelRange: 170e3, dotAbove: 3.5e6, dotPx: 9,
     idOf: (p) => p.icao24,
     timeOf: (p, now) => (p.t ? p.t * 1000 : now),
     altOf: (p) => (p.on_ground ? 0 : Math.max(0, p.alt_m ?? 0)),
@@ -80,7 +80,7 @@ export function makeAir(viewer) {
 
 export function makeSea(viewer) {
   const f = new Fleet(viewer, {
-    key: "sea", domain: "sea", px: 30, labelRange: 120e3,
+    key: "sea", domain: "sea", px: 30, labelRange: 120e3, dotAbove: 2.5e6, dotPx: 8,
     idOf: (p) => p.mmsi || p.id,
     timeOf: (p, now) => (p.t ? p.t * 1000 : now - (p.age_s || 0) * 1000),
     labelOf: (p) => p.name || p.label || p.mmsi,
@@ -90,8 +90,10 @@ export function makeSea(viewer) {
       const g = I.SEA_GROUP_OF[p.subtype] || I.SEA_GROUP_OF.unknown;
       const moving = (p.sog_kn ?? 0) > 0.5 && p.heading != null;
       return moving
-        ? { image: I.hullFilled(g.color, !!g.hollow), color: g.color, tint: "#ffffff", heading: p.heading, px: 30 }
-        : { image: I.dotFilled(g.color, !!g.hollow), color: g.color, tint: "#ffffff", heading: null, px: 18 };
+        ? { image: I.hullFilled(g.color, !!g.hollow), color: g.color, tint: "#ffffff", heading: p.heading, px: 30,
+            hollow: !!g.hollow }
+        : { image: I.dotFilled(g.color, !!g.hollow), color: g.color, tint: "#ffffff", heading: null, px: 18,
+            hollow: !!g.hollow };
     },
   });
   f.groupOf = (p) => (I.SEA_GROUP_OF[p.subtype] || I.SEA_GROUP_OF.unknown).key;
@@ -129,6 +131,7 @@ export function makeLand(viewer) {
   const modeOf = (p) => I.MODE_OF_FEED[p.feed_id] || "bus";
   const f = new Fleet(viewer, {
     key: "land", domain: "land", px: 26, labelRange: 25e3, near: 5e3, far: 6e5,
+    dotAbove: 6e5, dotPx: 7, lift: 3,
     idOf: (p) => `${p.feed_id}:${p.vehicle_key || p.label}`,
     timeOf: (p, now) => (p.fix_t ? p.fix_t * 1000 : now - (p.age_s || 0) * 1000),
     labelOf: (p) => (p.route_id ? `${p.route_id}` : p.label || ""),
@@ -170,11 +173,12 @@ export function makeLand(viewer) {
 // Amtrak's own map). A train reports every few minutes, so it is projected
 // along its heading for up to five minutes, not ninety seconds.
 
-export const RAIL_COLOR = "#1d4f91";
+export const RAIL_COLOR = I.COL.rail;
 
 export function makeRail(viewer) {
   const f = new Fleet(viewer, {
     key: "rail", domain: "land", horizon: 300, px: 30, labelRange: 400e3, near: 1e4, far: 6e6,
+    dotAbove: 2.5e6, dotPx: 10, lift: 3,
     idOf: (p) => p.id,
     timeOf: (p, now) => (p.ts ? p.ts * 1000 : now),
     labelOf: (p) => (p.number ? `${p.provider === "Amtrak" ? "" : `${p.provider} `}${p.number}` : ""),
@@ -205,6 +209,7 @@ export function makeRail(viewer) {
 export function makePlows(viewer) {
   const f = new Fleet(viewer, {
     key: "plow", domain: "land", horizon: 180, px: 26, labelRange: 60e3, near: 5e3, far: 3e6,
+    dotAbove: 1.2e6, dotPx: 9, lift: 3,
     idOf: (p) => p.id,
     timeOf: (p, now) => (p.ts ? p.ts * 1000 : now),
     labelOf: (p) => p.label || "",
@@ -234,7 +239,8 @@ export class WorkZones {
     this.key = "wz";
     this.on = false;
     this.lines = viewer.scene.primitives.add(new Cs.PolylineCollection());
-    this.bbs = viewer.scene.primitives.add(new Cs.BillboardCollection({ scene: viewer.scene }));
+    this.pts = new StaticPoints(viewer, { px: 22, dotPx: 8, dotAbove: 1.2e6,
+      scaler: new Cs.NearFarScalar(5e3, 1.1, 5e6, 0.6) });
     this.feats = [];
     this.meta = null;
   }
@@ -242,7 +248,7 @@ export class WorkZones {
   async load(region) {
     const Cs = C();
     const fc = await get(`/land/workzones?bbox=${REGIONS[region].box.join(",")}`);
-    this.lines.removeAll(); this.bbs.removeAll();
+    this.lines.removeAll(); this.pts.clear();
     this.feats = fc.features; this.meta = fc.properties;
     const col = Cs.Color.fromCssColorString(I.COL.workzone);
     const mat = Cs.Material.fromType("PolylineGlow", { color: col.withAlpha(0.95), glowPower: 0.22 });
@@ -259,19 +265,12 @@ export class WorkZones {
         });
       }
       const at = g.type === "Point" ? g.coordinates : lines[0]?.[Math.floor(lines[0].length / 2)];
-      if (at) {
-        this.bbs.add({
-          position: Cs.Cartesian3.fromDegrees(at[0], at[1], 6),
-          image: I.workzone(), width: 22, height: 22, color: col, id,
-          disableDepthTestDistance: 3e6,
-          scaleByDistance: new Cs.NearFarScalar(5e3, 1.1, 5e6, 0.45),
-        });
-      }
+      if (at) this.pts.add(at[0], at[1], 6, I.workzone(), I.COL.workzone, id);
     });
     this.setOn(this.on);
   }
 
-  setOn(on) { this.on = on; this.lines.show = this.bbs.show = on; }
+  setOn(on) { this.on = on; this.lines.show = this.pts.show = on; }
   get count() { return this.on ? this.feats.length : 0; }
   position(i) {
     const g = this.feats[i]?.geometry;
@@ -308,7 +307,7 @@ export class WorkZones {
 // cameras_us.py). Compact rows; the API answers at once and fills in while
 // its sources load, so the page asks again until nothing is loading.
 
-const CAM = Object.fromEntries(["id", "lon", "lat", "name", "src", "kind", "media", "page", "state", "note"]
+const CAM = Object.fromEntries(["id", "lon", "lat", "name", "src", "kind", "media", "page", "state", "note", "still"]
   .map((c, i) => [c, i]));
 
 export class Cameras {
@@ -317,7 +316,8 @@ export class Cameras {
     this.viewer = viewer;
     this.key = "cam";
     this.on = false;
-    this.bbs = viewer.scene.primitives.add(new Cs.BillboardCollection({ scene: viewer.scene }));
+    this.pts = new StaticPoints(viewer, { px: 22, dotPx: 7, dotAbove: 1.2e6,
+      scaler: new Cs.NearFarScalar(3e3, 1.1, 5e6, 0.6) });
     this.rows = [];
     this.meta = null;
     this.ids = new Set();
@@ -328,28 +328,20 @@ export class Cameras {
   static colour(kind) { return kind === "image" ? I.COL.camNone : I.COL.camStream; }
 
   async load() {
-    const Cs = C();
     const doc = await get("/cameras/us");
     this.meta = doc;
     const img = I.camera();
-    const scale = new Cs.NearFarScalar(3e3, 1.1, 5e6, 0.35);
     for (const r of doc.rows) {
       if (this.ids.has(r[CAM.id])) continue;
       this.ids.add(r[CAM.id]);
       const i = this.rows.push(r) - 1;
-      this.bbs.add({
-        position: Cs.Cartesian3.fromDegrees(r[CAM.lon], r[CAM.lat], 8),
-        image: img, width: 22, height: 22,
-        color: Cs.Color.fromCssColorString(Cameras.colour(r[CAM.kind])),
-        id: { kind: "cam", layer: this, id: i },
-        disableDepthTestDistance: 3e6, scaleByDistance: scale,
-      });
+      this.pts.add(r[CAM.lon], r[CAM.lat], 8, img, Cameras.colour(r[CAM.kind]), { kind: "cam", layer: this, id: i });
     }
     this.setOn(this.on);
     return doc;
   }
 
-  setOn(on) { this.on = on; this.bbs.show = on; }
+  setOn(on) { this.on = on; this.pts.show = on; }
   get count() { return this.on ? this.rows.length : 0; }
   position(i) {
     const r = this.rows[i];

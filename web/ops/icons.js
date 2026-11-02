@@ -330,6 +330,19 @@ export const dotFilled = (color, hollow = false) => glyph(`df${color}${hollow}`,
 
 const HOLLOW = "#6b7c89";
 
+// Far from the camera every contact is this: a dot in its colour with a
+// white rim, drawn at twice the size it is shown, so it stays crisp where a
+// shrunk pictogram turned to noise (2026-11-02). 2D draws the same at low
+// zoom.
+export const dot = (color, hollow = false) => glyph(`dot${color}${hollow}`, (g, n) => {
+  const r = n / 2;
+  g.beginPath(); g.arc(r, r, r - 2.5, 0, Math.PI * 2);
+  g.fillStyle = hollow ? "rgba(255,255,255,.85)" : color; g.fill();
+  g.lineWidth = 2.5; g.strokeStyle = hollow ? HOLLOW : "#ffffff"; g.stroke();
+  g.beginPath(); g.arc(r, r, r - 0.6, 0, Math.PI * 2);
+  g.lineWidth = 1.2; g.strokeStyle = "rgba(14,26,36,.55)"; g.stroke();
+}, 20);
+
 // As views/vessels.js GROUPS.
 export const SEA_GROUPS = [
   { key: "commercial", label: "Commercial", color: "#2a78d6",
@@ -363,6 +376,7 @@ export const COL = {
   camNone: "#7b8794",
   alpr: "#c2185b",
   plow: "#d9480f",
+  rail: "#1d4f91",            // intercity rail: Amtrak, VIA, Brightline
   state: "#1b2a36",
   fire: "#e8590c",
   select: "#ffffff",          // the reticle: white, its outline dark

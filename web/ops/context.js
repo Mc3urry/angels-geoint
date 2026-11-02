@@ -11,6 +11,7 @@
 
 import * as I from "./icons.js";
 import { get, esc } from "./api.js";
+import { StaticPoints } from "./fleet.js";
 
 const C = () => window.Cesium;
 
@@ -27,8 +28,9 @@ export class Satellites {
     this.key = "sat";
     this.on = false;
     this.sats = [];
-    this.bbs = viewer.scene.primitives.add(new (C().BillboardCollection)({ scene: viewer.scene }));
-    this.labels = viewer.scene.primitives.add(new (C().LabelCollection)({ scene: viewer.scene }));
+    const blend = C().BlendOption.TRANSLUCENT;
+    this.bbs = viewer.scene.primitives.add(new (C().BillboardCollection)({ scene: viewer.scene, blendOption: blend }));
+    this.labels = viewer.scene.primitives.add(new (C().LabelCollection)({ scene: viewer.scene, blendOption: blend }));
     this.orbit = viewer.scene.primitives.add(new (C().PolylineCollection)());
     this.loadedAt = 0;
     status(this, "off");
@@ -166,7 +168,10 @@ export class Alpr {
     this.viewer = viewer;
     this.key = "alpr";
     this.on = false;
-    this.bbs = viewer.scene.primitives.add(new (C().BillboardCollection)({ scene: viewer.scene }));
+    const Cs = C();
+    this.pts = new StaticPoints(viewer, { px: 24, dotPx: 7, dotAbove: 6e5,
+      ddc: new Cs.DistanceDisplayCondition(0, ALPR_SHOW_BELOW_M),
+      scaler: new Cs.NearFarScalar(2e3, 1.1, ALPR_SHOW_BELOW_M, 0.6) });
     this.rows = [];
     this.loadedAt = 0;
     status(this, "off");
@@ -175,24 +180,14 @@ export class Alpr {
   async load() {
     if (this.rows.length && Date.now() - this.loadedAt < 6 * 3600e3) return;
     status(this, "asking OpenStreetMap for the whole country (can take a minute)", "warn");
-    const Cs = C();
     const doc = await get("/context/alpr");
-    this.bbs.removeAll();
+    this.pts.clear();
     this.rows = doc.rows;
-    const col = Cs.Color.fromCssColorString(I.COL.alpr);
     const img = I.alpr();
-    const far = new Cs.DistanceDisplayCondition(0, ALPR_SHOW_BELOW_M);
-    const scale = new Cs.NearFarScalar(2e3, 1.1, ALPR_SHOW_BELOW_M, 0.4);
     doc.rows.forEach((r, i) => {
-      this.bbs.add({
-        position: Cs.Cartesian3.fromDegrees(r[0], r[1], 2),
-        image: img, width: 24, height: 24, color: col,
-        id: { kind: "alpr", layer: this, id: i },
-        distanceDisplayCondition: far, scaleByDistance: scale,
-        disableDepthTestDistance: 3e6,
-      });
+      this.pts.add(r[0], r[1], 2, img, I.COL.alpr, { kind: "alpr", layer: this, id: i });
     });
-    this.bbs.show = this.on;
+    this.pts.show = this.on;
     this.loadedAt = Date.now();
     const stale = doc.stale_s ? `, ${Math.round(doc.stale_s / 3600)} h old` : "";
     status(this, `${doc.n.toLocaleString()} mapped in the US${stale}; shown below 1,500 km`, stale ? "warn" : "ok");
@@ -200,7 +195,7 @@ export class Alpr {
 
   setOn(on) {
     this.on = on;
-    this.bbs.show = on;
+    this.pts.show = on;
     if (!on) status(this, "off");
   }
   get count() { return this.on ? this.rows.length : 0; }

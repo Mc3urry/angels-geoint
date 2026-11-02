@@ -537,17 +537,31 @@ function stopPicture() {
   $("#vbody").textContent = "";
 }
 
+// A stream is asked about first, so one that wants a password never puts
+// the publisher's sign-in box in front of anyone (DriveNC, 2026-11-02);
+// one that will not play is shown by its still frame.
+let watchSeq = 0;
 async function watch(i) {
-  const c = ev.cam.row(i);
+  let c = ev.cam.row(i);
   if (!c || !c.media) return;
   stopPicture();
+  const seq = ++watchSeq;
+  let why = "";
+  if (c.kind === "hls") {
+    const pr = await get(`/cameras/probe?id=${encodeURIComponent(c.id)}`)
+      .catch(() => ({ ok: false, why: "the API could not check the stream" }));
+    if (seq !== watchSeq) return;
+    if (!pr.ok) { why = pr.why; c = c.still ? { ...c, kind: "image", media: c.still } : { ...c, media: null }; }
+  }
   $("#vtitle").textContent = c.name || "Traffic camera";
-  $("#vsrc").textContent = c.src;
+  $("#vsrc").textContent = why ? `${c.src} · video not shown: ${why}` : c.src;
   if (c.page) $("#vlink").href = c.page; else $("#vlink").removeAttribute("href");
   $("#vlink").hidden = !c.page;
   $("#video").hidden = false;
   const body = $("#vbody");
-  if (c.kind === "player") {
+  if (!c.media) {
+    body.textContent = `The live video will not play here: ${why}. Use the publisher's page.`;
+  } else if (c.kind === "player") {
     body.textContent = "asking for CHART's player";
     let s;
     try { s = await get(c.media); } catch (e) {
@@ -703,18 +717,53 @@ document.addEventListener("keydown", (e) => {
 
 // -- the loops ------------------------------------------------------------------------------
 
-// 4 Hz: positions, the reticle and the selected trail.
+// EVERY FRAME: moving contacts are placed where they are now, and when the
+// camera has moved, the horizon decides what the Earth hides. Symbols are
+// not depth-tested (fleet.js, "THE GLITCHES"), so this is what keeps the far
+// side of the globe off the screen.
+const occ = new Cesium.EllipsoidalOccluder(Cesium.Ellipsoid.WGS84, Cesium.Cartesian3.ZERO);
+const lastCam = { p: new Cesium.Cartesian3(), d: new Cesium.Cartesian3() };
+const statics = () => [ev.cam.pts, ev.wz.pts, ctx.alpr.pts];
+let staticDirty = true, staticAt = 0;
+scene.preRender.addEventListener(() => {
+  const cam = viewer.camera;
+  const moved = !Cesium.Cartesian3.equalsEpsilon(cam.positionWC, lastCam.p, 0, 0.01)
+    || !Cesium.Cartesian3.equalsEpsilon(cam.directionWC, lastCam.d, 1e-7, 0);
+  if (moved) {
+    Cesium.Cartesian3.clone(cam.positionWC, lastCam.p);
+    Cesium.Cartesian3.clone(cam.directionWC, lastCam.d);
+    occ.cameraPosition = cam.positionWC;
+  }
+  const now = Date.now();
+  for (const f of fleets) f.frame(now, occ, moved);
+  // Tens of thousands of cameras and ALPR do not need asking sixty times a
+  // second while the camera flies: eight times is enough, and once more
+  // when it stops.
+  if (moved) staticDirty = true;
+  if (staticDirty && now - staticAt > 120) {
+    const h = cam.positionCartographic.height;
+    for (const s of statics()) s.cull(occ, h);
+    staticDirty = false; staticAt = now;
+  }
+  const pos = selPosition();
+  if (sel && pos) {
+    reticle.position = pos;
+    reticle.show = occ.isPointVisible(pos);
+  }
+});
+
+// 4 Hz: colours, filters, dots or symbols, and the selected trail.
 function fast() {
   const now = Date.now();
-  for (const f of fleets) f.tick(now);
+  const h = viewer.camera.positionCartographic.height;
+  for (const f of fleets) { f.setLod(h); f.tick(now, occ); }
+  for (const s of statics()) s.setLod(h);
   const pos = selPosition();
   if (!sel || !pos) {
     reticle.show = false;
     for (const p of [glow, drop]) if (p) p.show = false;
     return;
   }
-  reticle.position = pos;
-  reticle.show = true;
   const it = selItem();
   if (it && it.hist.length) {
     const pts = it.hist.map(([lo, la, al]) => Cesium.Cartesian3.fromDegrees(lo, la, al)).concat([pos]);
