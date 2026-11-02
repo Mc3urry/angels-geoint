@@ -134,6 +134,51 @@ def test_a_511_platform_list_gives_one_row_per_camera_video_first() -> None:
     assert [r[COL["id"]] for r in rows] == ["la511-1", "la511-2"]
     assert rows[0][COL["kind"]] == cu.HLS and rows[1][COL["kind"]] == cu.IMAGE
     assert rows[0][COL["note"]] == "I-20", "an Unknown direction is not a note"
+    assert rows[0][COL["still"]] == "https://lu.stage.traveliq.co/map/Cctv/2205", "a still to fall back on"
+    assert rows[1][COL["still"]] is None
+
+
+def test_drivenc_video_asks_for_a_sign_in_so_nc_is_stills() -> None:
+    doc = [{"Id": 5, "Latitude": 35.6, "Longitude": -82.5, "Location": "I-26 66.5W",
+            "Views": [{"Url": "https://eapps.ncdot.gov/services/traffic-prod/v1/cameras/images?filename=x.jpg",
+                       "VideoUrl": "https://cfase05.services.ncdot.gov:8887/live/x/playlist.m3u8",
+                       "Status": "Enabled"}]}]
+    r = cu.parse_iteris(doc, "NC", "DriveNC")[0]
+    assert r[COL["kind"]] == cu.IMAGE and "ncdot.gov/services" in r[COL["media"]]
+
+
+def test_a_stream_that_wants_a_password_is_not_played(monkeypatch) -> None:
+    pytest.importorskip("fastapi")
+    pytest.importorskip("httpx")
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from angels.api.routes import cameras as route
+
+    assert cu.playlist_ok(200, b"#EXTM3U\n#EXT-X-VERSION:3") and not cu.playlist_ok(200, b"<html>login")
+    route._state.clear()
+    route._auth_hosts.clear()
+    route._state["x"] = {"rows": [
+        cu._row("de-1", -75.6, 39.7, "open", "DelDOT", cu.HLS, "https://video.deldot.gov/a/playlist.m3u8"),
+        cu._row("nc-1", -82.5, 35.6, "locked", "Somewhere", cu.HLS, "https://locked.example:8887/b/playlist.m3u8",
+                still="https://locked.example/b.jpg")], "at": 0}
+    asked = []
+
+    def fake(url):
+        asked.append(url)
+        if "locked" in url:
+            raise route.urllib.error.HTTPError(url, 401, "Unauthorized", {}, None)
+        return 200, b"#EXTM3U\n"
+
+    monkeypatch.setattr(route, "_fetch_head", fake)
+    app = FastAPI()
+    app.include_router(route.router)
+    c = TestClient(app)
+    assert c.get("/cameras/probe", params={"id": "de-1"}).json()["ok"] is True
+    assert c.get("/cameras/probe", params={"id": "nc-1"}).json() == {"ok": False, "why": "the publisher asks for a sign-in"}
+    c.get("/cameras/probe", params={"id": "nc-1"})
+    assert len(asked) == 2, "a host that asked for a sign-in is not asked again"
+    assert c.get("/cameras/probe", params={"id": "https://anything"}).status_code == 404
 
 
 def test_ohgo_results_either_casing() -> None:

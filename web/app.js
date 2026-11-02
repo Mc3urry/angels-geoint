@@ -739,9 +739,11 @@ function renderStatus() {
 
     ${on.land ? `<div class="evidence">
       <span class="lt">Land &middot; evidence class</span>
-      <p>Cooperative only. Vehicles report their own positions, and work
-        zones are agencies' own declarations. The dashed lines are the state
-        boundaries the land question is about.</p>
+      <p>Vehicles, trains and plows report their own positions, and work
+        zones are agencies' own declarations: cooperative. Cameras are where
+        the state can see the road. Road speeds are an aggregate, and ALPR
+        locations are context. The dashed lines are the state boundaries the
+        land question is about.</p>
       <p>The land finding is the <em>gap</em> between the first two:
         slowdowns the vehicles show that no agency declared. That comparison
         is not on this map yet.</p></div>` : ""}
@@ -763,33 +765,30 @@ function renderStatus() {
 
 function landBlock() {
   const L = landInfo();
-  const v = L.vehicles?.properties, s = L.status, z = L.zones?.properties;
+  const v = L.vehicles, s = L.status, z = L.zones?.properties;
   const down = s ? s.vehicles.filter((r) => r.outcome !== "ok") : [];
-  const live = v?.source === "collector-live";
+  const gaps = (keys) => Object.entries(keys || {}).filter(([, k]) => !k).map(([k]) => k);
+  const fail = (k) => (L.failed[k] ? `<p class="err">${esc(L.failed[k])}</p>` : "");
+  const tGaps = gaps(v?.keys), cGaps = gaps(L.cams?.keys);
+  // One stat per toggle that is on, in the header's order, each saying
+  // where it comes from and what it is evidence of.
   return `
-    <div class="stat"><span class="n">${v ? v.n.toLocaleString() : "&mdash;"}</span>
-      <span class="l">${live
-        ? `Transit vehicles reported &middot; ${v.n_in_service.toLocaleString()} in service`
-        : "Transit vehicles that moved &middot; last 15 min"}${
-        v ? ` &middot; ${v.n_feeds} agencies` : ""}</span></div>
+    ${L.sub.vehicles ? `<div class="stat"><span class="n">${v ? v.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l">Transit vehicles, all US${v ? ` &middot; ${v.n_in_service.toLocaleString()} in service` : ""}</span></div>
     <div class="keyrow">${Object.values(G.MODES).map((m) =>
       `<span><img src="${G.tinted(m.glyph(), m.color)}" alt="">${m.label}</span>`).join("")}
       <span><img src="${G.tinted(G.bus(), G.NO_TRIP)}" alt="">no trip</span>
-      <span><img src="${G.tinted(G.workzone(), G.COL.workzone)}" alt="">work zone</span>
-      <span><img src="${G.tinted(G.camera(), G.COL.camStream)}" alt="">camera</span></div>
-    <p class="meta">${live
-      ? `The collector's last poll, ${v.poll_age_s} s ago, projected along each
-         vehicle's own heading and speed for up to 90 s. Grey badges carry
-         no trip, and are usually parked.`
-      : v ? `<strong>Not live:</strong> the collector's snapshot is missing or
-         stale, so this is the archive, ${v.archive_lag_s != null
-           ? Math.round(v.archive_lag_s / 60) + " min" : "some minutes"} behind
-         and holding only vehicles that moved. Is roads-vehicles running?` : ""}</p>
-    <p class="meta">${s ? `${s.n_answered} of ${s.n_feeds} border feeds answered at
-      the collector's last poll. These are the 38 agencies whose service area
-      crosses a state line (G2b); the rest of the country is not polled, by
-      design, which is why most of the map is empty.` : "Reading feed status&hellip;"}</p>
-    ${down.length ? `<p class="meta">Not answering, in the collector's own words:
+      <span><img src="${G.tinted(G.workzone(), G.COL.workzone)}" alt="">work zone</span></div>
+    <p class="meta">${!v ? "Asking the API&hellip;" : v.warming
+      ? `Warming up: the API is asking every US feed for the first time.`
+      : `${v.n_answered} of ${v.n_feeds} feeds answered, projected along each vehicle's own heading
+         and speed for up to 90 s. Grey badges carry no trip, and are usually parked.`}
+      ${v && v.border.includes("not running") ? " <strong>The border collector is not running</strong>, so the research feeds are missing." : ""}
+      ${tGaps.length ? ` No key yet: ${esc(tGaps.join(", "))}.` : ""}</p>
+    <p class="meta">${s ? `<strong>Research:</strong> ${v?.n_research != null ? `${v.n_research.toLocaleString()} of these are on ` : ""}the 38
+      G2b border feeds, whose service area crosses a state line; ${s.n_answered} of ${s.n_feeds} answered
+      the collector's last poll. The rest of the country is shown, not studied.` : "Reading feed status&hellip;"}</p>
+    ${down.length ? `<p class="meta">Border feeds not answering, in the collector's own words:
       ${down.map((r) => `${esc(r.provider || r.feed)} (${esc(r.outcome)}${
         r.status ? " " + esc(r.status) : ""})`).join(", ")}</p>` : ""}
     <div class="stat"><span class="n">${z ? z.n_in_view.toLocaleString() : "&mdash;"}</span>
@@ -800,12 +799,29 @@ function landBlock() {
       ? `From: ${z.feeds_in_view.map(esc).join(", ")}.`
       : "No feed declares a work zone in this view."} A state with none on
       this map usually publishes none, or only behind a key. That is the
-      publication regime this project studies, not an empty road.</p>` : ""}
-    <div class="stat"><span class="n">${L.cams ? L.cams.properties.n.toLocaleString() : "&mdash;"}</span>
-      <span class="l">CHART cameras &middot; Maryland</span></div>
-    <p class="meta">Where Maryland itself can see the road. They are their own
-      layer: switch on <strong>Cameras</strong> beside Vehicles to show them,
-      on their own or with the vehicles, and watch one in CHART's own player.</p>`;
+      publication regime this project studies, not an empty road.</p>` : ""}` : ""}
+    ${L.sub.rail ? `<div class="stat"><span class="n">${L.trains ? L.trains.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.rail(), G.COL.rail)}" alt="">Intercity trains running</span></div>
+      <p class="meta">Amtrak, VIA Rail and Brightline, via Amtraker${L.trains?.stale_s
+        ? `; ${Math.round(L.trains.stale_s / 60)} min old` : ""}.</p>${fail("rail")}` : ""}
+    ${L.sub.plows ? `<div class="stat"><span class="n">${L.plows ? L.plows.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.plow(), G.COL.plow)}" alt="">DOT snowplows at work</span></div>
+      <p class="meta">${L.plows ? Object.entries(L.plows.status || {}).map(([k, x]) => `${esc(k)} ${esc(x)}`).join(", ") : ""}.
+        Plows report only while working, so none outside a storm is the normal answer.</p>${fail("plows")}` : ""}
+    ${L.sub.cameras ? `<div class="stat"><span class="n">${L.cams ? L.cams.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.camera(), G.COL.camStream)}" alt="">Traffic cameras, all US${
+        L.cams?.loading ? " &middot; still loading" : ""}</span></div>
+      <p class="meta">Where the state can see the road: each from its own DOT, or LiveTrafficCam where no
+        key is set${cGaps.length ? ` (${esc(cGaps.join(" "))})` : ""}. Click one to watch it here.</p>${fail("cameras")}` : ""}
+    ${L.sub.speeds ? `<div class="stat"><span class="n">${L.speeds ? "on" : "&mdash;"}</span>
+      <span class="l">Road speeds against free flow</span></div>
+      <div class="keyrow"><span class="ramp" style="background:linear-gradient(90deg,#3ec46d,#f7c948,#e8590c,#8b1a1a)"></span>
+        <span>free flow to stopped</span></div>
+      <p class="meta">TomTom's aggregate of probe data per road. No vehicle is in it.</p>${fail("speeds")}` : ""}
+    ${L.sub.alpr ? `<div class="stat"><span class="n">${L.alpr ? L.alpr.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.alpr(), G.COL.alpr)}" alt="">ALPR cameras mapped in the US</span></div>
+      <p class="meta">Context, not evidence: locations volunteers mapped in OpenStreetMap, drawn from zoom 6.${
+        L.alpr ? "" : " The first load can take a minute."}</p>${fail("alpr")}` : ""}`;
 }
 
 // --- filters --------------------------------------------------------------

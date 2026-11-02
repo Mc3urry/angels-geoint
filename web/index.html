@@ -22,19 +22,22 @@
       <button data-domain="air" class="on">Air</button>
       <button data-domain="sea">Sea</button>
       <button data-domain="land"
-              title="Transit vehicles on 38 border feeds, declared work zones and the state lines. Cooperative only; the comparison is not built yet.">Land</button>
+              title="Transit, rail, plows, cameras, road speeds and ALPR across the US, with declared work zones and the state lines. The research reads the 38 border feeds; the comparison is not built yet.">Land</button>
     </div>
 
     <!-- The other evidence class, kept in its own control rather than
          alongside Air/Sea. Air and Sea are DOMAINS of the same cooperative
          feed; this is a different kind of knowing, and putting it in the same
          row of buttons would say the opposite. -->
-    <!-- LAND'S TWO LAYERS, shown only while Land is on, each toggled on or
-         off on its own: Vehicles (with work zones), and Cameras (Maryland's
-         CHART cameras, with a browser and CHART's own player). -->
+    <!-- LAND'S LAYERS, shown only while Land is on, each toggled on or off
+         on its own, from the same API routes as the 3D view (2026-11-02). -->
     <div id="landtabs" hidden>
-      <button data-landtab="vehicles" class="on">Vehicles</button>
-      <button data-landtab="cameras">Cameras</button>
+      <button data-landtab="vehicles" class="on" title="Transit across the US, with declared work zones">Transit</button>
+      <button data-landtab="rail" title="Amtrak, VIA Rail and Brightline">Intercity</button>
+      <button data-landtab="plows" title="State DOT snowplows, while they work">Plows</button>
+      <button data-landtab="cameras" title="Every state's traffic cameras; click one to watch">Cameras</button>
+      <button data-landtab="speeds" title="Road speeds against free flow (TomTom); aggregate, no vehicle in it">Speeds</button>
+      <button data-landtab="alpr" title="Mapped licence-plate cameras; context, shown from zoom 6">ALPR</button>
     </div>
 
     <div id="layers">
@@ -66,9 +69,9 @@
       <button data-hours="24" disabled>24h</button>
     </div>
 
-    <!-- The 3D ops view: the same API on a globe, with tracking, sensor
-         looks and context layers (2026-10-28). -->
-    <a id="to-ops" href="ops.html" title="Globe, click-to-track, sensor styles, context layers">3D view &#8599;</a>
+    <!-- The 3D view: the same API on a globe, with tracking and context
+         layers (2026-10-28). -->
+    <a id="to-ops" href="ops.html" title="Globe, click to follow, satellites">3D view &#8599;</a>
   </header>
 
   <div id="map"></div>

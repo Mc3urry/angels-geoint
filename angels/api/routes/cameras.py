@@ -2,6 +2,7 @@
 
     GET /cameras/us              every camera the sources below answered for
     GET /cameras/txdot-frame     one TxDOT frame, decoded (TxDOT sends base64 in JSON)
+    GET /cameras/probe?id=       whether a camera's live stream plays without a sign-in
 
 The parsing, the sources and what is kept are described in
 angels/core/cameras_us.py. Here: the network and the cache.
@@ -171,6 +172,61 @@ def cameras_us(background: bool = True) -> dict:
             "keys": keys(),
             "evidence": "where the state can see the road: public DOT and 511 feeds",
             "kept": "locations only; pictures are played from each publisher and never stored"}
+
+
+# -- will this stream play? -----------------------------------------------------
+#
+# A browser asked for a stream that needs a password shows a sign-in box
+# from the publisher's server (DriveNC, 2026-11-02). So before the page plays
+# a stream it asks here, and this asks the publisher for the playlist with no
+# credentials. Only a camera this API listed can be probed: the URL comes
+# from our own rows, never from the request. A host that asked for a sign-in
+# is remembered for ten minutes, so its other cameras are not asked again.
+
+PROBE_TIMEOUT_S = 8.0
+_auth_hosts: dict[str, tuple[float, str]] = {}
+
+
+def _row_of(cam_id: str) -> list | None:
+    with _lock:
+        for st in _state.values():
+            for r in st.get("rows") or []:
+                if r[0] == cam_id:
+                    return r
+    return None
+
+
+def _fetch_head(url: str) -> tuple[int, bytes]:
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=PROBE_TIMEOUT_S) as r:
+        return r.status, r.read(4096)
+
+
+@router.get("/probe")
+def probe(id: str = Query(..., max_length=120)) -> dict:
+    row = _row_of(id)
+    if row is None:
+        raise HTTPException(404, "not a camera this API listed")
+    col = {c: i for i, c in enumerate(cu.COLS)}
+    if row[col["kind"]] != cu.HLS:
+        return {"ok": True, "why": "not a stream"}
+    url = row[col["media"]]
+    host = urllib.parse.urlsplit(url).hostname or ""
+    hit = _auth_hosts.get(host)
+    if hit and time.time() - hit[0] < 600:
+        return {"ok": False, "why": hit[1]}
+    try:
+        status, body = _fetch_head(url)
+        ok = cu.playlist_ok(status, body)
+        why = "plays" if ok else "the publisher sent something that is not a playlist"
+    except urllib.error.HTTPError as exc:
+        ok, why = False, ("the publisher asks for a sign-in" if exc.code in (401, 403)
+                          else f"the publisher answered HTTP {exc.code}")
+        if exc.code in (401, 403):
+            _auth_hosts[host] = (time.time(), why)
+    except (urllib.error.URLError, TimeoutError, OSError):
+        ok, why = False, "the publisher did not answer"
+    return {"ok": ok, "why": why}
 
 
 _frames: dict[str, tuple[float, bytes]] = {}

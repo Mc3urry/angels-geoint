@@ -41,7 +41,9 @@ import re
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
-COLS = ["id", "lon", "lat", "name", "src", "kind", "media", "page", "state", "note"]
+COLS = ["id", "lon", "lat", "name", "src", "kind", "media", "page", "state", "note", "still"]
+# still: a still frame from the same camera, for a video row whose stream
+# will not play here (2026-11-02). Null when there is none.
 
 # kind: how the browser shows the picture
 IMAGE, HLS, PLAYER = "image", "hls", "player"
@@ -92,6 +94,13 @@ ITERIS = {
 }
 ITERIS_PATH = "/api/v2/get/cameras"
 
+# 511 sites whose VideoUrl is not public. DriveNC's points at NCDOT's own
+# video servers (cfase*.services.ncdot.gov), which ask the browser for a
+# username and password (seen 2026-11-02). A sign-in box from a state server
+# inside this page is not something to put in front of anyone, so these
+# states are shown by their still frames.
+NO_PUBLIC_VIDEO = {"NC"}
+
 
 def iteris_env(state: str) -> str:
     return f"CAM_KEY_{state}"
@@ -126,9 +135,9 @@ def _pinned(url: Any, origin: str) -> str | None:
     return url.strip()
 
 
-def _row(id_, lon, lat, name, src, kind, media, page=None, state="", note="") -> list:
+def _row(id_, lon, lat, name, src, kind, media, page=None, state="", note="", still=None) -> list:
     return [str(id_), round(lon, 6), round(lat, 6), str(name or "")[:160], src, kind,
-            media, page, state, str(note or "")[:120]]
+            media, page, state, str(note or "")[:120], still]
 
 
 # -- Caltrans ------------------------------------------------------------------
@@ -344,15 +353,22 @@ def parse_iteris(doc: Any, state: str, name: str) -> list[list]:
             continue
         views = [v for v in (c.get("Views") or []) if isinstance(v, dict)
                  and str(v.get("Status") or "Enabled").lower() == "enabled"]
-        video = next((_https(v.get("VideoUrl")) for v in views if _https(v.get("VideoUrl"))), None)
+        video = None if state in NO_PUBLIC_VIDEO else next(
+            (_https(v.get("VideoUrl")) for v in views if _https(v.get("VideoUrl"))), None)
         still = next((_https(v.get("Url")) for v in views if _https(v.get("Url"))), None)
         if not (video or still):
             continue
         label = c.get("Name") or c.get("Location") or f"{name} camera {c['Id']}"
         note = " · ".join(str(x) for x in (c.get("Roadway"), c.get("Direction")) if x and x not in ("None", "Unknown"))
         out.append(_row(f"{state.lower()}511-{c['Id']}", lon, lat, str(label).strip(), name,
-                        HLS if video else IMAGE, video or still, None, state, note))
+                        HLS if video else IMAGE, video or still, None, state, note,
+                        still if video else None))
     return out
+
+
+def playlist_ok(status: int, body: bytes) -> bool:
+    """An HLS playlist anyone can play: 200 and a playlist, not a login page."""
+    return status == 200 and body.lstrip()[:7] == b"#EXTM3U"
 
 
 def parse_ohgo(doc: Any) -> list[list]:

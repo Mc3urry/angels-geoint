@@ -14,7 +14,14 @@ import pytest
 from angels.api.routes import vehicles as v
 
 
-def test_the_border_feeds_are_left_to_the_research_collector(tmp_path) -> None:
+KEY_NAMES = ("API_511_ORG_KEY", "MTA_BUSTIME_KEY", "SWIFTLY_API_KEY", "OBA_PUGET_SOUND_KEY",
+             "TRIMET_APP_ID", "METRA_API_TOKEN", "CTA_TRAIN_KEY")
+
+
+def test_the_border_feeds_are_left_to_the_research_collector(tmp_path, monkeypatch) -> None:
+    # The keys in a real .env must not decide what this test sees.
+    for k in KEY_NAMES:
+        monkeypatch.delenv(k, raising=False)
     reg = tmp_path / "transit-registry.json"
     reg.write_text(json.dumps({"selected": [
         {"id": "mdb-1", "provider": "Border Transit", "url": "https://a.example/vp.pb"},
@@ -81,11 +88,11 @@ def test_vehicles_route_without_a_collector_says_so(monkeypatch, tmp_path) -> No
     doc = TestClient(app).get("/vehicles/us").json()
     assert doc["n"] == 0 and doc["warming"] is True
     assert "not running" in doc["border"] and doc["kept"].startswith("nothing")
+    assert isinstance(doc["border_feeds"], list), "the viewers mark the research feeds"
 
 
 def test_keyed_feeds_join_only_when_their_key_is_set(monkeypatch) -> None:
-    for k in ("API_511_ORG_KEY", "MTA_BUSTIME_KEY", "SWIFTLY_API_KEY", "OBA_PUGET_SOUND_KEY",
-              "TRIMET_APP_ID", "METRA_API_TOKEN", "CTA_TRAIN_KEY"):
+    for k in KEY_NAMES:
         monkeypatch.delenv(k, raising=False)
     doc = {"excluded": [
         {"id": "mdb-1574", "provider": "LA Metro", "rule": "needs a key",

@@ -473,7 +473,8 @@ h1 { margin: 0; font: 600 15px/1 var(--mono); letter-spacing: .2em; }
   border: 1px solid var(--rule); background: #fff; color: var(--ink-2);
 }
 #landtabs button:first-child { border-radius: 2px 0 0 2px; }
-#landtabs button:last-child { border-radius: 0 2px 2px 0; border-left: none; }
+#landtabs button + button { border-left: none; }
+#landtabs button:last-child { border-radius: 0 2px 2px 0; }
 #landtabs button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 #landtabs { margin-left: 8px; }
 
@@ -538,3 +539,15 @@ header button:focus-visible, #to-ops:focus-visible, #cam-drawer .cam:focus-visib
   outline: 2px solid var(--ink); outline-offset: 2px;
 }
 header button:active:not(:disabled) { transform: scale(.98); }
+
+/* -- 2026-11-02: every land source in this view too ------------------------ */
+.stat .l img.ic { width: 14px; height: 14px; vertical-align: -2px; margin-right: 5px; }
+.keyrow .ramp { display: inline-block; width: 90px; height: 6px; border-radius: 2px; }
+#cam-viewer video, #cam-viewer > img { display: block; width: 560px; max-height: 315px;
+  object-fit: contain; background: #000; }
+/* Six land toggles leave no room for the tagline on a laptop screen: it
+   gives way rather than wrap the controls onto two lines. */
+header button { white-space: nowrap; }
+@media (max-width: 1600px) {
+  header:has(#landtabs:not([hidden])) .gloss { display: none; }
+}

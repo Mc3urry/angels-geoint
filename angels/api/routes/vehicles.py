@@ -256,6 +256,9 @@ def vehicles_us() -> dict:
         "national_age_s": int(now - nat["time"]) if nat else None,
         "border": ("the research collector's live snapshot" if border
                    else "the research collector is not running; border feeds missing"),
+        # Which feeds are the research's (G2b), so a viewer can say which
+        # vehicles the land question reads and which it only shows.
+        "border_feeds": sorted(land.selection_index()),
         "error": poller.error,
         "keys": transit_keys(),
         "evidence": "cooperative: self-reported by agency vehicles",
