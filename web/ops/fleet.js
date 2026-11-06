@@ -52,6 +52,23 @@ const DEG_M = 111320;
 
 export const NO_DEPTH = Number.POSITIVE_INFINITY;
 
+// THE WAY A SYMBOL POINTS, ON THE GROUND (2026-11-06). Symbols were turned
+// by their heading relative to the Earth's spin axis (UNIT_Z) as it falls on
+// the screen. Looking straight down that is north; with the camera tilted
+// or turned it is not, and hulls pointed off their course by tens of
+// degrees. Now a symbol's axis IS its course: the unit vector along the
+// heading in the local east-north plane at its own position, which the
+// projection then draws correctly from any camera. Rotation stays zero.
+export function courseAxis(lon, lat, headingDeg, out) {
+  const C = window.Cesium;
+  const l = (lon * Math.PI) / 180, p = (lat * Math.PI) / 180, h = (headingDeg * Math.PI) / 180;
+  const sl = Math.sin(l), cl = Math.cos(l), sp = Math.sin(p), cp = Math.cos(p);
+  const ch = Math.cos(h), sh = Math.sin(h);
+  // north = (-sin p cos l, -sin p sin l, cos p); east = (-sin l, cos l, 0)
+  return C.Cartesian3.fromElements(-sp * cl * ch - sl * sh, -sp * sl * ch + cl * sh, cp * ch,
+                                   out || new C.Cartesian3());
+}
+
 export class Fleet {
   constructor(viewer, o) {
     const Cesium = window.Cesium;
@@ -191,14 +208,15 @@ export class Fleet {
     it.bb.width = px; it.bb.height = px;
     // A dot is drawn at its own size whatever the distance.
     it.bb.scaleByDistance = dots ? undefined : this.scaler;
-    it.bb.alignedAxis = it.rotates ? C.Cartesian3.UNIT_Z : C.Cartesian3.ZERO;
-    if (!it.rotates) it.bb.rotation = 0;
+    if (!it.rotates) it.bb.alignedAxis = C.Cartesian3.ZERO;   // set by tick() when it turns
+    it.bb.rotation = 0;
+    it._axisKey = null;
     if (it.lbl) it.lbl.pixelOffset = new C.Cartesian2(0, px / 2 + 3);
     if (wantTick && !it.tick) {
       it.tick = this.bbs.add({
         image: s.tick, width: px, height: px, position: it.bb.position,
         id: { kind: "fleet", layer: this, id: it.id },
-        alignedAxis: C.Cartesian3.UNIT_Z,
+        alignedAxis: C.Cartesian3.ZERO,                       // set by tick()
         scaleByDistance: this.scaler,
         disableDepthTestDistance: NO_DEPTH,
         show: false,
@@ -285,9 +303,17 @@ export class Fleet {
       const w = it.now;
       const alpha = w.stale ? Math.min(it.alpha, 0.35) : it.alpha;
       it.bb.color = this.colour(it.tint, alpha);
-      const rot = it.heading != null ? -C.Math.toRadians(it.heading) : 0;
-      if (it.rotates) it.bb.rotation = rot;
-      if (it.tick) { it.tick.rotation = rot; it.tick.color = this.colour(it.color, alpha); }
+      if (it.heading != null && (it.rotates || it.tick)) {
+        // Recomputed when the course or the position (to 0.01 degree) changes.
+        const k = `${Math.round(it.heading * 10)}|${Math.round(w.lon * 100)}|${Math.round(w.lat * 100)}`;
+        if (k !== it._axisKey) {
+          it._axisKey = k;
+          const axis = courseAxis(w.lon, w.lat, it.heading);
+          if (it.rotates) it.bb.alignedAxis = axis;
+          if (it.tick) it.tick.alignedAxis = axis;
+        }
+      }
+      if (it.tick) it.tick.color = this.colour(it.color, alpha);
       this.reveal(it, occ);
     }
   }
