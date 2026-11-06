@@ -61,6 +61,102 @@ def test_a_national_poll_reads_feeds_the_collectors_way() -> None:
     assert row[:2] == ["mdb-2", "bus-7"] and row[9] is True, "a vehicle on a trip is in service"
 
 
+def test_one_slow_or_broken_feed_does_not_hold_the_others() -> None:
+    import threading
+    gate = threading.Event()
+
+    class Fake:
+        def one(self, feed):
+            if feed["id"] == "slow":
+                gate.wait(5)
+            if feed["id"] == "broken":
+                raise ValueError("not a feed")
+            return feed["id"], "ok", [[feed["id"], "v1"]]
+
+    p = v.NationalPoller(feeds_fn=lambda: [{"id": "fast"}, {"id": "slow"}, {"id": "broken"}])
+    fake = Fake()
+    p.one = fake.one
+    p.cycle(wait_s=0.5)
+    assert p.doc["feeds"] == {"fast": "ok", "slow": "slow", "broken": "error: ValueError"}
+    assert [r[0] for r in p.doc["vehicles"]] == ["fast"]
+    gate.set()
+    p.inflight["slow"].result(timeout=5)
+    p.cycle(wait_s=0.5)
+    assert p.doc["feeds"]["slow"] == "ok", "a slow feed's answer is used when it comes"
+
+
+def test_swiftly_feeds_share_a_budget_that_survives_a_restart(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(v, "SWIFTLY_BUDGET", 4)
+    feeds = [{"id": f"sw-{i}", "url": f"https://api.goswift.ly/real-time/a{i}/gtfs-rt-vehicle-positions"}
+             for i in range(6)] + [{"id": "free", "url": "https://free.example/vp.pb"}]
+    asked = []
+
+    class Fake:
+        def one(self, feed):
+            asked.append(feed["id"])
+            return feed["id"], "ok", []
+
+    def poller():
+        p = v.NationalPoller(feeds_fn=lambda: feeds)
+        p.one = Fake().one
+        p.swiftly_log_path = tmp_path / "swiftly.json"
+        return p
+
+    p = poller()
+    p.cycle(wait_s=1)
+    assert asked.count("free") == 1 and sum(a.startswith("sw-") for a in asked) == 4, "never past the budget"
+    assert {p.doc["feeds"][f"sw-{i}"] for i in range(6)} >= {"queued"}
+    assert p.swiftly_every_s == v.SWIFTLY_WINDOW_S * 6 / 4, "each agency's turn is spread over the window"
+    asked.clear()
+    p2 = poller()                                  # the API restarted inside the window
+    p2.cycle(wait_s=1)
+    assert asked == ["free"], "a restart does not spend the window twice"
+
+
+def test_a_swiftly_agency_that_refuses_the_key_is_left_alone(tmp_path) -> None:
+    feeds = [{"id": "granted", "url": "https://api.goswift.ly/real-time/a/gtfs-rt-vehicle-positions"},
+             {"id": "refused", "url": "https://api.goswift.ly/real-time/b/gtfs-rt-vehicle-positions"}]
+    p = v.NationalPoller(feeds_fn=lambda: feeds)
+    p.swiftly_log_path = tmp_path / "swiftly.json"
+    now = 1_000_000.0
+    assert p.due(feeds[1], 2, now)
+    p.denied_until["refused"] = now + v.SWIFTLY_DENIED_S
+    assert not p.due(feeds[1], 2, now + 3600), "not asked again for six hours"
+    assert p.due(feeds[0], 2, now + 3600)
+    assert p.swiftly_every_s == max(v.INTERVAL_S, v.SWIFTLY_WINDOW_S * 1 / v.SWIFTLY_BUDGET), \
+        "the budget goes to the agencies that accept the key"
+
+
+def test_refusals_survive_a_restart(tmp_path) -> None:
+    feeds = [{"id": "refused", "url": "https://api.goswift.ly/real-time/b/gtfs-rt-vehicle-positions"}]
+
+    class Refuse:
+        def __init__(self, p):
+            self.p = p
+
+        def one(self, feed):
+            self.p.denied_until[feed["id"]] = time.time() + v.SWIFTLY_DENIED_S
+            return feed["id"], "http_error 403", []
+
+    import time
+    p = v.NationalPoller(feeds_fn=lambda: feeds)
+    p.swiftly_log_path = tmp_path / "swiftly.json"
+    p.one = Refuse(p).one
+    p.cycle(wait_s=1)
+    p2 = v.NationalPoller(feeds_fn=lambda: feeds)
+    p2.swiftly_log_path = tmp_path / "swiftly.json"
+    assert not p2.due(feeds[0], 1, time.time()), "a restart does not ask a refusing agency again"
+
+
+def test_one_feed_listed_twice_is_asked_once(tmp_path, monkeypatch) -> None:
+    for k in KEY_NAMES:
+        monkeypatch.delenv(k, raising=False)
+    reg = tmp_path / "transit-registry.json"
+    reg.write_text(json.dumps({"selected": [
+        {"id": "a", "url": "https://x.example/vp.pb"}, {"id": "b", "url": "https://x.example/vp.pb"}]}))
+    assert [f["id"] for f in v.national_feeds(reg, border={})] == ["a"]
+
+
 def test_amtraker_trains_become_rows() -> None:
     doc = {"5": [{"trainID": "5-28", "trainNum": "5", "routeName": "California Zephyr",
                   "lat": 39.7, "lon": -105.0, "heading": "W", "velocity": 50,

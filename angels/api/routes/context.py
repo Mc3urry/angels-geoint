@@ -17,6 +17,7 @@ only ever one, and no analysis reads it.
 from __future__ import annotations
 
 import json
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -38,7 +39,14 @@ OVERPASS_TIMEOUT_S = 260.0
 
 CELESTRAK = "https://celestrak.org/NORAD/elements/gp.php?GROUP={g}&FORMAT=tle"
 SAT_GROUPS = ("stations", "visual", "gps-ops")
-OVERPASS = "https://overpass-api.de/api/interpreter"
+# The main Overpass server first, then two public mirrors: the whole country
+# is a heavy query, and one busy server should not mean no layer.
+OVERPASS_SERVERS = (
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+)
+ALPR_RETRY_S = 300
 ALPR_TTL_S = 24 * 3600
 ALPR_CACHE = INTERIM / "context" / "alpr-us.json"
 
@@ -99,18 +107,64 @@ def _write_disk(path: Path, doc: dict) -> None:
         pass                                      # a cache that cannot be written is only slower
 
 
+def _fetch_alpr() -> dict:
+    body = urllib.parse.urlencode({"data": ctx.overpass_query_us()}).encode()
+    last: Exception = TimeoutError("no Overpass server")
+    for url in OVERPASS_SERVERS:
+        try:
+            doc = ctx.slim_alpr(json.loads(_get(url, data=body, timeout=OVERPASS_TIMEOUT_S)))
+        except (urllib.error.URLError, TimeoutError, ValueError, OSError) as exc:
+            last = exc
+            continue
+        doc["fetched_at"] = time.time()
+        doc["server"] = urllib.parse.urlsplit(url).hostname
+        _write_disk(ALPR_CACHE, doc)
+        return doc
+    raise last
+
+
+# IN THE BACKGROUND, 2026-11-02. The whole country takes Overpass minutes,
+# longer than a browser or a script will wait, so the first ask starts one
+# fetch and answers at once with `loading`; the pages ask again until the
+# rows are there. Only one fetch runs however many tabs ask. A failure is a
+# 502 naming the source (after which it is tried again in five minutes),
+# and a stale answer beats none.
+_alpr_lock = threading.Lock()
+_alpr_job: dict[str, Any] = {"running": False, "error": None, "failed_at": 0.0}
+
+
+def _alpr_background() -> None:
+    try:
+        doc = _fetch_alpr()
+        _cache["alpr"] = (time.time(), doc)
+        _alpr_job["error"] = None
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError) as exc:
+        _alpr_job["error"] = type(exc).__name__
+        _alpr_job["failed_at"] = time.time()
+    finally:
+        _alpr_job["running"] = False
+
+
 @router.get("/alpr")
-def alpr() -> dict:
-    path = ALPR_CACHE
+def alpr(background: bool = True) -> dict:
     if "alpr" not in _cache:
-        disk = _read_disk(path)
+        disk = _read_disk(ALPR_CACHE)
         if disk:
             _cache["alpr"] = disk
-
-    def make():
-        body = urllib.parse.urlencode({"data": ctx.overpass_query_us()}).encode()
-        doc = ctx.slim_alpr(json.loads(_get(OVERPASS, data=body, timeout=OVERPASS_TIMEOUT_S)))
-        doc["fetched_at"] = time.time()
-        _write_disk(path, doc)
-        return doc
-    return _cached("alpr", ALPR_TTL_S, make)
+    if not background:
+        return _cached("alpr", ALPR_TTL_S, _fetch_alpr)
+    now = time.time()
+    hit = _cache.get("alpr")
+    if hit and now - hit[0] < ALPR_TTL_S:
+        return hit[1]
+    with _alpr_lock:
+        may_retry = not _alpr_job["error"] or now - _alpr_job["failed_at"] > ALPR_RETRY_S
+        if not _alpr_job["running"] and may_retry:
+            _alpr_job["running"] = True
+            threading.Thread(target=_alpr_background, daemon=True).start()
+    if hit:
+        return {**hit[1], "stale_s": int(now - hit[0])}
+    if _alpr_job["error"] and not _alpr_job["running"]:
+        raise HTTPException(502, f"alpr: the source did not answer ({_alpr_job['error']})")
+    return {"rows": [], "n": 0, "loading": True, "evidence": ctx.CONTEXT,
+            "note": "asking OpenStreetMap for the whole country; the first answer can take a few minutes"}

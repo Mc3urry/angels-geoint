@@ -30,6 +30,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $Repo = $PSScriptRoot
+. (Join-Path $PSScriptRoot "_env.ps1")
 
 function Test-Port([int]$Port) {
     try {
@@ -44,10 +45,18 @@ function Start-App {
     if (Test-Port $ApiPort) {
         Write-Host "  API already running on $ApiPort" -ForegroundColor DarkGray
     } else {
+        # THE PROJECT'S INTERPRETER, NOT WHATEVER `uvicorn` IS ON PATH
+        # (2026-11-02). From a conda (base) prompt that was base's uvicorn,
+        # which has no gtfs-realtime-bindings, so the API could not read a
+        # single national transit feed while the collector, started through
+        # _env.ps1, read them fine. Same lookup as tasks.ps1 and collector.ps1.
+        $Py = Assert-AngelsPython
+        if (-not $Py) { return }
+        Write-Host "  python: $Py" -ForegroundColor DarkGray
         Start-Process powershell -ArgumentList @(
             "-NoExit", "-Command",
             "Set-Location '$Repo'; Write-Host 'ANGELS API' -ForegroundColor Magenta; " +
-            "uvicorn angels.api.main:app --reload --port $ApiPort"
+            "& '$Py' -m uvicorn angels.api.main:app --reload --port $ApiPort"
         ) -WindowStyle Minimized
         Write-Host "  Serving  -> http://127.0.0.1:$ApiPort" -ForegroundColor Green
     }

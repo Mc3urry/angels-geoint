@@ -65,7 +65,7 @@ def test_the_routes_answer_without_the_network(monkeypatch, tmp_path) -> None:
     app.include_router(route.router)
     c = TestClient(app)
     assert c.get("/context/satellites").json()["n"] == 1
-    assert c.get("/context/alpr").json()["n"] == 1
+    assert c.get("/context/alpr", params={"background": "false"}).json()["n"] == 1
     assert (tmp_path / "alpr-us.json").exists(), "the country is cached for a restart"
 
     # A restart reads the file instead of asking Overpass for the country again.
@@ -94,5 +94,42 @@ def test_a_failed_source_is_a_502_not_an_empty_layer(monkeypatch, tmp_path) -> N
     monkeypatch.setattr(route, "_get", offline)
     app = FastAPI()
     app.include_router(route.router)
-    r = TestClient(app).get("/context/alpr")
+    r = TestClient(app).get("/context/alpr", params={"background": "false"})
     assert r.status_code == 502 and "did not answer" in r.json()["detail"]
+
+
+def test_the_country_loads_in_the_background_and_the_page_asks_again(monkeypatch, tmp_path) -> None:
+    pytest.importorskip("fastapi")
+    pytest.importorskip("httpx")
+    import time
+
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from angels.api.routes import context as route
+
+    route._cache.clear()
+    route._alpr_job.update(running=False, error=None, failed_at=0.0)
+    monkeypatch.setattr(route, "ALPR_CACHE", tmp_path / "alpr-us.json")
+    servers = []
+
+    def fake_get(url, data=None, timeout=None):
+        servers.append(url)
+        if "overpass-api.de" in url:
+            raise route.urllib.error.URLError("busy")      # the main server is down: a mirror answers
+        time.sleep(0.2)
+        return json.dumps({"elements": [{"type": "node", "id": 5, "lat": 30.0, "lon": -97.0}]}).encode()
+
+    monkeypatch.setattr(route, "_get", fake_get)
+    app = FastAPI()
+    app.include_router(route.router)
+    c = TestClient(app)
+    first = c.get("/context/alpr").json()
+    assert first["loading"] is True and first["n"] == 0
+    for _ in range(50):
+        doc = c.get("/context/alpr").json()
+        if not doc.get("loading"):
+            break
+        time.sleep(0.1)
+    assert doc["n"] == 1 and doc["server"] == "overpass.kumi.systems"
+    assert sum("overpass-api.de" in s for s in servers) == 1, "one fetch, however often the page asked"
