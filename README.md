@@ -121,24 +121,48 @@ poor and is a first-class limitation** — see
 
 ![The viewer, national sea box](docs/viewer-conus-sea.jpg)
 
-Four collectors run continuously as Windows scheduled tasks under the SYSTEM
+Collectors run continuously as Windows scheduled tasks under the SYSTEM
 account, so collection survives logoff and reboot:
 
 | collector | feed | cadence |
 |---|---|---|
 | `air` | ADS-B via OpenSky, DC–Baltimore | 30 s poll |
 | `conus` | ADS-B, continental US | 10 min poll |
+| `air-indep` | MLAT and Mode S via adsb.fi, DC–Baltimore | 30 s poll |
 | `sea` | AIS via aisstream, Chesapeake–Delaware | pushed, ~175 msg/min |
 | `sea-conus` | AIS, US waters | pushed, ~1,850 msg/min |
+| `roads-wzdx` | declared work zones, 25 keyless WZDx feeds | 10 min poll |
+| `roads-vehicles` | transit positions, the 38 G2b border feeds | 30 s poll |
+
+The sea questions and the air questions are answered, so from 2026-11-06
+only the two road collectors, plus `air` and `conus` (which feed the
+viewers' aircraft at no OpenSky cost), are kept running. The land window
+closes on 2026-11-25.
 
 Live AIS is written in **`ais.COLUMNS`**, the MarineCadastre bulk schema, so
 everything the retrospective analysis does — clipping, the reception grid, the
 matcher, the boundary analysis — runs on live-collected data unchanged.
 
-The viewer shows aircraft and vessels on two boxes each, with archive trails,
-session wakes, and a hover card that separates what a contact broadcast from
-what this project says about it. It renders **cooperative reporting only**,
-and says so on every screen.
+There are two viewers on one API, and `.\app.ps1` serves both:
+
+- **the 2D view** (`/`), MapLibre, built for the research;
+- **the 3D view** (`/ops.html`), CesiumJS, after God's Eye View.
+
+They have the same layers:
+
+- **Cooperative:** aircraft, vessels, transit, intercity rail, DOT plows and
+  declared work zones.
+- **Observed:** Sentinel-1 unexplained returns, with the fixed structures
+  removed from them, and a probe that answers "when did the radar last look
+  here".
+- **The state's own:** traffic cameras across the US, played from each
+  publisher's servers.
+- **Aggregate:** live road speeds.
+- **Context:** satellites, and ALPR locations with their mapped direction.
+
+Each viewer also has search (contacts and places), My location, archive
+trails and the same cards. Every card separates what a contact broadcast
+from what this project says about it, and says which kind of evidence it is.
 
 ![A vessel hover card](docs/viewer-hover-card.jpg)
 
@@ -176,9 +200,17 @@ pointless.
 | aisstream.io | live AIS | free API key |
 | OpenSky Network | ADS-B state vectors | free account, credit budget |
 | NOAA Maritime Limits | 12 / 24 / 200 nm lines | public domain |
+| adsb.fi | MLAT and Mode S positions | free, one request a second |
+| WZDx feeds (25 states and cities) | declared work zones | keyless, public |
+| GTFS-Realtime (Mobility Database) | transit vehicle positions | keyless; some keyed (viewer only) |
+| Census TIGERweb | state boundaries | public domain |
+| Maryland CHART, state DOT and 511 feeds | traffic cameras, counts | public; some free keys (viewer only) |
+| TomTom | road speeds, place search | free key (viewer only) |
+| CelesTrak, OpenStreetMap | satellites, ALPR locations | public (viewer context) |
 
 Credentials go in `.env` (see `.env.example`); it is gitignored and nothing in
-the repo prints a credential value.
+the repo prints a credential value. Keys are applied on the server and never
+reach a browser.
 
 ## Reproducing the result
 
@@ -240,7 +272,7 @@ Windows, which is where the collectors run:
 ```powershell
 .\tasks.ps1 dev
 .\tasks.ps1 test
-.\app.ps1                                  # API + viewer, opens the browser
+.\app.ps1                                  # API + both viewers: / and /ops.html
 .\app.ps1 stop                             # closes the viewer; collection continues
 ```
 
@@ -267,7 +299,7 @@ task or process. It reports that it is blind rather than reporting nothing.
 
 ## Tests
 
-Over 800 tests, and three of them decide whether the rest mean anything:
+About 1,300 tests, and three of them decide whether the rest mean anything:
 
 - **`test_architecture.py`** fails the build if `core` imports `adapters`, or
   if an ingest script ships without a heartbeat.
@@ -279,15 +311,25 @@ Over 800 tests, and three of them decide whether the rest mean anything:
 
 ## Status
 
+As of 2026-11-06:
+
 | Phase | | |
 |---|---|---|
 | 0 | Core model, aviation ingest, archive, map | done |
 | 1 | Detectors, searched-water coverage, SAR → AIS subtraction | done |
 | 2 | Maritime adapter — the generality test | done |
-| 3 | Boundary analysis over 12 passes | **done — see above** |
+| 3 | Boundary analysis over 12 passes | **done: no, see above** |
 | 4 | Live multi-domain viewer, continuous collection | done |
-| 5 | Land domain (GTFS-RT), cross-domain comparison | scoped |
-| 6 | Inversion classifier, chronolocation | scoped |
+| F | Air at the ADS-B obligation boundary | **done: refuted at 8 and 33 days** |
+| G | Land: undeclared disruption at state lines | **pre-registered; collecting until 2026-11-25** |
+| — | Two viewers, 2D and 3D, with the same layers | done |
+| 6 | Inversion classifier, chronolocation | scoped, not built |
+
+**Where the project stands.** The sea and air answers are final and
+reproduce. Land is built and pre-registered, and its result is computed
+once, after the window closes, by the registered rule. It is reported
+whichever way it falls. The writing draws on FINDINGS and
+`docs/reporting-defects.md`.
 
 ## Running the tests
 
@@ -318,7 +360,7 @@ instead of rendering nothing.
 
 ## How this project checks itself
 
-**Thirty-four faults** found here share one shape: a routine reporting an
+**Fifty faults** found here share one shape: a routine reporting an
 outcome its own execution did not entitle it to report, with nothing in the
 output to say so. Almost none was an arithmetic error — the quantities
 computed correctly. What failed was what the programs said about what they
@@ -361,7 +403,7 @@ inputs changing underneath them.
 ## The air domain, and why its null is worth more
 
 Sea has both halves: AIS self-reports, Sentinel-1 observes without consent.
-Land has only the cooperative half built. **Air was recorded for a week as
+Land has both too, in its own way (see below). **Air was recorded for a week as
 structurally incapable of the comparison** — until the probe that established
 that was found to have been reading the wrong JSON key and answering
 "0 aircraft" every time it ran. The retraction and the measurement that
@@ -460,6 +502,42 @@ exposure declared, in
 Name the output: the default path is the tracked eight-day result, and
 re-running over a longer window answers a different question.
 
+## Land: whether agencies declare their disruption
+
+On land, the party that cooperates or does not is the **agency**, and its
+declaration is where it says the road is disrupted: WZDx work-zone feeds,
+published keylessly by some states, behind a key by others, and by some not
+at all. The independent observation is the transit fleets. Buses report
+their own positions, and two consecutive fixes of one bus give a speed, so a
+cell of road can be seen to slow down whether or not anyone declared it.
+
+The obvious test is true by construction. Where a state publishes nothing,
+every slowdown is undeclared by definition. So the registered test measures
+the undeclared share **only where declarations are visible**. It asks
+whether an agency that publishes declares less of its disruption near a
+line where its neighbour stops publishing than near a line where its
+neighbour publishes too.
+
+It has the same shape as the air test: a treatment, a control and a
+difference in differences. It is decided by the same displaced-boundary
+null. The whole plan was written before any speed, slowdown or border
+figure existed:
+[`docs/phase-g-prereg.md`](docs/phase-g-prereg.md).
+
+- **Window:** 2026-10-28 to 2026-11-25, 29 days, in each cell's local time.
+- **Anomaly:** a cell-hour under half its own median at that hour on that
+  kind of day, from at least 5 pairs and 2 vehicles, against at least 5 days
+  of baseline.
+- **Declared:** a work zone active in that hour, as published at the time,
+  within 300 m.
+- **Stop conditions:** fewer than 30 anomaly cell-hours in any group, or no
+  control lines. Either is reported as a finding, not loosened.
+
+The pipeline is built and tested. G1 to G4 cover the work-zone collector
+with its change ledger, the border-feed selection, the vehicle collector,
+the observation mask and road speeds. G6, the comparison, is written after
+registration and run once.
+
 ## Scope
 
 Targets are **platforms and institutions, never persons** — vessels, aircraft,
@@ -486,9 +564,10 @@ cameras into a movement history. Institutional vehicles are treated
 differently on purpose -- a bus carries a route number and is meant to be
 identified.
 
-### Viewer-only exception (amended 2026-10-28)
+### Viewer-only exception (amended 2026-10-28, extended to both viewers 2026-11-06)
 
-The 3D view (`web/ops.html`) shows things the rest of the project does not:
+Both viewers (`web/index.html` and `web/ops.html`) show things the rest of
+the project does not:
 
 - **every aircraft in the OpenSky feed**, private light aircraft included,
   by its broadcast call sign;
@@ -531,14 +610,23 @@ widen any analysis:
   the last poll is held in memory. The land question's evidence stays the
   38 border feeds the research collector archives (G2b). Nothing from the
   national layer enters it.
-- The 3D view keeps nothing. No track, trail or click is written to disk,
-  and the trail behind a followed contact is gone when the tab is closed.
+- The viewers keep nothing. No track, trail, search or click is written to
+  disk, and the trail behind a followed contact is gone when the tab is
+  closed.
+- **Search** sends only the typed text and the centre of the map to
+  `/geo/search`, which asks TomTom (or OpenStreetMap's Nominatim, without a
+  key) for places. Contacts are matched in the page.
+- **My location** is the browser's own, after it asks. It is drawn and sent
+  nowhere: no request carries it.
+- Both run on localhost. Before either is deployed publicly, the terms of
+  every picture source (Maryland CHART first) must be read.
 - The context layers (satellites, ALPR) are labelled "context, not
   evidence" in every payload.
 - Every key these layers use is read from `.env` by the API and added on
   the server. None is ever sent to the browser.
 
-The 2D research viewer (`web/index.html`) is unchanged by this amendment.
+On 2026-11-06 the 2D view gained the same national layers, so the
+exception now covers both viewers. Nothing else in it changed.
 
 ## License
 
