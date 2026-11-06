@@ -96,7 +96,61 @@ def test_livetrafficcam_live_cameras_only_and_absolute_frames() -> None:
 
 def test_the_aggregator_is_not_asked_for_states_read_directly() -> None:
     assert not cu.DIRECT & set(cu.LTC_STATES)
-    assert len(cu.LTC_STATES) + len(cu.DIRECT) == 51
+    assert len(cu.LTC_STATES) + len(cu.DIRECT) + len(cu.NOT_ON_LTC) == 51
+    assert "DC" not in cu.LTC_STATES, "LiveTrafficCam answers 400 for DC"
+    assert {"CT", "DC"} <= set(cu.NO_CAMERA_SOURCE), "a state with no source is named, not left blank"
+
+
+def test_the_older_511_shape_reads_the_same() -> None:
+    v1 = [{"ID": "CAM-9", "Name": "I-95 at Exit 27", "RoadwayName": "I-95", "DirectionOfTravel": "Northbound",
+           "Latitude": 41.2, "Longitude": -73.2, "Url": "https://ctroads.org/map/Cctv/9",
+           "VideoUrl": None, "Disabled": False, "Blocked": False},
+          {"ID": "CAM-10", "Latitude": 41.2, "Longitude": -73.2, "Url": "https://ctroads.org/map/Cctv/10",
+           "Disabled": True}]
+    rows = cu.parse_iteris(v1, "CT", "CTroads")
+    assert [r[COL["id"]] for r in rows] == ["ct511-CAM-9"]
+    assert rows[0][COL["kind"]] == cu.IMAGE and rows[0][COL["note"]] == "I-95 · Northbound"
+
+
+def test_a_404_on_v2_asks_the_older_endpoint(monkeypatch) -> None:
+    pytest.importorskip("fastapi")
+    from angels.api.routes import cameras as route
+
+    monkeypatch.setenv("CAM_KEY_CT", "not-a-real-key")
+    asked = []
+
+    def fake_json(url, encoding="utf-8", headers=None):
+        asked.append(url.split("?")[0])
+        if "/api/v2/" in url:
+            raise route.urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+        return []
+
+    monkeypatch.setattr(route, "_json", fake_json)
+    assert route._iteris("https://ctroads.org", "CT") == []
+    assert asked == ["https://ctroads.org/api/v2/get/cameras", "https://ctroads.org/api/getcameras"]
+
+
+def test_livetrafficcam_is_asked_in_turn_and_a_429_waits(monkeypatch) -> None:
+    pytest.importorskip("fastapi")
+    from angels.api.routes import cameras as route
+
+    calls, slept = [], []
+
+    def fake_json(url, encoding="utf-8", headers=None):
+        calls.append(url)
+        if len(calls) == 1:
+            raise route.urllib.error.HTTPError(url, 429, "Too Many Requests", {"Retry-After": "7"}, None)
+        return {"cams": []}
+
+    monkeypatch.setattr(route, "_json", fake_json)
+    assert route._ltc_json("https://livetrafficcam.com/api/cams.json?state=OK", sleep=slept.append) == {"cams": []}
+    assert len(calls) == 2 and 7.0 in slept, "a 429 waits as long as it was asked to"
+
+
+def test_ohgo_that_parses_to_nothing_says_what_it_saw() -> None:
+    with pytest.raises(ValueError, match="camera fields"):
+        cu.parse_ohgo({"results": [{"id": "x", "latitude": 40, "longitude": -83,
+                                    "cameraViews": [{"smallUrl": "http://x/y.jpg"}]}]})
 
 
 def test_the_route_answers_while_loading_and_names_failures(monkeypatch) -> None:
@@ -117,6 +171,7 @@ def test_the_route_answers_while_loading_and_names_failures(monkeypatch) -> None
     app.include_router(route.router)
     doc = TestClient(app).get("/cameras/us", params={"background": "false"}).json()
     assert doc["n"] == 1 and doc["loading"] is False
+    assert "CT" in doc["gaps"], "the map is told which states have no source"
     assert doc["sources"]["DelDOT"]["failed"] == ["deldot: URLError"]
     assert "never stored" in doc["kept"]
 
@@ -226,3 +281,19 @@ def test_a_key_moves_a_state_off_the_aggregator_and_never_into_a_response(monkey
     assert r.json()["n"] == 1 and r.json()["keys"]["NY"] is True
     assert any(secret in u for u in asked), "the key reaches the state"
     assert secret not in r.text, "and never comes back"
+
+
+def test_a_refusal_carries_the_publishers_reason_but_never_a_key(monkeypatch) -> None:
+    pytest.importorskip("fastapi")
+    import io
+
+    from angels.api.routes import cameras as route
+
+    monkeypatch.setenv("CAM_KEY_CT", "ct-secret-0123456789")
+
+    def err(body):
+        return route.urllib.error.HTTPError("u", 400, "Bad Request", {}, io.BytesIO(body))
+
+    assert route._http_reason(err(b'{"Message":"Invalid API key."}')) == "Message : Invalid API key."
+    assert route._http_reason(err(b'{"Message":"key ct-secret-0123456789 is not active"}')) == ""
+    assert route._http_reason(err(b"<html><body>see https://ctroads.org/help</body></html>")) == ""

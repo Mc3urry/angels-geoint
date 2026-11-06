@@ -72,7 +72,16 @@ STATES = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI"
           "WV", "WI", "WY")
 # Read from their own DOT, so the aggregator is not asked for them.
 DIRECT = {"CA", "WA", "TX", "DE", "MD"}
-LTC_STATES = tuple(s for s in STATES if s not in DIRECT)
+# STATES WITH NO PUBLIC CAMERA SOURCE, said on the map rather than left
+# blank (2026-11-02). An empty state reads as "no cameras there"; these are
+# "no source this project may use".
+NO_CAMERA_SOURCE = {
+    "CT": "CTroads' API has no cameras, its terms forbid automated collection "
+          "and framing, and LiveTrafficCam lists none",
+    "DC": "LiveTrafficCam lists none (it answers HTTP 400), and no DDOT feed is wired",
+}
+NOT_ON_LTC = set(NO_CAMERA_SOURCE)
+LTC_STATES = tuple(s for s in STATES if s not in DIRECT and s not in NOT_ON_LTC)
 
 # THE 511 PLATFORM WITH A DEVELOPER KEY. These states run the same 511
 # software, with the same documented endpoint (`/api/v2/get/cameras?key=
@@ -89,10 +98,16 @@ ITERIS = {
     "ID": ("Idaho 511", "https://511.idaho.gov"),
     "UT": ("UDOT Traffic", "https://www.udottraffic.utah.gov"),
     "NV": ("NVroads", "https://prod-nv.ibi511.com"),
-    "CT": ("CTroads", "https://ctroads.org"),
+    # Not CT. CTroads gives a developer key, but its API offers event feeds
+    # only: v2 cameras answered 404 and v1 "This method is not available in
+    # this context" (2026-11-02; ctroads.org/developers/help lists only
+    # GetEventFeeds). Connecticut's cameras come from LiveTrafficCam.
     "NC": ("DriveNC", "https://www.drivenc.gov"),
 }
 ITERIS_PATH = "/api/v2/get/cameras"
+# The platform's older endpoint, for a site that answers 404 to v2 (CTroads
+# did, 2026-11-02). Same key; a flat camera list instead of Views.
+ITERIS_V1_PATH = "/api/getcameras"
 
 # 511 sites whose VideoUrl is not public. DriveNC's points at NCDOT's own
 # video servers (cfase*.services.ncdot.gov), which ask the browser for a
@@ -349,18 +364,26 @@ def parse_iteris(doc: Any, state: str, name: str) -> list[list]:
         if not isinstance(c, dict):
             continue
         lat, lon = _num(c.get("Latitude")), _num(c.get("Longitude"))
-        if not _ok_point(lat, lon) or c.get("Id") is None:
+        cid = c.get("Id", c.get("ID"))
+        if not _ok_point(lat, lon) or cid is None:
             continue
-        views = [v for v in (c.get("Views") or []) if isinstance(v, dict)
+        if "Views" in c:
+            raw = c.get("Views") or []
+        else:                                 # the v1 shape: one view, flat
+            raw = [{"Url": c.get("Url"), "VideoUrl": c.get("VideoUrl"),
+                    "Status": "Disabled" if c.get("Disabled") or c.get("Blocked") else "Enabled"}]
+        views = [v for v in raw if isinstance(v, dict)
                  and str(v.get("Status") or "Enabled").lower() == "enabled"]
         video = None if state in NO_PUBLIC_VIDEO else next(
             (_https(v.get("VideoUrl")) for v in views if _https(v.get("VideoUrl"))), None)
         still = next((_https(v.get("Url")) for v in views if _https(v.get("Url"))), None)
         if not (video or still):
             continue
-        label = c.get("Name") or c.get("Location") or f"{name} camera {c['Id']}"
-        note = " · ".join(str(x) for x in (c.get("Roadway"), c.get("Direction")) if x and x not in ("None", "Unknown"))
-        out.append(_row(f"{state.lower()}511-{c['Id']}", lon, lat, str(label).strip(), name,
+        label = c.get("Name") or c.get("Location") or f"{name} camera {cid}"
+        road = c.get("Roadway") or c.get("RoadwayName")
+        way = c.get("Direction") or c.get("DirectionOfTravel")
+        note = " · ".join(str(x) for x in (road, way) if x and x not in ("None", "Unknown"))
+        out.append(_row(f"{state.lower()}511-{cid}", lon, lat, str(label).strip(), name,
                         HLS if video else IMAGE, video or still, None, state, note,
                         still if video else None))
     return out
@@ -392,6 +415,20 @@ def parse_ohgo(doc: Any) -> list[list]:
             continue
         out.append(_row(f"ohgo-{g('Id')}", lon, lat, str(g("Location") or g("Description") or "OHGO camera"),
                         "OHGO (Ohio DOT)", IMAGE, img, None, "OH", str(g("Description") or "")))
+    if not out:
+        # Answered, and nothing came out: say what the answer looked like
+        # (field names only), so the parser can be fixed from one report.
+        first = (results or [None])[0] if isinstance(results, list) else None
+        views = first.get("CameraViews", first.get("cameraViews")) if isinstance(first, dict) else None
+        view = views[0] if isinstance(views, list) and views and isinstance(views[0], dict) else None
+        raise ValueError("no cameras parsed; answer fields "
+                         f"{sorted(doc)[:8] if isinstance(doc, dict) else type(doc).__name__}, "
+                         f"{len(results) if isinstance(results, list) else 0} results, "
+                         f"camera fields {sorted(first)[:12] if isinstance(first, dict) else None}, "
+                         f"view fields {sorted(view)[:8] if view else None}, "
+                         # "TLS", not the scheme: a message naming a URL scheme is
+                         # withheld by the route, in case it carries a key.
+                         f"pictures over TLS {any(str(x).startswith('https:') for x in view.values()) if view else None}")
     return out
 
 

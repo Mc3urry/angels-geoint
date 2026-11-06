@@ -18,6 +18,7 @@ anything is still loading. A source that fails says so by name in
 from __future__ import annotations
 
 import json
+import re
 import os
 import threading
 import time
@@ -56,6 +57,48 @@ def _json(url: str, encoding: str = "utf-8", headers: dict | None = None) -> Any
     return json.loads(_get(url).decode(encoding, "replace"))
 
 
+def _iteris(base: str, st: str) -> Any:
+    """v2 first; the older v1 endpoint if v2 is not there (404)."""
+    q = "?" + urllib.parse.urlencode({"key": os.getenv(cu.iteris_env(st), "").strip(), "format": "json"})
+    try:
+        return _json(base + cu.ITERIS_PATH + q)
+    except urllib.error.HTTPError as exc:
+        if exc.code != 404:
+            raise
+    return _json(base + cu.ITERIS_V1_PATH + q)
+
+
+# LIVETRAFFICCAM, ONE AT A TIME. Asked sixteen states at once, it answered
+# HTTP 429 (too many requests) for most of them (2026-11-02). Its states are
+# now asked in turn, a second and a half apart, and a 429 waits and tries
+# again twice. The whole set takes about a minute, in the background.
+LTC_GAP_S = 1.5
+_ltc_lock = threading.Lock()
+_ltc_last = [0.0]
+
+
+def _ltc_json(url: str, tries: int = 3, sleep=time.sleep) -> Any:
+    for attempt in range(tries):
+        with _ltc_lock:
+            gap = LTC_GAP_S - (time.time() - _ltc_last[0])
+            if gap > 0:
+                sleep(gap)
+            try:
+                return _json(url)
+            except urllib.error.HTTPError as exc:
+                if exc.code != 429 or attempt == tries - 1:
+                    raise
+                wait_s = 5.0 * (attempt + 1)
+                try:
+                    wait_s = max(wait_s, min(60.0, float(exc.headers.get("Retry-After", 0))))
+                except (TypeError, ValueError, AttributeError):
+                    pass
+                sleep(wait_s)
+            finally:
+                _ltc_last[0] = time.time()
+    raise RuntimeError("unreachable")
+
+
 def keys() -> dict[str, bool]:
     """Which keyed state sources have a key. Presence only, never a value."""
     k = {st: bool(os.getenv(cu.iteris_env(st), "").strip()) for st in cu.ITERIS}
@@ -82,21 +125,47 @@ def sources() -> dict[str, tuple[str, Callable[[], list[list]]]]:
             # The key travels in the query string, as the platform requires;
             # it is built here, used once, and never returned or logged.
             s[f"511-{st}"] = (name, lambda st=st, name=name, base=base: cu.parse_iteris(
-                _json(base + cu.ITERIS_PATH + "?" + urllib.parse.urlencode(
-                    {"key": os.getenv(cu.iteris_env(st), "").strip(), "format": "json"})), st, name))
+                _iteris(base, st), st, name))
     if have["OH"]:
         s["ohgo"] = ("OHGO (Ohio DOT)", lambda: cu.parse_ohgo(_json(
             cu.OHGO_URL, headers={"Authorization": f"APIKEY {os.getenv(cu.OHGO_ENV, '').strip()}"})))
     for st in cu.LTC_STATES:
         if have.get(st):
             continue                      # read from the state itself
-        s[f"ltc-{st}"] = ("LiveTrafficCam", lambda st=st: cu.parse_ltc(_json(cu.LTC_URL.format(s=st)), st))
+        s[f"ltc-{st}"] = ("LiveTrafficCam", lambda st=st: cu.parse_ltc(_ltc_json(cu.LTC_URL.format(s=st)), st))
     return s
 
 
 _lock = threading.Lock()
 _state: dict[str, dict[str, Any]] = {}     # key -> {rows, at, error, loading}
 _refreshing = False
+
+
+def _safe(msg: str) -> bool:
+    """A parser's own message may be shown; anything that could carry a URL,
+    and so a key, may not."""
+    low = msg.lower()
+    return not any(t in low for t in ("http", "key=", "apikey", "://"))
+
+
+def _secrets() -> list[str]:
+    """Every camera key in the environment, used or not."""
+    return [v.strip() for k, v in os.environ.items()
+            if (k.startswith("CAM_KEY_") or k == cu.OHGO_ENV) and v.strip()]
+
+
+def _http_reason(exc: urllib.error.HTTPError) -> str:
+    """HTTP 400 alone says nothing; the publisher's own reason usually does
+    ("invalid key", "key not yet active"). Its first words are kept, as
+    plain text, and only if they hold no URL and none of our keys."""
+    try:
+        raw = exc.read(600).decode("utf-8", "replace")
+    except Exception:                       # noqa: BLE001 - a reason is optional
+        return ""
+    text = " ".join(re.sub(r"<[^>]+>|[{}\[\]\"]", " ", raw).split())[:160]
+    if not text or not _safe(text) or any(k in text for k in _secrets()):
+        return ""
+    return text
 
 
 def _refresh(keys: list[str], table: dict) -> None:
@@ -108,7 +177,9 @@ def _refresh(keys: list[str], table: dict) -> None:
             with _lock:
                 _state[k] = {"rows": rows, "at": time.time(), "error": None, "loading": False}
         except (urllib.error.URLError, TimeoutError, OSError, ValueError, KeyError, TypeError) as exc:
-            err = (f"HTTP {exc.code}" if isinstance(exc, urllib.error.HTTPError)
+            reason = _http_reason(exc) if isinstance(exc, urllib.error.HTTPError) else ""
+            err = (f"HTTP {exc.code}{f' ({reason})' if reason else ''}" if isinstance(exc, urllib.error.HTTPError)
+                   else f"ValueError: {exc}"[:300] if isinstance(exc, ValueError) and _safe(str(exc))
                    else type(exc).__name__)
             with _lock:
                 old = _state.get(k) or {}
@@ -170,6 +241,7 @@ def cameras_us(background: bool = True) -> dict:
     return {"cols": cu.COLS, "rows": rows, "n": len(rows), "loading": loading,
             "sources": by_pub,
             "keys": keys(),
+            "gaps": cu.NO_CAMERA_SOURCE,
             "evidence": "where the state can see the road: public DOT and 511 feeds",
             "kept": "locations only; pictures are played from each publisher and never stored"}
 
