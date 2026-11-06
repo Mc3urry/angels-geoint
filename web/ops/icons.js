@@ -223,6 +223,76 @@ export const alpr = () => glyph("alpr", (g) => {
   g.fillText("LPR", 32, 33);
 });
 
+// Which way an ALPR faces: a wedge from the camera's spot, pointing north
+// until it is turned to the mapped bearing. Drawn white, so the layer's
+// colour tints it, and half-transparent, so it reads as a direction and not
+// as a second symbol. The hexagon sits on top of its point.
+export const facingCone = () => glyph("cone", (g) => {
+  const p = new Path2D("M32 32 L20 3 Q32 -2 44 3 Z");
+  g.globalAlpha = 0.55;
+  g.fillStyle = "#fff"; g.fill(p);
+  g.globalAlpha = 0.9;
+  g.lineWidth = 2; g.strokeStyle = INK; g.stroke(p);
+});
+
+// OpenStreetMap's camera:direction, as bearings. Mappers write degrees
+// ("90"), compass points ("NE", "north"), ranges ("45-135", read as their
+// middle) or several at once ("90;270"). "forward" and "backward" are
+// relative to a road this point does not know, so they give nothing.
+const POINT_DEG = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, ESE: 112.5, SE: 135, SSE: 157.5,
+  S: 180, SSW: 202.5, SW: 225, WSW: 247.5, W: 270, WNW: 292.5, NW: 315, NNW: 337.5,
+  NORTH: 0, EAST: 90, SOUTH: 180, WEST: 270, NORTHEAST: 45, NORTHWEST: 315, SOUTHEAST: 135,
+  SOUTHWEST: 225 };
+const wrap = (d) => ((d % 360) + 360) % 360;
+export function facingDegrees(v) {
+  if (v == null || v === "") return [];
+  return String(v).split(/[;,]/).map((s) => s.trim().toUpperCase()).map((s) => {
+    if (/^-?\d+(\.\d+)?$/.test(s)) return wrap(Number(s));
+    const r = s.match(/^(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)$/);
+    if (r) { const a = Number(r[1]); let b = Number(r[2]); if (b < a) b += 360; return wrap((a + b) / 2); }
+    return POINT_DEG[s.replace(/[^A-Z]/g, "")] ?? null;
+  }).filter((d) => d != null).slice(0, 4);
+}
+
+// -- observed (Sentinel-1) ---------------------------------------------------
+//
+// The 2D view's foreign encoding, kept: a HOLLOW ring and a cross in one
+// slate tone for an unexplained return, a fainter ring for a fixed structure.
+// Nothing else on either map is hollow. Drawn in their colours with a pale
+// halo, so they read on imagery too; the billboard is not tinted.
+export const OBS = { cand: "#2f4858", site: "#9aa7ad" };
+
+export const candRing = () => glyph("cand", (g) => {
+  g.beginPath(); g.arc(32, 32, 20, 0, Math.PI * 2);
+  g.lineWidth = 9; g.strokeStyle = "rgba(255,255,255,.8)"; g.stroke();
+  g.lineWidth = 4.5; g.strokeStyle = OBS.cand; g.stroke();
+  g.beginPath(); g.moveTo(32, 21); g.lineTo(32, 43); g.moveTo(21, 32); g.lineTo(43, 32);
+  g.lineWidth = 6; g.strokeStyle = "rgba(255,255,255,.8)"; g.stroke();
+  g.lineWidth = 3; g.strokeStyle = OBS.cand; g.stroke();
+});
+
+export const siteRing = () => glyph("site", (g) => {
+  g.beginPath(); g.arc(32, 32, 18, 0, Math.PI * 2);
+  g.lineWidth = 7; g.strokeStyle = "rgba(255,255,255,.7)"; g.stroke();
+  g.lineWidth = 3.5; g.strokeStyle = OBS.site; g.stroke();
+});
+
+// A searched point (the coverage probe) and a found place: a pin.
+export const pin = (color = "#0e1a24") => glyph(`pin${color}`, (g) => {
+  const p = new Path2D("M32 60 C26 46 14 38 14 25 A18 18 0 0 1 50 25 C50 38 38 46 32 60 Z");
+  g.lineWidth = 4; g.strokeStyle = "#fff"; g.stroke(p);
+  g.fillStyle = color; g.fill(p);
+  g.beginPath(); g.arc(32, 25, 7, 0, Math.PI * 2); g.fillStyle = "#fff"; g.fill();
+});
+
+// Where the browser says the viewer is: the platform convention, a blue dot
+// with a white rim.
+export const here = () => glyph("here", (g) => {
+  g.beginPath(); g.arc(32, 32, 14, 0, Math.PI * 2);
+  g.fillStyle = "#1a73e8"; g.fill();
+  g.lineWidth = 5; g.strokeStyle = "#fff"; g.stroke();
+});
+
 // -- context -----------------------------------------------------------------
 
 export const satellite = () => glyph("sat", (g) => {

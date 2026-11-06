@@ -19,6 +19,7 @@ import { API, get, esc, requests } from "./api.js";
 import * as I from "./icons.js";
 import { REGIONS, makeAir, makeSea, makeLand, makeRail, makePlows, WorkZones, Cameras, States, ageText, RAIL_COLOR } from "./layers.js";
 import { Satellites, Alpr } from "./context.js";
+import { Observed, Probe, ArchiveTracks } from "./research.js";
 import { card as cardHtml } from "../views/popup.js";
 
 const Cesium = window.Cesium;
@@ -96,7 +97,10 @@ const ev = {
   wz: new WorkZones(viewer),
   cam: new Cameras(viewer),
   states: new States(viewer),
+  obs: new Observed(viewer),
+  tracks: new ArchiveTracks(viewer),
 };
+const probe = new Probe(viewer);
 const ctx = {
   sat: new Satellites(viewer),
   alpr: new Alpr(viewer),
@@ -107,7 +111,7 @@ let region = "air";
 const state = { labels: true, trails: true, seaGroups: new Set(I.SEA_GROUPS.map((g) => g.key)),
                 inServiceOnly: false };
 const on = { air: true, sea: true, land: false, rail: false, plow: false, speed: false, wz: false,
-             cam: false, states: true, sat: false, alpr: false };
+             cam: false, states: true, sat: false, alpr: false, obs: false, tracks: false };
 
 // ROAD SPEEDS: TomTom's flow tiles through our API (routes/traffic.py),
 // which adds the key. Aggregate speed per road; no vehicle is in it.
@@ -171,10 +175,11 @@ const pollers = {
     ev.land.ingest(transitFeatures(d));
     const kind = d.warming ? "warn" : d.error ? "err" : "ok";
     const gaps = missing(d.keys);
-    setStatus("land", d.warming
+    setStatus("land", d.error ? `the API's transit poller: ${d.error}` : d.warming
       ? `warming up: the API is asking every US feed (${d.n.toLocaleString()} so far)`
       : `${d.n_answered} of ${d.n_feeds} feeds answered${d.border.includes("not running") ? "; border collector not running" : ""}${
-        gaps.length ? `. No key yet: ${gaps.join(", ")}` : ""}`,
+        gaps.length ? `. No key yet: ${gaps.join(", ")}` : ""}${
+        d.swiftly ? `. Swiftly agencies every ${Math.round(d.swiftly.every_s / 60) || 1} min (its limit)` : ""}`,
       kind);
   } },
   plow: { ms: () => 60e3, run: async () => {
@@ -204,12 +209,25 @@ const pollers = {
     const gaps = missing(d.keys);
     setStatus("cam", d.loading ? `loading: ${d.n.toLocaleString()} so far`
       : `${Object.keys(d.sources).length - failed.length} publishers${failed.length ? `; did not answer: ${failed.join(", ")}` : ""}${
-        gaps.length ? `. Via LiveTrafficCam until keyed: ${gaps.join(" ")}` : ""}`,
+        gaps.length ? `. Via LiveTrafficCam until keyed: ${gaps.join(" ")}` : ""}${
+        Object.keys(d.gaps || {}).length ? `. No public source: ${Object.keys(d.gaps).join(", ")}` : ""}`,
       d.loading || failed.length ? "warn" : "ok");
   } },
   states: { ms: () => 3600e3, run: async () => { await ev.states.load(region); setStatus("states", "the discontinuity"); } },
+  // The research layers, as in the 2D view (research.js).
+  obs: { ms: () => 3600e3, run: async () => {
+    const m = await ev.obs.load();
+    const age = m.as_of ? Math.round((Date.now() - Date.parse(`${m.as_of}T00:00:00Z`)) / 86400000) : null;
+    setStatus("obs", `${(m.n ?? 0).toLocaleString()} unexplained returns in water AIS reaches, as of ${
+      m.as_of || "unknown"}${age != null ? ` (${age} days old)` : ""}`);
+  } },
+  tracks: { ms: () => 45e3, run: async () => {
+    const m = await ev.tracks.load(region);
+    setStatus("tracks", `${(m.n_tracks ?? 0).toLocaleString()} recorded paths, last ${ev.tracks.hours} h, ${
+      REGIONS[region].label}`, m.n_tracks ? "ok" : "warn");
+  } },
   sat: { ms: () => 6 * 3600e3, run: () => ctx.sat.load() },
-  alpr: { ms: () => 1e9, run: () => ctx.alpr.load() },
+  alpr: { ms: () => (ctx.alpr.loading ? 10e3 : 1e9), run: () => ctx.alpr.load() },
 };
 const timers = {};
 
@@ -257,14 +275,15 @@ function setLayer(key, value) {
   else target.setOn(value);
   if (value) schedule(key, true);
   else { clearTimeout(timers[key]); status[key] = null; }
-  if (!value && sel && sel.layer === target) deselect();
+  if (!value && sel && (sel.layer === target || (key === "obs" && sel.kind === "probe"))) deselect();
   renderSide();
 }
 
 // -- the layer list -------------------------------------------------------------
 
 const GROUPS = [
-  { title: "Cooperative", note: "self-reported", keys: ["air", "sea", "land", "rail", "plow", "wz"] },
+  { title: "Cooperative", note: "self-reported", keys: ["air", "tracks", "sea", "land", "rail", "plow", "wz"] },
+  { title: "Observed", note: "not reported; days old", keys: ["obs"] },
   { title: "Aggregate", note: "no vehicle in it", keys: ["speed"] },
   { title: "The state's own", keys: ["cam", "states"] },
   { title: "Context", note: "not evidence", keys: ["sat", "alpr"] },
@@ -272,7 +291,16 @@ const GROUPS = [
 
 const dot = (c) => `<span class="gl"><i style="width:12px;height:12px;border-radius:50%;background:${c};border:1.5px solid #fff;box-shadow:0 0 0 1px #0e1a24"></i></span>`;
 
+const HOURS = [1, 2, 6, 24];
 const ROW = {
+  tracks: { name: "Air archive", gl: `<span class="gl"><i style="width:20px;height:4px;border-radius:2px;background:linear-gradient(90deg,${
+      I.ALT_STOPS.map((s) => s[1]).join(",")})"></i></span>`,
+    key: () => HOURS.map((h) => `<span class="btn hr ${h === ev.tracks.hours ? "on" : ""}" data-hours="${h}"
+      title="Recorded paths from the last ${h} h">${h} h</span>`).join("") + `<span>recorded, not live</span>` },
+  obs: { name: "Observed \u00b7 SAR", icon: () => I.candRing(),
+    key: () => `<span><img src="${I.candRing()}" alt="">unexplained return</span>
+      <span><img src="${I.siteRing()}" alt="">fixed structure, removed</span>
+      <span>Click the globe to ask when the radar last looked there.</span>` },
   air: { name: "Aircraft", icon: () => I.planeDisc(I.ALT_STOPS[2][1]),
     key: () => `<span class="ramp"></span><span class="ends"><span>ground</span><span>40,000 ft</span></span>` },
   sea: { name: "Vessels", icon: () => I.hullFilled(I.SEA_GROUPS[0].color),
@@ -350,6 +378,8 @@ $("#side").addEventListener("click", (e) => {
     ev.land.filter = state.inServiceOnly ? (p) => p.in_service : null;
     ev.land.tick(); renderSide(); return;
   }
+  const hb = e.target.closest("[data-hours]");
+  if (hb) { ev.tracks.hours = Number(hb.dataset.hours); schedule("tracks", true); renderSide(); return; }
   if (e.target.closest("[data-hide]")) { setSide(false); return; }
   const t = e.target.closest("[data-toggle]");
   if (t) { setLayer(t.dataset.toggle, !on[t.dataset.toggle]); return; }
@@ -387,7 +417,7 @@ function setRegion(r) {
   if (r === region) { flyRegion(r); return; }
   region = r;
   segOn("#regions", "region", r);
-  for (const k of ["air", "sea", "wz", "states"]) if (on[k]) schedule(k, true);
+  for (const k of ["air", "sea", "wz", "states", "tracks"]) if (on[k]) schedule(k, true);
   flyRegion(r);
 }
 $("#regions").onclick = (e) => { const b = e.target.closest("button"); if (b) setRegion(b.dataset.region); };
@@ -429,6 +459,7 @@ function select(pick) {
 
 function deselect() {
   sel = null;
+  probe.clear();
   unfollow();
   ctx.sat.orbit.removeAll();
   reticle.show = false;
@@ -486,9 +517,10 @@ function renderCard() {
   if (!el.firstElementChild) el.innerHTML = '<div id="cbody"></div><div class="acts" id="cacts"></div>';
   const body = cardHtml(c).replace('<div class="ph">',
     '<div class="ph"><button class="x" data-act="close" title="Close (Esc)">&times;</button>');
+  const followable = sel.kind === "fleet" || sel.kind === "sat";
   const acts = [
-    `<button data-act="follow" class="${following ? "on" : ""}"
-      title="Keep the camera on it (F)">${following ? "Following" : "Follow"}</button>`,
+    followable ? `<button data-act="follow" class="${following ? "on" : ""}"
+      title="Keep the camera on it (F)">${following ? "Following" : "Follow"}</button>` : "",
     `<button data-act="fly">Fly to</button>`,
     c.watch ? `<button data-act="watch" data-cam="${sel.id}">Watch</button>` : "",
     c.link ? `<a href="${esc(c.link[0])}" target="_blank" rel="noopener noreferrer">${esc(c.link[1])} &#8599;</a>` : "",
@@ -668,8 +700,25 @@ scene.canvas.addEventListener("mouseleave", () => { $("#tip").hidden = true; sce
 handler.setInputAction((c) => {
   const p = pickAt(c.position);
   $("#tip").hidden = true;
-  if (p) select(p); else deselect();
+  if (p) select(p);
+  else if (on.obs) probeAt(c.position);
+  else deselect();
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+// THE COVERAGE PROBE, armed only while Observed is on, as in 2D: clicking
+// the globe asks when the radar last looked there. "Never searched" and
+// "searched, nothing there" look identical on a map, and this is the one
+// control that tells them apart.
+function probeAt(screen) {
+  const g = viewer.camera.pickEllipsoid(screen);
+  if (!g) { deselect(); return; }
+  const k = Cesium.Cartographic.fromCartesian(g);
+  unfollow();
+  sel = null;
+  const ask = probe.ask(Cesium.Math.toDegrees(k.longitude), Cesium.Math.toDegrees(k.latitude));
+  select({ kind: "probe", layer: probe, id: 0 });
+  ask.then(renderCard);
+}
 handler.setInputAction((c) => {
   const p = pickAt(c.position);
   if (p) { select(p); follow(true); }
@@ -678,29 +727,137 @@ handler.setInputAction((c) => {
 // -- search -----------------------------------------------------------------------------
 
 const hits = $("#hits");
-$("#search input").addEventListener("input", (e) => {
-  const q = e.target.value.trim().toLowerCase();
-  if (q.length < 2) { hits.hidden = true; return; }
+// ONE BOX FOR CONTACTS AND PLACES (2026-11-03). Contacts on the layers that
+// are on are matched here in the page, as you type; places (a town, an
+// address, an airport, or "lat, lon") come from the API's /geo/search,
+// asked once typing pauses. Only the text and the centre of the view are
+// sent; "My location" is never part of it.
+let placeT = 0, placeSeq = 0, places = [];
+const viewCentre = () => {
+  const g = viewer.camera.pickEllipsoid(new Cesium.Cartesian2(scene.canvas.clientWidth / 2,
+                                                              scene.canvas.clientHeight / 2));
+  const k = g ? Cesium.Cartographic.fromCartesian(g) : viewer.camera.positionCartographic;
+  return [Cesium.Math.toDegrees(k.longitude), Cesium.Math.toDegrees(k.latitude)];
+};
+
+function renderHits(q) {
   const found = [];
   for (const f of fleets) if (on[f.key]) for (const it of f.find(q)) found.push([f, it]);
   if (on.sat) for (const s of ctx.sat.sats) if (s.name.toLowerCase().includes(q)) found.push([ctx.sat, s]);
-  hits.innerHTML = found.slice(0, 12).map(([f, it], i) => {
-    const isSat = f === ctx.sat;
-    const label = isSat ? it.name : f.labelOf(it.props) || it.id;
-    const img = isSat ? I.tinted(I.satellite(), it.color) : it.bb.image;
-    return `<li data-i="${i}"><img src="${img}" alt="">${esc(label)}<small>${isSat ? "satellite" : f.key}</small></li>`;
-  }).join("") || `<li>No match among the layers that are on.</li>`;
+  if (on.cam) {
+    let n = 0;
+    ev.cam.rows.forEach((r, i) => {
+      if (n < 6 && String(r[3] || "").toLowerCase().includes(q)) { found.push([ev.cam, i]); n += 1; }
+    });
+  }
+  const contacts = found.slice(0, 10).map(([f, it], i) => {
+    if (f === ctx.sat) {
+      return `<li data-i="${i}"><img src="${I.tinted(I.satellite(), it.color)}" alt="">${esc(it.name)}<small>satellite</small></li>`;
+    }
+    if (f === ev.cam) {
+      const r = ev.cam.row(it);
+      return `<li data-i="${i}"><img src="${I.tinted(I.camera(), Cameras.colour(r.kind))}" alt="">${esc(r.name)}<small>camera ${esc(r.state)}</small></li>`;
+    }
+    return `<li data-i="${i}"><img src="${it.bb.image}" alt="">${esc(f.labelOf(it.props) || it.id)}<small>${f.key}</small></li>`;
+  });
+  const pl = places.map((p, i) => `<li data-p="${i}"><img src="${I.pin()}" alt="">${esc(p.name)}<small>${esc(p.label || p.kind)}</small></li>`);
+  hits.innerHTML = (contacts.length ? `<li class="hd">On the map</li>${contacts.join("")}` : "")
+    + (pl.length ? `<li class="hd">Places</li>${pl.join("")}` : "")
+    || (q.length >= 3 ? `<li class="none">Searching places&hellip;</li>` : `<li class="none">No match among the layers that are on.</li>`);
   hits._found = found;
   hits.hidden = false;
+}
+
+$("#search input").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  places = [];
+  clearTimeout(placeT);
+  // A cleared box clears what it put on the map: the place pin.
+  if (!q) { placePin.show = false; placeSeq += 1; }
+  if (q.length < 2) { hits.hidden = true; return; }
+  renderHits(q);
+  if (q.length < 3) return;
+  const seq = ++placeSeq;
+  placeT = setTimeout(async () => {
+    const [lon, lat] = viewCentre();
+    try {
+      const d = await get(`/geo/search?q=${encodeURIComponent(e.target.value.trim())}&lon=${lon.toFixed(3)}&lat=${lat.toFixed(3)}`);
+      if (seq !== placeSeq) return;
+      places = d.results || [];
+    } catch (err) {
+      if (seq !== placeSeq) return;
+      places = [];
+      hits.insertAdjacentHTML("beforeend", `<li class="none">Places: ${esc(err.kind === "offline" ? "API not reachable" : err.message)}</li>`);
+      return;
+    }
+    renderHits(q);
+  }, 350);
+});
+$("#search input").addEventListener("search", (e) => { if (!e.target.value.trim()) placePin.show = false; });
+$("#search input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { const first = hits.querySelector("li[data-i], li[data-p]"); if (first) first.click(); }
 });
 hits.addEventListener("click", (e) => {
+  const pl = e.target.closest("li[data-p]");
+  if (pl) { goToPlace(places[Number(pl.dataset.p)]); hits.hidden = true; return; }
   const li = e.target.closest("li[data-i]");
   if (!li) return;
   const [f, it] = hits._found[Number(li.dataset.i)];
-  select(f === ctx.sat ? { kind: "sat", layer: ctx.sat, id: it.norad } : { kind: "fleet", layer: f, id: it.id });
+  select(f === ctx.sat ? { kind: "sat", layer: ctx.sat, id: it.norad }
+    : f === ev.cam ? { kind: "cam", layer: ev.cam, id: it }
+    : { kind: "fleet", layer: f, id: it.id });
   flyToSel();
   hits.hidden = true;
 });
+
+// A found place gets a pin; a place with an extent is framed by it.
+const placePin = selBbs.add({ image: I.pin(), width: 30, height: 30, show: false,
+  verticalOrigin: Cesium.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY });
+function goToPlace(p) {
+  if (!p) return;
+  unfollow();
+  placePin.position = Cesium.Cartesian3.fromDegrees(p.lon, p.lat, 0);
+  placePin.show = true;
+  const b = p.bbox;
+  if (b && b[2] - b[0] < 20 && b[3] - b[1] < 20 && (b[2] - b[0] > 0.002 || b[3] - b[1] > 0.002)) {
+    viewer.camera.flyTo({ destination: Cesium.Rectangle.fromDegrees(b[0], b[1], b[2], b[3]), duration: 1.8 });
+  } else {
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(p.lon, p.lat - 0.03, 6e3),
+      orientation: { heading: 0, pitch: Cesium.Math.toRadians(-60), roll: 0 }, duration: 1.8 });
+  }
+  toast(`${p.name}${p.label ? `, ${p.label}` : ""}`);
+}
+
+// MY LOCATION, from the browser, after it asks. The position is drawn here
+// and goes nowhere else: no request carries it, nothing stores it.
+const hereDot = selBbs.add({ image: I.here(), width: 18, height: 18, show: false,
+  disableDepthTestDistance: Number.POSITIVE_INFINITY });
+let hereRing = null;
+function locate() {
+  if (!navigator.geolocation) { toast("This browser cannot share its location"); return; }
+  const b = $("#locate");
+  b.classList.add("busy");
+  navigator.geolocation.getCurrentPosition((pos) => {
+    b.classList.remove("busy");
+    const { longitude: lon, latitude: lat, accuracy } = pos.coords;
+    const at = Cesium.Cartesian3.fromDegrees(lon, lat, 0);
+    hereDot.position = at; hereDot.show = true;
+    if (hereRing) viewer.entities.remove(hereRing);
+    hereRing = viewer.entities.add({ position: at, ellipse: {
+      semiMajorAxis: Math.max(accuracy, 10), semiMinorAxis: Math.max(accuracy, 10),
+      material: Cesium.Color.fromCssColorString("#1a73e8").withAlpha(0.15),
+      outline: true, outlineColor: Cesium.Color.fromCssColorString("#1a73e8").withAlpha(0.6), height: 0 } });
+    unfollow();
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat - 0.02, Math.max(2500, accuracy * 6)),
+      orientation: { heading: 0, pitch: Cesium.Math.toRadians(-60), roll: 0 }, duration: 1.8 });
+    toast(`You are here, to within ${accuracy < 1000 ? `${Math.round(accuracy)} m` : `${(accuracy / 1000).toFixed(1)} km`}`);
+  }, (err) => {
+    b.classList.remove("busy");
+    toast(err.code === 1 ? "Location not allowed: allow it for this page in the browser's site settings"
+      : "The browser could not find a location");
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+}
+$("#locate").onclick = locate;
 document.addEventListener("click", (e) => { if (!e.target.closest("#search")) hits.hidden = true; });
 
 // -- keyboard -------------------------------------------------------------------------------
@@ -723,7 +880,7 @@ document.addEventListener("keydown", (e) => {
 // side of the globe off the screen.
 const occ = new Cesium.EllipsoidalOccluder(Cesium.Ellipsoid.WGS84, Cesium.Cartesian3.ZERO);
 const lastCam = { p: new Cesium.Cartesian3(), d: new Cesium.Cartesian3() };
-const statics = () => [ev.cam.pts, ev.wz.pts, ctx.alpr.pts];
+const statics = () => [ev.cam.pts, ev.wz.pts, ctx.alpr.cones, ctx.alpr.pts, ev.obs.sites, ev.obs.pts];
 let staticDirty = true, staticAt = 0;
 scene.preRender.addEventListener(() => {
   const cam = viewer.camera;

@@ -681,3 +681,6 @@ export function vesselCard(p, { others = 0, pinnable = false } = {}) {
     hint: pinHint(pinnable),
   });
 }
+
+// The vessels drawn now, for the search box (finder.js).
+export const vesselFleet = () => (visible ? fleet : []);

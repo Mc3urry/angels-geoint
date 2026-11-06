@@ -179,3 +179,20 @@ body.collapsed #readout { left: 12px; }
 .lyr:focus-visible, .seg button:focus-visible, .acts button:focus-visible, #search input:focus-visible {
   outline: 2px solid var(--ink); outline-offset: -2px;
 }
+
+/* -- search: contacts and places; my location (2026-11-03) ---------------- */
+#hits li.hd { font: 600 11px var(--sans); color: var(--ink-3); cursor: default; padding-top: 7px; }
+#hits li.hd:hover, #hits li.none:hover { background: none; }
+#hits li.none { color: var(--ink-3); cursor: default; font-family: var(--sans); }
+#hits li small { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#locate {
+  margin-left: 6px; width: 30px; height: 28px; display: grid; place-items: center;
+  border: 1px solid var(--rule); border-radius: 2px; background: #fff; color: var(--ink-2); cursor: pointer;
+}
+#locate:hover { border-color: var(--ink-3); color: var(--ink); }
+#locate.busy { color: #1a73e8; animation: locate-pulse 1s var(--ease) infinite alternate; }
+@keyframes locate-pulse { from { opacity: 1; } to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { #locate.busy { animation: none; } }
+.key .btn.hr { text-decoration: none; opacity: 1; padding: 0 5px; border: 1px solid var(--rule); border-radius: 2px;
+  font: 11px var(--mono); color: var(--ink-2); }
+.key .btn.hr.on { background: var(--ink); border-color: var(--ink); color: #fff; }

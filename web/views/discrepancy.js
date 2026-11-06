@@ -251,10 +251,10 @@ const RECEPTION = {
   unheard: ["none received here \u2014 the silence is OURS", true],
 };
 
-export function candidateCard(p, { others = 0, pinnable = false } = {}) {
+export function candidateCardData(p, { others = 0, pinnable = false } = {}) {
   const rec = RECEPTION[String(p.reception || "").toLowerCase()];
 
-  return card({
+  return {
     title: "UNEXPLAINED RETURN",
     chip: CAND,
     // The age in days, with no freshness band. A pill reading "stale" would
@@ -281,12 +281,16 @@ export function candidateCard(p, { others = 0, pinnable = false } = {}) {
       <b>not a confirmed vessel</b>: a radar return that nothing
       cooperative accounts for.`,
     hint: pinHint(pinnable),
-  });
+  };
 }
 
-export function siteCard(p, { pinnable = false } = {}) {
+export function candidateCard(p, ctx) {
+  return card(candidateCardData(p, ctx));
+}
+
+export function siteCardData(p, { pinnable = false } = {}) {
   const n = p.n_dates ?? null;
-  return card({
+  return {
     title: "FIXED STRUCTURE",
     chip: SITE,
     sub: "Excluded from the candidate list",
@@ -302,5 +306,45 @@ export function siteCard(p, { pinnable = false } = {}) {
     evidence: `<b>Excluded on purpose, and drawn anyway.</b> An exclusion
       you cannot see is one you have to take on trust.`,
     hint: pinHint(pinnable),
-  });
+  };
+}
+
+export function siteCard(p, ctx) {
+  return card(siteCardData(p, ctx));
+}
+
+// --- the coverage answer as a card ------------------------------------------
+//
+// The 3D view shows the probe's answer in its card, where the 2D view uses
+// its panel; the words are the same either way. Built here so the two
+// cannot drift.
+const pctOf = (r) => (r == null ? "\u2014" : `${Math.round(100 * r)}%`);
+
+export function probeCardData(probe) {
+  const dm = `${Number(probe.lat).toFixed(3)}, ${Number(probe.lon).toFixed(3)}`;
+  const p = probe.last;
+  if (!p) {
+    return {
+      title: "Never searched", chip: SITE, sub: `This point &middot; ${dm}`,
+      rows: [["Passes on disk", `${esc(probe.n_passes_on_disk)}; none covered this cell`]],
+      foot: [esc(probe.note || "")],
+      evidence: `<b>Observed coverage.</b> Empty water here is an untested
+        claim, not a negative result.`,
+    };
+  }
+  const hist = (probe.history || []).slice(1, 5)
+    .map((h) => `${esc(h.acquired.slice(0, 10))} (${Math.round(h.age_days)}&nbsp;d, ${esc(h.status)})`);
+  return {
+    title: `Last searched ${esc(p.acquired.replace("T", " ").slice(0, 16))} UTC`,
+    chip: CAND, sub: `This point &middot; ${dm}`, age: `${Math.round(p.age_days)}d`,
+    rows: [
+      ["Scene", esc(p.scene)],
+      ["Examined", p.status === "searched" ? `in full (${pctOf(p.searched_fraction)})`
+        : `only ${pctOf(p.searched_fraction)}: part-searched shoreline`, { warn: p.status !== "searched" }],
+      ["Water mask", p.mask_source === "fallback" ? "pooled shoreline, not this scene's own" : null],
+      ["Earlier", hist.length ? hist.join("<br>") : null],
+    ],
+    evidence: `<b>Observed coverage.</b> Anything that arrived since is
+      unobserved by construction.`,
+  };
 }

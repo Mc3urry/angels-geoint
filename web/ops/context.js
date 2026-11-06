@@ -11,7 +11,8 @@
 
 import * as I from "./icons.js";
 import { get, esc } from "./api.js";
-import { StaticPoints } from "./fleet.js";
+import { StaticPoints, courseAxis } from "./fleet.js";
+import { satCardData } from "./satcard.js";
 
 const C = () => window.Cesium;
 
@@ -128,28 +129,9 @@ export class Satellites {
 
   card(id) {
     const s = this.byId(id);
-    if (!s) return null;
-    const sat = window.satellite;
-    const e = this.eci(s.rec, new Date());
-    let altKm = null;
-    if (e) {
-      const gd = sat.eciToGeodetic(sat.propagate(s.rec, new Date()).position, sat.gstime(new Date()));
-      altKm = gd.height;
-    }
-    const v = s.vel ? Math.hypot(s.vel.x, s.vel.y, s.vel.z) : null;
-    const periodMin = (2 * Math.PI) / s.rec.no;
-    return {
-      title: s.name, sub: `NORAD ${esc(s.norad)} · ${esc(I.SAT_GROUPS[s.group]?.label ?? s.group)}`,
-      chip: s.color, glyph: I.satellite(),
-      rows: [
-        ["Altitude", altKm != null ? `${Math.round(altKm).toLocaleString()} km` : "—"],
-        ["Speed", v != null ? `${v.toFixed(2)} km/s` : "—"],
-        ["Inclination", `${(s.rec.inclo * 180 / Math.PI).toFixed(1)}°`],
-        ["Period", `${periodMin.toFixed(1)} min`],
-      ],
-      evidence: "<b>Context, not evidence.</b> Position computed in this browser from CelesTrak's published elements (SGP4).",
-    };
+    return s ? satCardData(s) : null;
   }
+
 }
 
 // -- ALPR (viewer-only scope exception) ---------------------------------------
@@ -162,6 +144,7 @@ export class Satellites {
 // nothing a count does not.
 
 export const ALPR_SHOW_BELOW_M = 1.5e6;
+export const ALPR_CONE_BELOW_M = 2e5;
 
 export class Alpr {
   constructor(viewer) {
@@ -169,6 +152,11 @@ export class Alpr {
     this.key = "alpr";
     this.on = false;
     const Cs = C();
+    // Which way each faces: a wedge under its hexagon, shown within 200 km.
+    // Made first so the hexagons draw over it.
+    this.cones = new StaticPoints(viewer, { px: 46, dotAbove: Infinity,
+      ddc: new Cs.DistanceDisplayCondition(0, ALPR_CONE_BELOW_M),
+      scaler: new Cs.NearFarScalar(1e3, 1.2, ALPR_CONE_BELOW_M, 0.6) });
     this.pts = new StaticPoints(viewer, { px: 24, dotPx: 7, dotAbove: 6e5,
       ddc: new Cs.DistanceDisplayCondition(0, ALPR_SHOW_BELOW_M),
       scaler: new Cs.NearFarScalar(2e3, 1.1, ALPR_SHOW_BELOW_M, 0.6) });
@@ -179,15 +167,28 @@ export class Alpr {
 
   async load() {
     if (this.rows.length && Date.now() - this.loadedAt < 6 * 3600e3) return;
-    status(this, "asking OpenStreetMap for the whole country (can take a minute)", "warn");
     const doc = await get("/context/alpr");
+    // The API fetches the country in the background (a few minutes the
+    // first time) and answers `loading` until it has it; main.js asks again.
+    this.loading = !!doc.loading;
+    if (this.loading) {
+      status(this, "asking OpenStreetMap for the whole country; a few minutes the first time", "warn");
+      return;
+    }
     this.pts.clear();
+    this.cones.clear();
     this.rows = doc.rows;
-    const img = I.alpr();
+    const img = I.alpr(), cone = I.facingCone();
+    const Cs = C();
     doc.rows.forEach((r, i) => {
-      this.pts.add(r[0], r[1], 2, img, I.COL.alpr, { kind: "alpr", layer: this, id: i });
+      const id = { kind: "alpr", layer: this, id: i };
+      for (const deg of I.facingDegrees(r[5])) {
+        const { bb } = this.cones.add(r[0], r[1], 2, cone, I.COL.alpr, id);
+        bb.alignedAxis = courseAxis(r[0], r[1], deg);    // its facing, on the ground (fleet.js)
+      }
+      this.pts.add(r[0], r[1], 2, img, I.COL.alpr, id);
     });
-    this.pts.show = this.on;
+    this.pts.show = this.cones.show = this.on;
     this.loadedAt = Date.now();
     const stale = doc.stale_s ? `, ${Math.round(doc.stale_s / 3600)} h old` : "";
     status(this, `${doc.n.toLocaleString()} mapped in the US${stale}; shown below 1,500 km`, stale ? "warn" : "ok");
@@ -195,7 +196,7 @@ export class Alpr {
 
   setOn(on) {
     this.on = on;
-    this.pts.show = on;
+    this.pts.show = this.cones.show = on;
     if (!on) status(this, "off");
   }
   get count() { return this.on ? this.rows.length : 0; }
@@ -213,7 +214,10 @@ export class Alpr {
       chip: I.COL.alpr, glyph: I.alpr(),
       rows: [
         ["Maker", maker ? esc(maker) : null],
-        ["Facing", facing ? esc(facing) : null],
+        ["Facing", facing ? (I.facingDegrees(facing).map((d) =>
+          `${String(Math.round(d) % 360).padStart(3, "0")}° ${
+            ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(d / 45) % 8]}`).join(", ")
+          || `${esc(facing)} <span class="dim">(as mapped)</span>`) : "not mapped"],
       ],
       link: [`https://www.openstreetmap.org/node/${Number(osm)}`, `OSM node ${Number(osm)}`],
       evidence: "<b>Context, not evidence.</b> Where a volunteer mapped one, from public OpenStreetMap tags. Never what it reads. Shown under the viewer-only scope exception.",

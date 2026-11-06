@@ -48,6 +48,8 @@
            sessions do not want. Nothing is fetched at all until it is on. -->
       <button data-layer="trails"
               title="Historical tracks from the archive for the selected box. Off by default; reads the archive, not the live feed.">Trails</button>
+      <button data-layer="sats"
+              title="Satellites, drawn where they are overhead. Context, not evidence; computed in the browser from CelesTrak's elements.">Satellites</button>
     </div>
 
     <!-- WHICH SKY. Not a zoom control: the two boxes are polled at
@@ -62,7 +64,7 @@
 
     <!-- Disabled until Trails is on: a time range for a layer that is not
          drawn is a control that does nothing, which is worse than absent. -->
-    <div id="range">
+    <div id="range" hidden>
       <button data-hours="1" disabled>1h</button>
       <button data-hours="2" class="on" disabled>2h</button>
       <button data-hours="6" disabled>6h</button>
@@ -78,6 +80,7 @@
   <aside id="panel"><p class="empty">starting…</p></aside>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -30,7 +30,7 @@
 // along the bearing at the speed the vehicle itself sent, never longer than
 // HORIZON_S.land, and not at all when it sent no speed.
 
-import { ageShort, attachHover, card, esc, freshness, pinHint } from "./popup.js";
+import { ageShort, attachHover, card, compass, esc, freshness, pinHint } from "./popup.js";
 import { reckonFleet } from "./reckon.js";
 import * as G from "../ops/icons.js";
 
@@ -72,7 +72,7 @@ async function addGlyphs(map) {
     "intercity": [G.rail(), G.COL.rail], "plow": [G.plow(), G.COL.plow],
     "wz-sign": [G.workzone(), G.COL.workzone],
     "cam-live": [G.camera(), G.COL.camStream], "cam-none": [G.camera(), G.COL.camNone],
-    "alpr": [G.alpr(), G.COL.alpr],
+    "alpr": [G.alpr(), G.COL.alpr], "alpr-cone": [G.facingCone(), G.COL.alpr],
   };
   await Promise.all(Object.entries(want).map(async ([id, [url, c]]) => {
     if (map.hasImage(id)) return;
@@ -116,7 +116,7 @@ const symbol = (id, source, image, size, extra = {}) => ({
 
 export function addLand(map) {
   for (const id of ["land-states", "land-zones", "land-cams", "land-veh", "land-rail",
-                    "land-plow", "land-alpr"]) {
+                    "land-plow", "land-alpr", "land-alpr-cone"]) {
     map.addSource(id, { type: "geojson", data: empty() });
   }
   addGlyphs(map).catch(() => {});
@@ -141,6 +141,11 @@ export function addLand(map) {
     { filter: ["==", ["geometry-type"], "Point"] }));
   // ALPR appear from zoom 6, as in the 3D view (below 1,500 km): tens of
   // thousands of hexagons over a continent say nothing a count does not.
+  // Which way each one faces, from zoom 10, under its hexagon.
+  map.addLayer(symbol("land-alpr-cone", "land-alpr-cone", "alpr-cone",
+    ["interpolate", ["linear"], ["zoom"], 10, 1.1, 16, 1.9],
+    { minzoom: 10, layout: { "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map",
+                             "icon-pitch-alignment": "map" } }));
   map.addLayer(symbol("land-alpr", "land-alpr", "alpr", sizeBy(0.3, 0.42, 0.75), { minzoom: 6 }));
   map.addLayer(symbol("land-cams", "land-cams", ["case", ["get", "live"], "cam-live", "cam-none"],
     sizeBy(0.3, 0.5, 0.85)));
@@ -235,7 +240,9 @@ export function addLand(map) {
     layers: ["land-alpr"], tolerance: 6, key: (p) => p.osm,
     html: (p) => card({
       title: "Licence-plate camera", chip: G.COL.alpr, sub: esc(p.operator || "operator not mapped"),
-      rows: [["Maker", p.maker ? esc(p.maker) : null], ["Facing", p.facing ? esc(p.facing) : null],
+      rows: [["Maker", p.maker ? esc(p.maker) : null],
+             ["Facing", p.facing ? (G.facingDegrees(p.facing).map(compass).join(", ")
+               || `${esc(p.facing)} <span class="dim">(as mapped)</span>`) : "not mapped"],
              ["OSM node", esc(p.osm)]],
       evidence: "Context, not evidence. Where a volunteer mapped one, from public OpenStreetMap tags. Never what it reads.",
     }),
@@ -251,7 +258,7 @@ const TAB_LAYERS = {
   plows: ["land-plow"],
   cameras: ["land-cams"],
   speeds: ["land-speed"],
-  alpr: ["land-alpr"],
+  alpr: ["land-alpr-cone", "land-alpr"],
 };
 const sub = { vehicles: true, rail: false, plows: false, cameras: false, speeds: false, alpr: false };
 const ALL_LAYERS = ["land-states-line", ...Object.values(TAB_LAYERS).flat()];
@@ -370,15 +377,23 @@ async function loadSpeeds(map) {
   speeds = s;
 }
 
+// The API fetches the country in the background and answers `loading`
+// until it has it (a few minutes the first time); the loop asks again.
 async function loadAlpr(map) {
-  if (alpr) return;
+  if (alpr && !alpr.loading) return;
   const d = await get("/context/alpr");
   alpr = d;
+  if (d.loading) return;
   map.getSource("land-alpr")?.setData({
     type: "FeatureCollection",
     features: d.rows.map(([lon, lat, osm, operator, maker, facing]) => ({
       type: "Feature", geometry: { type: "Point", coordinates: [lon, lat] },
       properties: { osm, operator, maker, facing } })),
+  });
+  map.getSource("land-alpr-cone")?.setData({
+    type: "FeatureCollection",
+    features: d.rows.flatMap(([lon, lat, , , , facing]) => G.facingDegrees(facing).map((rot) => ({
+      type: "Feature", geometry: { type: "Point", coordinates: [lon, lat] }, properties: { rot } }))),
   });
 }
 
@@ -421,6 +436,7 @@ export function startLand(map, onUpdate, onError) {
   loop((m) => loadSub(m, "rail"), RAIL_POLL_MS, () => sub.rail);
   loop((m) => loadSub(m, "plows"), PLOW_POLL_MS, () => sub.plows);
   loop((m) => loadSub(m, "cameras"), () => (cams?.loading ? CAM_LOADING_MS : 60000), () => sub.cameras);
+  loop((m) => loadSub(m, "alpr"), 10000, () => sub.alpr && (!alpr || alpr.loading));
   setInterval(() => { if (visible && !document.hidden) draw(map); }, DRAW_MS);
 }
 
@@ -672,3 +688,10 @@ export async function setLandSub(map, name, on, { force = false } = {}) {
 }
 
 export const landSub = () => ({ ...sub });
+
+// What each Land toggle is drawing now, for the search box (finder.js).
+export const landFleets = () => {
+  const off = !visible;
+  return { transit: off || !sub.vehicles ? [] : fleet, rail: off || !sub.rail ? [] : rail,
+           plows: off || !sub.plows ? [] : plows, cams: off || !sub.cameras ? [] : (cams?.rows || []) };
+};

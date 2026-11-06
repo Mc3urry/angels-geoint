@@ -39,9 +39,17 @@
     </div>
 
     <div id="search">
-      <input type="search" placeholder="find call sign, vessel, route" autocomplete="off" spellcheck="false">
+      <input type="search" placeholder="Search contacts or places" aria-label="Search contacts or places"
+             autocomplete="off" spellcheck="false">
       <ul id="hits" hidden></ul>
     </div>
+    <!-- The browser's own position, after it asks. Drawn here, sent nowhere. -->
+    <button id="locate" title="Show my location (the browser asks first; it is never sent anywhere)"
+            aria-label="Show my location">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/>
+        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 1.5v3.5M12 19v3.5M1.5 12H5M19 12h3.5" stroke="currentColor" stroke-width="1.8"/></svg>
+    </button>
     <a id="to-2d" href="index.html" title="The 2D research viewer">2D view &#8599;</a>
   </header>
 

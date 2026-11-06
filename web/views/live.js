@@ -574,3 +574,6 @@ export function startLive(map, onUpdate, onError) {
 }
 
 export const liveInfo = () => ({ n: fleet.length, lastPoll, requests, visible });
+
+// The aircraft drawn now, for the search box (finder.js). Nothing is copied.
+export const liveFleet = () => (visible ? fleet : []);

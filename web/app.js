@@ -19,16 +19,18 @@
 // of self-reported positions looks exactly like a display of reality.
 
 import { fetchTracks, addTracks } from "./views/map.js";
-import { addLive, startLive, liveInfo, liveMeta, liveAoi, setAoi,
+import { addLive, startLive, liveInfo, liveMeta, liveAoi, setAoi, liveFleet,
          setVisible as setAirVisible, POLL_MS, NATIONAL_POLL_MS }
   from "./views/live.js";
 import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
          setGroups, setSeaAoi, setWake, wakeStats, GROUPS, SUBTYPE_LABEL,
-         HULL_PATH }
+         HULL_PATH, vesselFleet }
   from "./views/vessels.js";
 import { addLand, startLand, setVisible as setLandVisible, setLandAoi,
-         refreshLand, landInfo, setLandSub, ensureInView } from "./views/land.js";
+         refreshLand, landInfo, setLandSub, ensureInView, landFleets, openCamera } from "./views/land.js";
 import * as G from "./ops/icons.js";
+import { addFinder, nowOf } from "./views/finder.js";
+import { addSats, setSats, satsInfo, satList, satPosition } from "./views/sats.js";
 import { esc } from "./views/popup.js";
 import { addDiscrepancy, loadDiscrepancy, discrepancyInfo,
          setVisible as setObsVisible, coverageAt, coverageSummary }
@@ -684,6 +686,8 @@ function renderStatus() {
 
     ${observed ? observedBlock() : ""}
 
+    ${satsInfo().visible ? satBlock() : ""}
+
     ${on.air && trails_on ? `<div class="stat"><span class="n">${
       trails?.properties.n_tracks ?? "&hellip;"}</span>
       <span class="l">Archive trails &middot; last ${trailHours}h &middot; ${
@@ -761,6 +765,67 @@ function renderStatus() {
   });
 }
 
+// --- satellites -------------------------------------------------------------
+
+function satBlock() {
+  const s = satsInfo();
+  if (s.error) return `<p class="err">Satellites: ${esc(s.error)}</p>`;
+  return `<div class="stat"><span class="n">${s.n ? s.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.satellite(), G.SAT_GROUPS.visual.color)}" alt="">Satellites,
+      drawn where they are overhead</span></div>
+    <div class="keyrow">${Object.values(G.SAT_GROUPS).map((g) =>
+      `<span><img src="${G.tinted(G.satellite(), g.color)}" alt="">${g.label}</span>`).join("")}</div>
+    <p class="meta">Context, not evidence: computed in this browser from CelesTrak's elements, moved every
+      two seconds. Click one for its ground track over one orbit.</p>`;
+}
+
+// --- the search box's sources ---------------------------------------------------
+//
+// What finder.js may match: only what the layers that are on are drawing,
+// read from the layers themselves. Each says how to name it, where it is
+// now and whether it moves (a moving contact is followed when chosen).
+
+function searchSources() {
+  const L = landFleets();
+  const seaGroup = (p) => G.SEA_GROUP_OF[p.subtype] || G.SEA_GROUP_OF.unknown;
+  const deadReckon = liveMeta()?.dead_reckon !== false;
+  return [
+    { items: liveFleet(), moves: true, zoom: 10,
+      icon: (it) => G.planeDisc(G.altColour(it.props.alt_m, it.props.on_ground)),
+      label: (it) => it.props.callsign || it.props.icao24, sub: () => "aircraft",
+      hay: (it) => `${it.props.callsign || ""} ${it.props.icao24 || ""}`,
+      where: (it) => nowOf(it, "air", deadReckon ? undefined : 0), id: (it) => it.props.icao24 },
+    { items: vesselFleet(), moves: true, zoom: 12,
+      icon: (it) => G.hullFilled(seaGroup(it.props).color, !!seaGroup(it.props).hollow),
+      label: (it) => it.props.name || it.props.mmsi, sub: (it) => `vessel ${it.props.mmsi || ""}`,
+      hay: (it) => `${it.props.name || ""} ${it.props.mmsi || ""} ${it.props.call_sign || ""}`,
+      where: (it) => nowOf(it, "sea"), id: (it) => it.props.mmsi },
+    { items: L.transit, moves: true, zoom: 14,
+      icon: (it) => G.tinted(G.MODES[it.props.mode]?.glyph() || G.bus(), it.props.c),
+      label: (it) => `${it.props.provider || it.props.feed_id}${it.props.route_id ? ` ${it.props.route_id}` : ""}`,
+      sub: (it) => (it.props.label ? `vehicle ${it.props.label}` : "transit"),
+      hay: (it) => `${it.props.provider} ${it.props.route_id} ${it.props.label}`,
+      where: (it) => nowOf(it, "land"), id: (it) => `${it.props.feed_id}:${it.props.vehicle_key}` },
+    { items: L.rail, moves: true, zoom: 11,
+      icon: () => G.tinted(G.rail(), G.COL.rail),
+      label: (it) => `${it.props.route || it.props.provider} ${it.props.number || ""}`.trim(), sub: (it) => it.props.provider,
+      hay: (it) => `${it.props.route} ${it.props.number} ${it.props.provider} ${it.props.destination}`,
+      where: (it) => nowOf(it, "land", 300), id: (it) => it.props.id },
+    { items: L.plows, moves: true, zoom: 12,
+      icon: () => G.tinted(G.plow(), G.COL.plow),
+      label: (it) => `${it.props.agency || ""} ${it.props.label || ""}`.trim(), sub: () => "snowplow",
+      hay: (it) => `${it.props.agency} ${it.props.label}`, where: (it) => nowOf(it, "land", 180), id: (it) => it.props.id },
+    { items: L.cams, moves: false, zoom: 14, max: 6,
+      icon: (r) => G.tinted(G.camera(), r.kind === "image" ? G.COL.camNone : G.COL.camStream),
+      label: (r) => r.name || "camera", sub: (r) => `camera ${r.state || ""}`,
+      hay: (r) => `${r.name} ${r.state} ${r.src}`, where: (r) => [r.lon, r.lat], id: (r) => r.id,
+      onPick: (r) => openCamera(map, r) },
+    { items: satList(), moves: true, zoom: 3,
+      icon: (s) => G.tinted(G.satellite(), s.color), label: (s) => s.name, sub: () => "satellite",
+      hay: (s) => `${s.name} ${s.norad}`, where: (s) => satPosition(s), id: (s) => s.norad },
+  ];
+}
+
 // --- land -----------------------------------------------------------------
 
 function landBlock() {
@@ -779,12 +844,16 @@ function landBlock() {
       `<span><img src="${G.tinted(m.glyph(), m.color)}" alt="">${m.label}</span>`).join("")}
       <span><img src="${G.tinted(G.bus(), G.NO_TRIP)}" alt="">no trip</span>
       <span><img src="${G.tinted(G.workzone(), G.COL.workzone)}" alt="">work zone</span></div>
+    ${v?.error ? `<p class="err">The API's transit poller: ${esc(v.error)}</p>` : ""}
     <p class="meta">${!v ? "Asking the API&hellip;" : v.warming
       ? `Warming up: the API is asking every US feed for the first time.`
       : `${v.n_answered} of ${v.n_feeds} feeds answered, projected along each vehicle's own heading
          and speed for up to 90 s. Grey badges carry no trip, and are usually parked.`}
       ${v && v.border.includes("not running") ? " <strong>The border collector is not running</strong>, so the research feeds are missing." : ""}
-      ${tGaps.length ? ` No key yet: ${esc(tGaps.join(", "))}.` : ""}</p>
+      ${tGaps.length ? ` No key yet: ${esc(tGaps.join(", "))}.` : ""}
+      ${v?.swiftly ? ` Swiftly's agencies share its limit of 180 requests per 15 minutes, so each is
+        refreshed about every ${Math.round(v.swiftly.every_s / 60) || 1} min and drawn faint in between${
+        v.swiftly.paused_s ? `; paused ${Math.ceil(v.swiftly.paused_s / 60)} min after Swiftly said slow down` : ""}.` : ""}</p>
     <p class="meta">${s ? `<strong>Research:</strong> ${v?.n_research != null ? `${v.n_research.toLocaleString()} of these are on ` : ""}the 38
       G2b border feeds, whose service area crosses a state line; ${s.n_answered} of ${s.n_feeds} answered
       the collector's last poll. The rest of the country is shown, not studied.` : "Reading feed status&hellip;"}</p>
@@ -812,16 +881,20 @@ function landBlock() {
       <span class="l"><img class="ic" src="${G.tinted(G.camera(), G.COL.camStream)}" alt="">Traffic cameras, all US${
         L.cams?.loading ? " &middot; still loading" : ""}</span></div>
       <p class="meta">Where the state can see the road: each from its own DOT, or LiveTrafficCam where no
-        key is set${cGaps.length ? ` (${esc(cGaps.join(" "))})` : ""}. Click one to watch it here.</p>${fail("cameras")}` : ""}
+        key is set${cGaps.length ? ` (${esc(cGaps.join(" "))})` : ""}. Click one to watch it here.</p>
+      ${Object.keys(L.cams?.gaps || {}).length ? `<p class="meta"><strong>No public source:</strong> ${
+        Object.entries(L.cams.gaps).map(([st, why]) => `<span title="${esc(why)}">${esc(st)}</span>`).join(", ")}.
+        Those states are blank because nothing this project may use publishes their cameras, not because
+        they have none.</p>` : ""}${fail("cameras")}` : ""}
     ${L.sub.speeds ? `<div class="stat"><span class="n">${L.speeds ? "on" : "&mdash;"}</span>
       <span class="l">Road speeds against free flow</span></div>
       <div class="keyrow"><span class="ramp" style="background:linear-gradient(90deg,#3ec46d,#f7c948,#e8590c,#8b1a1a)"></span>
         <span>free flow to stopped</span></div>
       <p class="meta">TomTom's aggregate of probe data per road. No vehicle is in it.</p>${fail("speeds")}` : ""}
-    ${L.sub.alpr ? `<div class="stat"><span class="n">${L.alpr ? L.alpr.n.toLocaleString() : "&mdash;"}</span>
+    ${L.sub.alpr ? `<div class="stat"><span class="n">${L.alpr && !L.alpr.loading ? L.alpr.n.toLocaleString() : "&mdash;"}</span>
       <span class="l"><img class="ic" src="${G.tinted(G.alpr(), G.COL.alpr)}" alt="">ALPR cameras mapped in the US</span></div>
       <p class="meta">Context, not evidence: locations volunteers mapped in OpenStreetMap, drawn from zoom 6.${
-        L.alpr ? "" : " The first load can take a minute."}</p>${fail("alpr")}` : ""}`;
+        L.alpr && !L.alpr.loading ? "" : " Asking OpenStreetMap for the whole country: a few minutes the first time."}</p>${fail("alpr")}` : ""}`;
 }
 
 // --- filters --------------------------------------------------------------
@@ -913,6 +986,9 @@ function setTrails(want) {
   trailTimer = null;
   document.querySelectorAll("#range button")
           .forEach((b) => { b.disabled = !want; });
+  // Absent rather than disabled while Trails is off: a time range for a
+  // layer that is not drawn is a control that does nothing (2026-11-03).
+  el("range").hidden = !want;
 
   setWake(map, want);
   if (want) wakeSince = Date.now();
@@ -949,6 +1025,8 @@ map.on("load", async () => {
   setSeaVisible(map, false);
   addLand(map);
   setLandVisible(map, false);
+  addSats(map);
+  addFinder(map, searchSources);
 
   // The probe is armed only while the observed layer is on. Clicking water on
   // a purely cooperative map and being told about radar coverage would be an
@@ -1035,6 +1113,7 @@ map.on("load", async () => {
       b.classList.toggle("on", want);
       if (b.dataset.layer === "observed") setObserved(want);
       if (b.dataset.layer === "trails") setTrails(want);
+      if (b.dataset.layer === "sats") setSats(map, want, renderStatus);
     };
   });
 

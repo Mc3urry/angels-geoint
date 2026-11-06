@@ -113,11 +113,11 @@ function shape(r) {
   return "orbiting or loitering";
 }
 
-export function trackCard(p, { others = 0, pinnable = false } = {}) {
+export function trackCardData(p, { others = 0, pinnable = false } = {}) {
   const mins = p.duration_s != null ? Math.round(p.duration_s / 60) : null;
   const r = p.path_km > 0 ? p.net_km / p.path_km : 1;
 
-  return card({
+  return {
     title: p.platform_id ?? "track",
     sub: "Recorded path \u2014 archive, not a live position",
     foot: [crowd(others)],
@@ -134,5 +134,9 @@ export function trackCard(p, { others = 0, pinnable = false } = {}) {
       the platform itself, and the gaps between them are gaps in what it
       chose to send \u2014 not in where it went.`,
     hint: pinHint(pinnable),
-  });
+  };
+}
+
+export function trackCard(p, ctx) {
+  return card(trackCardData(p, ctx));
 }
