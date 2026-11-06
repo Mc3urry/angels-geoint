@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 from angels import __version__
 from angels.api.routes import (basemap, cameras, context, coverage, dossier,
-                                events, labels, land, live, tracks, traffic,
+                                events, geo, labels, land, live, tracks, traffic,
                                 vehicles)
 from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME, ROOT
 
@@ -68,6 +68,9 @@ app.include_router(land.router)
 app.include_router(context.router)
 # The 3D view's basemap tiles, with the CARTO key added server-side.
 app.include_router(basemap.router)
+# Place search for both views' search bars (TomTom with its key here, else
+# Nominatim). Contacts are searched in the page; only place names come here.
+app.include_router(geo.router)
 # The 3D view's national layers: traffic cameras and transit across the US.
 # Viewer only (README, "Viewer-only exception"); nothing is stored.
 app.include_router(cameras.router)
