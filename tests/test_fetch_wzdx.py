@@ -49,7 +49,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from scripts.fetch_wzdx import (HTTP_ERROR, KNOWN_SPEC_VERSIONS,
+from scripts.fetch_wzdx import (CONTENT_DIGEST_VERSION, HTTP_ERROR, KNOWN_SPEC_VERSIONS,
                                 KNOWN_WZDX_VERSIONS, NOT_JSON, NOT_WZDX, OK,
                                 STORED_OUTCOMES, TRUNCATED, VERSION_UNKNOWN,
                                 append_ledger, blind_feeds, body_path,
@@ -1135,14 +1135,49 @@ def test_a_version_one_sidecar_is_recomputed_not_compared(tmp_path) -> None:
 
     side = json.loads((tmp_path / "roads" / "wzdx" / "_last" /
                        "CivicLink_CrewCast.json").read_text(encoding="utf-8"))
-    assert side["content_version"] == 2
+    assert side["content_version"] == CONTENT_DIGEST_VERSION
     again = store(tmp_path, "CivicLink_CrewCast", crewcast(1793040913))
     assert again["sidecar_migrated"] is False, "upgraded once, not every cycle"
 
 
 def test_every_ledger_row_says_which_digest_it_carries() -> None:
     rec = feed_record(FEED, status=200, body=wzdx(n=2), elapsed_s=0.1)
-    assert rec["content_digest_version"] == 2
+    assert rec["content_digest_version"] == CONTENT_DIGEST_VERSION
+
+
+# -- C: mndot's rolling end date (version 3, 2026-11-06) ---------------------
+
+def mndot_body(end: str, start: str = "2026-10-01T12:00:00Z") -> dict:
+    return {"feed_info": {"version": "4.2", "update_date": "x"}, "type": "FeatureCollection",
+            "features": [{"type": "Feature", "id": "mn-1",
+                          "properties": {"core_details": {"description": "I-35 lane"},
+                                         "start_date": start, "end_date": end}}]}
+
+
+def test_mndots_rolling_end_date_is_the_same_claim() -> None:
+    """C. "Now plus about 3.8 years", an hour apart: no road changed."""
+    a = mndot_body("2030-08-16T14:50:17Z")
+    b = mndot_body("2030-08-16T15:58:51Z")
+    assert content_digest(a, "mndot") == content_digest(b, "mndot")
+
+
+def test_a_real_end_date_still_counts_in_mndot_and_everywhere_else() -> None:
+    near_a, near_b = mndot_body("2026-11-20T23:00:00Z"), mndot_body("2026-11-27T23:00:00Z")
+    assert content_digest(near_a, "mndot") != content_digest(near_b, "mndot"), \
+        "an end date inside three years is a real declaration"
+    far_a, far_b = mndot_body("2030-08-16T14:50:17Z"), mndot_body("2030-08-16T15:58:51Z")
+    assert content_digest(far_a, "indot") != content_digest(far_b, "indot"), \
+        "only the feeds named in ROLLING_END_DATE_FEEDS are read this way"
+    assert content_digest(far_a) != content_digest(far_b), "no feed named, no exclusion"
+
+
+def test_the_ledger_digest_uses_the_feeds_name() -> None:
+    feed = {**FEED, "feedName": "mndot"}
+    a = feed_record(feed, status=200, body=json.dumps(mndot_body("2030-08-16T14:50:17Z")).encode(),
+                    elapsed_s=0.1)
+    b = feed_record(feed, status=200, body=json.dumps(mndot_body("2030-08-16T15:58:51Z")).encode(),
+                    elapsed_s=0.1)
+    assert a["content_sha256"] == b["content_sha256"] and a["sha256"] != b["sha256"]
 
 
 # -- the envelope-only share (2026-10-27) -----------------------------------

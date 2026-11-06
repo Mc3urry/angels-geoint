@@ -438,7 +438,26 @@ def digest(body: bytes) -> str:
 # kept. Every sidecar written under version 1 is recomputed from the body it
 # names (see `last_seen`), and each ledger row says which version produced
 # its digest, so the ledger before and after the change can be told apart.
-CONTENT_DIGEST_VERSION = 2
+CONTENT_DIGEST_VERSION = 3
+
+# VERSION 3, 2026-11-06, decided by Joshua (C).
+#
+#   C. mndot gives an open-ended event an `end_date` of "now plus about 3.8
+#      years" (2030-08-16T14:50:17Z, then 15:58:51Z an hour later): a
+#      placeholder for "no end" that moves with the clock, so every cycle
+#      read as a changed declaration. For the feeds named here, an end date
+#      more than ROLLING_END_SPAN_DAYS after the event's own start is read
+#      as "no end" and left out of the claim. It is always at least 3.8
+#      years for mndot's placeholder.
+#
+# Scoped to the feed, not general, on measurement: across the 20 feeds'
+# latest bodies on 2026-11-06, indot (189), kansas (167) and wsdot (111) carry
+# real projects more than three years long with fixed end dates, and a
+# general rule would have hidden every edit to them. The cost inside mndot:
+# an edit to a genuine end date more than three years out is not seen as a
+# change. mndot's flapping (events removed then re-added) still counts.
+ROLLING_END_DATE_FEEDS = frozenset({"mndot"})
+ROLLING_END_SPAN_DAYS = 3 * 365 + 1
 
 # Separator, then ten digits that read as a Unix time between 2017 and 2049.
 # Narrow on purpose: an id like `event-12` or a ten-digit number with no
@@ -459,9 +478,28 @@ def stable_id(value: Any) -> Any:
     return value
 
 
-def claim_of(feature: Any) -> Any:
-    """A feature as a claim about a road: version 2's two exclusions applied
-    to a copy, never to the feature itself."""
+def _when(value: Any) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def rolling_end(props: dict[str, Any]) -> bool:
+    """True if `end_date` is the placeholder kind: more than three years
+    after the event's own start (C, version 3)."""
+    start, end = _when(props.get("start_date")), _when(props.get("end_date"))
+    if start is None or end is None:
+        return False
+    if (start.tzinfo is None) != (end.tzinfo is None):
+        return False
+    return (end - start).days > ROLLING_END_SPAN_DAYS
+
+
+def claim_of(feature: Any, feed: str | None = None) -> Any:
+    """A feature as a claim about a road: the content digest's exclusions
+    (A and B for every feed, C for the feeds named in ROLLING_END_DATE_FEEDS)
+    applied to a copy, never to the feature itself."""
     if not isinstance(feature, dict):
         return feature
     f = copy.deepcopy(feature)
@@ -472,10 +510,12 @@ def claim_of(feature: Any) -> Any:
         core = props.get("core_details")
         if isinstance(core, dict):
             core.pop("update_date", None)
+        if feed in ROLLING_END_DATE_FEEDS and rolling_end(props):
+            props["end_date"] = "open-ended"
     return f
 
 
-def content_digest(obj: Any) -> str | None:
+def content_digest(obj: Any, feed: str | None = None) -> str | None:
     """Of the road events alone, insensitive to order and to the envelope.
 
     MEASURED 2026-10-06, FROM TWO CYCLES 15.6 MINUTES APART.
@@ -516,7 +556,7 @@ def content_digest(obj: Any) -> str | None:
     feats = obj.get("features")
     if not isinstance(feats, list):
         return None
-    claims = [claim_of(f) for f in feats]
+    claims = [claim_of(f, feed) for f in feats]
     canonical = json.dumps(
         sorted(claims, key=lambda f: (str(f.get("id") if isinstance(f, dict)
                                           else f),
@@ -568,7 +608,7 @@ def feed_record(feed: dict[str, Any], *, status: int | None,
         # the difference between them is how four feeds were found rewriting
         # `update_date` over identical road events.
         "sha256": digest(body) if body else None,
-        "content_sha256": content_digest(obj),
+        "content_sha256": content_digest(obj, feed.get("feedName")),
         # Which definition produced it. Version 1 before 2026-10-27; see
         # CONTENT_DIGEST_VERSION. A reader comparing rows across the change
         # needs this, and nothing else in the row would say.
@@ -1064,7 +1104,7 @@ def last_seen(root: Path, feed: str) -> dict[str, Any]:
         got["migration_failed"] = True
         return got
 
-    content = content_digest(obj)
+    content = content_digest(obj, feed)
     if content is None:
         got["migration_failed"] = True
         return got
