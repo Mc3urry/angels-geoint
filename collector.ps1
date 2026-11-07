@@ -492,8 +492,12 @@ function Show-One($key) {
     # as data arriving, and this is the difference.
     $raw = Join-Path $Repo ("data\raw\" + $fp.Dataset)
     if (Test-Path $raw) {
-        $files = Get-ChildItem $raw -Recurse -Filter *.parquet
-        $hours = Get-ChildItem $raw -Directory | Sort-Object Name
+        # Parquet for air and sea, gzipped JSON bodies for WZDx. Counting
+        # parquet alone reported the work-zone archive as "0 files, 0 MB"
+        # over 318 hours of bodies (2026-11-06), and `_last`, the sidecar
+        # folder, was counted as an hour.
+        $files = Get-ChildItem $raw -Recurse -File -Include *.parquet, *.json.gz
+        $hours = Get-ChildItem $raw -Directory -Filter "hour=*" | Sort-Object Name
         $mb    = [math]::Round(($files | Measure-Object Length -Sum).Sum / 1MB, 1)
         Write-Host "    Archive:   $($files.Count) files, $($hours.Count) hours, $mb MB"
         if ($hours.Count) {
