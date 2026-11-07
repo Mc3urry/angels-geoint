@@ -20,6 +20,7 @@ import * as I from "./icons.js";
 import { REGIONS, makeAir, makeSea, makeLand, makeRail, makePlows, WorkZones, Cameras, States, ageText, RAIL_COLOR } from "./layers.js";
 import { Satellites, Alpr } from "./context.js";
 import { Observed, Probe, ArchiveTracks } from "./research.js";
+import { RoadEvents, hubLine } from "./roadevents.js";
 import { card as cardHtml } from "../views/popup.js";
 
 const Cesium = window.Cesium;
@@ -95,6 +96,7 @@ const ev = {
   rail: makeRail(viewer),
   plow: makePlows(viewer),
   wz: new WorkZones(viewer),
+  rev: new RoadEvents(viewer),
   cam: new Cameras(viewer),
   states: new States(viewer),
   obs: new Observed(viewer),
@@ -110,7 +112,7 @@ const fleets = [ev.air, ev.sea, ev.land, ev.rail, ev.plow];
 let region = "air";
 const state = { labels: true, trails: true, seaGroups: new Set(I.SEA_GROUPS.map((g) => g.key)),
                 inServiceOnly: false };
-const on = { air: true, sea: true, land: false, rail: false, plow: false, speed: false, wz: false,
+const on = { air: true, sea: true, land: false, rail: false, plow: false, speed: false, wz: false, rev: false,
              cam: false, states: true, sat: false, alpr: false, obs: false, tracks: false };
 
 // ROAD SPEEDS: TomTom's flow tiles through our API (routes/traffic.py),
@@ -127,10 +129,14 @@ const speed = {
       this.layer = viewer.imageryLayers.addImageryProvider(new Cesium.UrlTemplateImageryProvider({
         url: `${API}/traffic/flow/{z}/{x}/{y}.png`, maximumLevel: 18, minimumLevel: 0,
         credit: "Traffic flow © TomTom" }));
-      this.layer.alpha = 0.9;
+      // As 2D: opaque, a little more saturation and contrast (2026-11-07).
+      this.layer.alpha = 1;
+      this.layer.saturation = 1.25;
+      this.layer.contrast = 1.15;
     }
     this.layer.show = this.on;
-    setStatus("speed", "speed against free flow, every road with probe data");
+    setStatus("speed", `speed against free flow, every road with probe data${
+      s.tiles && !s.tiles.startsWith("512") ? `; ${s.tiles}` : ""}`, s.tiles && !s.tiles.startsWith("512") ? "warn" : "ok");
   },
   setOn(v) { this.on = v; if (this.layer) this.layer.show = v; },
   get count() { return null; },
@@ -200,6 +206,15 @@ const pollers = {
     const m = ev.wz.meta || {};
     setStatus("wz", `${m.n_in_view ?? 0} declared in ${REGIONS[region].label}${m.as_points ? ", as points" : ""}`,
       m.truncated ? "warn" : "ok");
+  } },
+  // CARS hub road events (IN KS MN NE): every ten seconds while the API
+  // is first asking the hubs, then every five minutes, as the API caches.
+  rev: { ms: () => (ev.rev.meta?.loading ? 10e3 : 300e3), run: async () => {
+    const m = await ev.rev.load();
+    const line = hubLine(m);
+    setStatus("rev", m.loading ? `asking the hubs: ${m.n.toLocaleString()} so far`
+      : `${m.n.toLocaleString()} declared${line ? `: ${line}` : ""}`,
+      m.loading || Object.values(m.sources || {}).some((x) => x.error) ? "warn" : "ok");
   } },
   // Every few seconds while the API's sources are still loading, then
   // every fifteen minutes.
@@ -282,7 +297,7 @@ function setLayer(key, value) {
 // -- the layer list -------------------------------------------------------------
 
 const GROUPS = [
-  { title: "Cooperative", note: "self-reported", keys: ["air", "tracks", "sea", "land", "rail", "plow", "wz"] },
+  { title: "Cooperative", note: "self-reported", keys: ["air", "tracks", "sea", "land", "rail", "plow", "wz", "rev"] },
   { title: "Observed", note: "not reported; days old", keys: ["obs"] },
   { title: "Aggregate", note: "no vehicle in it", keys: ["speed"] },
   { title: "The state's own", keys: ["cam", "states"] },
@@ -310,6 +325,9 @@ const ROW = {
     key: () => Object.values(I.MODES).map((m) => `<span><img src="${I.tinted(m.glyph(), m.color)}" alt="">${m.label}</span>`).join("")
       + `<span class="btn ${state.inServiceOnly ? "off" : ""}" data-notrip title="Show or hide vehicles with no trip"><img src="${I.tinted(I.bus(), I.NO_TRIP)}" alt="">no trip</span>` },
   wz: { name: "Work zones", icon: () => I.tinted(I.workzone(), I.COL.workzone) },
+  rev: { name: "Road events \u00b7 CARS", icon: () => I.tinted(I.roadEvent(), I.ROAD_EVENT_KINDS.incident.color),
+    key: () => Object.values(I.ROAD_EVENT_KINDS).map((k) => `<span><img src="${I.tinted(I.roadEvent(), k.color)}" alt="">${k.label}</span>`).join("")
+      + `<span>IN KS MN NE; declared, not Phase G</span>` },
   rail: { name: "Intercity rail", icon: () => I.tinted(I.rail(), RAIL_COLOR),
     key: () => `<span>Amtrak, VIA, Brightline</span>` },
   plow: { name: "DOT snowplows", icon: () => I.tinted(I.plow(), I.COL.plow),
@@ -750,6 +768,15 @@ function renderHits(q) {
       if (n < 6 && String(r[3] || "").toLowerCase().includes(q)) { found.push([ev.cam, i]); n += 1; }
     });
   }
+  if (on.rev) {
+    let n = 0;
+    ev.rev.feats.forEach((f, i) => {
+      const p = f.properties;
+      if (n < 5 && `${p.headline} ${p.road} ${p.state} ${p.text || ""}`.toLowerCase().includes(q)) {
+        found.push([ev.rev, i]); n += 1;
+      }
+    });
+  }
   const contacts = found.slice(0, 10).map(([f, it], i) => {
     if (f === ctx.sat) {
       return `<li data-i="${i}"><img src="${I.tinted(I.satellite(), it.color)}" alt="">${esc(it.name)}<small>satellite</small></li>`;
@@ -757,6 +784,11 @@ function renderHits(q) {
     if (f === ev.cam) {
       const r = ev.cam.row(it);
       return `<li data-i="${i}"><img src="${I.tinted(I.camera(), Cameras.colour(r.kind))}" alt="">${esc(r.name)}<small>camera ${esc(r.state)}</small></li>`;
+    }
+    if (f === ev.rev) {
+      const p = ev.rev.feats[it].properties;
+      return `<li data-i="${i}"><img src="${I.tinted(I.roadEvent(), (I.ROAD_EVENT_KINDS[p.kind] || I.ROAD_EVENT_KINDS.other).color)}" alt="">${
+        esc(p.headline || "road event")}<small>${esc(`${p.road || ""} ${p.state}`.trim())}</small></li>`;
     }
     return `<li data-i="${i}"><img src="${it.bb.image}" alt="">${esc(f.labelOf(it.props) || it.id)}<small>${f.key}</small></li>`;
   });
@@ -805,6 +837,7 @@ hits.addEventListener("click", (e) => {
   const [f, it] = hits._found[Number(li.dataset.i)];
   select(f === ctx.sat ? { kind: "sat", layer: ctx.sat, id: it.norad }
     : f === ev.cam ? { kind: "cam", layer: ev.cam, id: it }
+    : f === ev.rev ? { kind: "rev", layer: ev.rev, id: it }
     : { kind: "fleet", layer: f, id: it.id });
   flyToSel();
   hits.hidden = true;
@@ -880,7 +913,7 @@ document.addEventListener("keydown", (e) => {
 // side of the globe off the screen.
 const occ = new Cesium.EllipsoidalOccluder(Cesium.Ellipsoid.WGS84, Cesium.Cartesian3.ZERO);
 const lastCam = { p: new Cesium.Cartesian3(), d: new Cesium.Cartesian3() };
-const statics = () => [ev.cam.pts, ev.wz.pts, ctx.alpr.cones, ctx.alpr.pts, ev.obs.sites, ev.obs.pts];
+const statics = () => [ev.cam.pts, ev.wz.pts, ev.rev.pts, ctx.alpr.cones, ctx.alpr.pts, ev.obs.sites, ev.obs.pts];
 let staticDirty = true, staticAt = 0;
 scene.preRender.addEventListener(() => {
   const cam = viewer.camera;

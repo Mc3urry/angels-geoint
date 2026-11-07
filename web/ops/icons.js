@@ -199,6 +199,17 @@ export const workzone = () => glyph("wz", (g) => {
   g.beginPath(); g.arc(32, 45, 3.6, 0, 7); g.fill();
 });
 
+// A road event declared by a state's 511 system (CARS hub, 2026-11-07): a
+// warning triangle, so it is not taken for a WZDx work zone (the diamond).
+// Colour = what kind of event (ROAD_EVENT_KINDS).
+export const roadEvent = () => glyph("rev", (g) => {
+  const p = new Path2D("M32 5 L60 56 L4 56 Z");
+  fillStroke(g, p, 5);
+  g.fillStyle = INK;
+  g.fillRect(29, 22, 6, 18);
+  g.beginPath(); g.arc(32, 47, 3.6, 0, 7); g.fill();
+});
+
 export const camera = () => glyph("cam", (g) => {
   g.fillStyle = "#fff"; g.strokeStyle = INK; g.lineWidth = 5;
   roundRect(g, 6, 6, 52, 52, 11); g.stroke(); g.fill();
@@ -398,7 +409,9 @@ export const dotFilled = (color, hollow = false) => glyph(`df${color}${hollow}`,
   g.lineWidth = hollow ? 4 : 3.5; g.strokeStyle = hollow ? HOLLOW : "#ffffff"; g.stroke();
 });
 
-const HOLLOW = "#6b7c89";
+// Darker than the "other" grey (2026-11-07, visibility pass): a hollow
+// symbol is only its edge, and on the light map the old grey edge faded out.
+const HOLLOW = "#4f5d69";
 
 // Far from the camera every contact is this: a dot in its colour with a
 // white rim, drawn at twice the size it is shown, so it stays crisp where a
@@ -419,7 +432,7 @@ export const SEA_GROUPS = [
     subtypes: ["cargo", "tanker", "passenger", "highspeed"] },
   { key: "fishing", label: "Fishing", color: "#eb6834", subtypes: ["fishing"] },
   { key: "government", label: "Gov / military", color: "#4a3aa7", subtypes: ["government"] },
-  { key: "other", label: "Other traffic", color: "#6b7c89",
+  { key: "other", label: "Other traffic", color: "#5f7487",
     subtypes: ["tug", "service", "pleasure", "other"] },
   { key: "unknown", label: "Undeclared", color: "#6b7c89", hollow: true, subtypes: ["unknown"] },
 ];
@@ -438,7 +451,8 @@ export const MODES = {
   rail: { label: "Rail", color: "#c99400", glyph: rail },
   ferry: { label: "Ferry", color: "#0f97a8", glyph: ferry },
 };
-export const NO_TRIP = "#8d96a0";
+// Darker, 2026-11-07: the paler grey vanished on the light basemap.
+export const NO_TRIP = "#6f7b87";
 
 export const COL = {
   workzone: "#f08c00",
@@ -451,6 +465,18 @@ export const COL = {
   fire: "#e8590c",
   select: "#ffffff",          // the reticle: white, its outline dark
   trail: "#a8175c",           // the followed contact's reported fixes: the 2D accent
+};
+
+// Road events (CARS hub): the server's `kind`, one colour each.
+export const ROAD_EVENT_KINDS = {
+  incident: { label: "Incident", color: "#d62828" },
+  closure: { label: "Closure", color: "#6a040f" },
+  roadwork: { label: "Roadwork", color: "#a35f00" },
+  restriction: { label: "Restriction", color: "#364fc7" },
+  weather: { label: "Weather, surface", color: "#0c8599" },
+  traffic: { label: "Traffic, delay", color: "#5c940d" },
+  event: { label: "Special event", color: "#9c36b5" },
+  other: { label: "Other", color: "#868e96" },
 };
 
 export const SAT_GROUPS = {

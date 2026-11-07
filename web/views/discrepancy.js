@@ -106,16 +106,20 @@ export function addDiscrepancy(map) {
     type: "circle",
     source: "candidates",
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 3.4, 12, 8],
+      // A little larger and heavier, 2026-11-07: the product of the
+      // project was the faintest thing on the map.
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 4.2, 12, 9],
       "circle-color": "rgba(0,0,0,0)",
       "circle-opacity": 0,
       "circle-stroke-color": CAND,
-      "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 5, 1.4, 12, 2.2],
+      "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 5, 1.8, 12, 2.8],
       // Older passes fade. The layer is retrospective, and how retrospective
       // varies by twelve days across it.
       "circle-stroke-opacity": [
         "interpolate", ["linear"], ["coalesce", ["get", "age_days"], 0],
-        0, 0.95, 60, 0.75, 240, 0.45,
+        // Floor raised 0.45 to 0.65, 2026-11-07: every return in the
+        // archive is over 240 days old, so the floor was how all of them drew.
+        0, 0.95, 60, 0.85, 240, 0.65,
       ],
     },
   });

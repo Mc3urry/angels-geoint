@@ -100,15 +100,46 @@ function Start-App {
 }
 
 function Stop-App {
-    # Only the processes holding these two ports -- deliberately narrow, so
-    # this can never take down the collector or an unrelated python.
-    foreach ($p in @($ApiPort, $WebPort)) {   # WebPort too, for old setups
-        $conns = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue
-        foreach ($c in $conns) {
-            Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue
-            Write-Host "  Stopped whatever was on port $p" -ForegroundColor Yellow
+    # Only the API's own processes -- deliberately narrow, so this can never
+    # take down the collector or an unrelated python.
+    #
+    # `uvicorn --reload` is two processes: a reloader, which binds the port,
+    # and a worker it spawns, which serves. Until 2026-11-07 this stopped
+    # only the port's owner, so the worker was left serving the old code with
+    # nothing to reload it, and every later start said "already running".
+    # Now: the port's owners, any python running uvicorn on angels.api.main,
+    # and each multiprocessing worker whose parent is one of those or is gone.
+    $procs = @(Get-CimInstance Win32_Process -Filter "Name like 'python%'" -ErrorAction SilentlyContinue)
+    $target = @{}
+    foreach ($port in @($ApiPort, $WebPort)) {   # WebPort too, for old setups
+        foreach ($c in @(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue)) {
+            $target[[int]$c.OwningProcess] = $true
         }
     }
+    foreach ($p in $procs) {
+        if ($p.CommandLine -match 'uvicorn\s+angels\.api\.main:app') { $target[[int]$p.ProcessId] = $true }
+    }
+    foreach ($p in $procs) {
+        if ($p.CommandLine -match 'spawn_main\(parent_pid=(\d+)') {
+            $parent = [int]$Matches[1]
+            $gone = -not (Get-Process -Id $parent -ErrorAction SilentlyContinue)
+            if ($target.ContainsKey($parent) -or $gone) { $target[[int]$p.ProcessId] = $true }
+        }
+    }
+    if ($target.Count -eq 0) { Write-Host "  Nothing was running" -ForegroundColor DarkGray; return }
+    foreach ($id in $target.Keys) {
+        if (Get-Process -Id $id -ErrorAction SilentlyContinue) {
+            Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+            Write-Host "  Stopped process $id" -ForegroundColor Yellow
+        }
+    }
+    # Wait for the port to be released, so a start straight after this does
+    # not find it still answering and say "already running".
+    foreach ($i in 1..20) {
+        if (-not (Test-Port $ApiPort)) { return }
+        Start-Sleep -Milliseconds 300
+    }
+    Write-Host "  Port $ApiPort still answers: close the minimised ANGELS API window" -ForegroundColor Yellow
 }
 
 function Show-Status {

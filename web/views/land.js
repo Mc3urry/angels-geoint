@@ -15,6 +15,8 @@
 //   Cameras   /cameras/us       every state's traffic cameras
 //   Speeds    /traffic/flow     TomTom flow tiles: aggregate, no vehicle in it
 //   ALPR      /context/alpr     mapped plate-reader locations: context only
+//   Events    /roads/events     IN KS MN NE road events from the CARS hubs
+//                               (2026-11-07): declared, viewer only, not Phase G
 //
 // The keys stay on the server (angels/api/routes/*): nothing here holds one.
 // None of it changes an analysis artefact. The research question reads the
@@ -33,6 +35,7 @@
 import { ageShort, attachHover, card, compass, esc, freshness, pinHint } from "./popup.js";
 import { reckonFleet } from "./reckon.js";
 import * as G from "../ops/icons.js";
+import { roadEventCardData, kindOf, HUB_BOX } from "../ops/roadevents.js";
 
 const API = location.port === "8000" ? "" : "http://127.0.0.1:8000";
 const ORIGIN = API || location.origin;
@@ -44,6 +47,8 @@ const RAIL_POLL_MS = 30000;
 const PLOW_POLL_MS = 60000;
 const CAM_LOADING_MS = 8000;            // while the API's camera sources load
 const CAM_POLL_MS = 900000;
+const REV_POLL_MS = 300000;            // the API keeps the hubs' answer 5 min
+const REV_LOADING_MS = 10000;
 
 const BOX = { air: [-77.7, 38.3, -76.0, 39.6], conus: [-125.0, 24.0, -66.5, 49.5] };
 
@@ -52,7 +57,7 @@ let running = false;
 let aoi = "air";
 let fleet = [], rail = [], plows = [];
 let vehicles = null, status = null, zones = null, cams = null, trains = null, plowDoc = null,
-    speeds = null, alpr = null;
+    speeds = null, alpr = null, roadEv = null;
 let lastPoll = 0, requests = 0;
 const failed = {};                      // sub-layer -> message
 
@@ -71,6 +76,7 @@ async function addGlyphs(map) {
     "veh-ferry-off": [G.ferry(), G.NO_TRIP],
     "intercity": [G.rail(), G.COL.rail], "plow": [G.plow(), G.COL.plow],
     "wz-sign": [G.workzone(), G.COL.workzone],
+    ...Object.fromEntries(Object.entries(G.ROAD_EVENT_KINDS).map(([k, v]) => [`rev-${k}`, [G.roadEvent(), v.color]])),
     "cam-live": [G.camera(), G.COL.camStream], "cam-none": [G.camera(), G.COL.camNone],
     "alpr": [G.alpr(), G.COL.alpr], "alpr-cone": [G.facingCone(), G.COL.alpr],
   };
@@ -116,7 +122,7 @@ const symbol = (id, source, image, size, extra = {}) => ({
 
 export function addLand(map) {
   for (const id of ["land-states", "land-zones", "land-cams", "land-veh", "land-rail",
-                    "land-plow", "land-alpr", "land-alpr-cone"]) {
+                    "land-plow", "land-alpr", "land-alpr-cone", "land-rev", "land-rev-line"]) {
     map.addSource(id, { type: "geojson", data: empty() });
   }
   addGlyphs(map).catch(() => {});
@@ -139,26 +145,39 @@ export function addLand(map) {
     layout: { visibility: "none", "line-cap": "round" } });
   map.addLayer(symbol("land-zones-point", "land-zones", "wz-sign", sizeBy(0.32, 0.6, 0.9),
     { filter: ["==", ["geometry-type"], "Point"] }));
+  // Road events (CARS hubs): a line where the event gives both ends, and a
+  // warning triangle at its first point, coloured by kind.
+  map.addLayer({ id: "land-rev-line", type: "line", source: "land-rev-line",
+    paint: { "line-color": ["get", "color"], "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 14, 7],
+             "line-opacity": 0.85 },
+    layout: { visibility: "none", "line-cap": "round" } });
+  map.addLayer(symbol("land-rev", "land-rev", ["concat", "rev-", ["get", "kind"]], sizeBy(0.42, 0.62, 0.9),
+    { layout: { "symbol-sort-key": ["match", ["get", "kind"], "incident", 3, "closure", 2, "weather", 0, 1] } }));
   // ALPR appear from zoom 6, as in the 3D view (below 1,500 km): tens of
   // thousands of hexagons over a continent say nothing a count does not.
   // Which way each one faces, from zoom 10, under its hexagon.
   map.addLayer(symbol("land-alpr-cone", "land-alpr-cone", "alpr-cone",
-    ["interpolate", ["linear"], ["zoom"], 10, 1.1, 16, 1.9],
+    ["interpolate", ["linear"], ["zoom"], 10, 0.75, 13, 1.05, 16, 1.6],
     { minzoom: 10, layout: { "icon-rotate": ["get", "rot"], "icon-rotation-alignment": "map",
                              "icon-pitch-alignment": "map" } }));
-  map.addLayer(symbol("land-alpr", "land-alpr", "alpr", sizeBy(0.3, 0.42, 0.75), { minzoom: 6 }));
+  // Smaller when far, full size close (2026-11-07): at metro scale the
+  // cameras and plate readers were solid blue and magenta masses that hid
+  // every other layer.
+  map.addLayer(symbol("land-alpr", "land-alpr", "alpr",
+    ["interpolate", ["linear"], ["zoom"], 6, 0.2, 10, 0.4, 13, 0.66, 16, 0.8], { minzoom: 6 }));
   map.addLayer(symbol("land-cams", "land-cams", ["case", ["get", "live"], "cam-live", "cam-none"],
-    sizeBy(0.3, 0.5, 0.85)));
+    ["interpolate", ["linear"], ["zoom"], 3, 0.2, 8, 0.36, 11, 0.55, 14, 0.85]));
   map.addLayer(symbol("land-plow", "land-plow", "plow", sizeBy(0.35, 0.6, 0.9),
-    { paint: { "icon-opacity": ["case", ["get", "stale"], 0.35, 1] } }));
+    { paint: { "icon-opacity": ["case", ["get", "stale"], 0.5, 1] } }));
   map.addLayer(symbol("land-veh-dot", "land-veh",
     ["concat", "veh-", ["get", "mode"], ["case", ["get", "in_service"], "", "-off"]],
     ["interpolate", ["linear"], ["zoom"], 3, 0.3, 8, 0.5, 12, 0.75, 15, 0.95],
     { layout: { "symbol-sort-key": ["case", ["get", "in_service"], 1, 0] },
-      // In service: solid. No trip (usually parked): faint. Stale: fainter.
-      paint: { "icon-opacity": ["case", ["get", "stale"], 0.3, ["get", "in_service"], 1, 0.55] } }));
+      // In service: solid. No trip (usually parked): grey and a little
+      // faint. Stale: fainter. Raised 2026-11-07; 0.55 and 0.3 read as gone.
+      paint: { "icon-opacity": ["case", ["get", "stale"], 0.5, ["get", "in_service"], 1, 0.8] } }));
   map.addLayer(symbol("land-rail", "land-rail", "intercity", sizeBy(0.4, 0.62, 0.9),
-    { paint: { "icon-opacity": ["case", ["get", "stale"], 0.35, 1] } }));
+    { paint: { "icon-opacity": ["case", ["get", "stale"], 0.5, 1] } }));
 
   // The same hover and pin as aircraft and vessels (popup.js), with a few
   // pixels of tolerance because these are small symbols with no hit layer.
@@ -222,6 +241,10 @@ export function addLand(map) {
     }),
   });
   attachHover(map, {
+    layers: ["land-rev", "land-rev-line"], tolerance: 6, key: (p) => p.id,
+    html: (p, { pinnable }) => card({ ...roadEventCardData(p), hint: pinHint(pinnable) }),
+  });
+  attachHover(map, {
     layers: ["land-cams"], tolerance: 6, key: (p) => p.id,
     html: (p) => card({
       title: p.name || "Traffic camera", chip: p.live ? G.COL.camStream : G.COL.camNone,
@@ -259,8 +282,10 @@ const TAB_LAYERS = {
   cameras: ["land-cams"],
   speeds: ["land-speed"],
   alpr: ["land-alpr-cone", "land-alpr"],
+  events: ["land-rev-line", "land-rev"],
 };
-const sub = { vehicles: true, rail: false, plows: false, cameras: false, speeds: false, alpr: false };
+const sub = { vehicles: true, rail: false, plows: false, cameras: false, speeds: false, alpr: false,
+              events: false };
 const ALL_LAYERS = ["land-states-line", ...Object.values(TAB_LAYERS).flat()];
 
 function applyLayers(map) {
@@ -371,10 +396,33 @@ async function loadSpeeds(map) {
     map.addSource("land-speed", { type: "raster", tileSize: 256, maxzoom: 18,
       tiles: [`${ORIGIN}/traffic/flow/{z}/{x}/{y}.png`],
       attribution: "Traffic flow &copy; TomTom" });
+    // Full opacity, a little more saturation and contrast, and no cross-fade
+    // (it blurred every refresh): the lines were thin and faint (2026-11-07).
+    // The tiles themselves are 512 px with widened lines (routes/traffic.py).
     map.addLayer({ id: "land-speed", type: "raster", source: "land-speed",
-      layout: { visibility: "none" }, paint: { "raster-opacity": 0.9 } }, "land-states-line");
+      layout: { visibility: "none" },
+      paint: { "raster-opacity": 1, "raster-saturation": 0.25, "raster-contrast": 0.15,
+               "raster-fade-duration": 0 } }, "land-states-line");
   }
   speeds = s;
+}
+
+// The API asks the five hubs in the background and answers `loading` until
+// they have answered; the loop asks again sooner while it does. The whole
+// set is drawn, whatever the AOI: the hubs are in the Midwest.
+let revAt = 0;
+async function loadRoadEvents(map, force = false) {
+  const wait = roadEv?.properties?.loading ? REV_LOADING_MS : REV_POLL_MS;
+  if (roadEv && !force && Date.now() - revAt < wait) return;
+  const d = await get("/roads/events");
+  revAt = Date.now();
+  roadEv = d;
+  const feats = d.features.map((f) => ({ ...f, properties: { ...f.properties, color: kindOf(f.properties).color } }));
+  map.getSource("land-rev-line")?.setData({ type: "FeatureCollection",
+    features: feats.filter((f) => f.geometry.type === "LineString") });
+  map.getSource("land-rev")?.setData({ type: "FeatureCollection", features: feats.map((f) => ({
+    ...f, geometry: { type: "Point",
+                      coordinates: f.geometry.type === "Point" ? f.geometry.coordinates : f.geometry.coordinates[0] } })) });
 }
 
 // The API fetches the country in the background and answers `loading`
@@ -401,7 +449,7 @@ async function loadAlpr(map) {
 // a missing TomTom key must not say the vehicles are down.
 const LOADERS = {
   vehicles: pollVehicles, rail: pollRail, plows: pollPlows, cameras: (m) => loadCameras(m),
-  speeds: loadSpeeds, alpr: loadAlpr,
+  speeds: loadSpeeds, alpr: loadAlpr, events: (m) => loadRoadEvents(m),
 };
 
 async function loadSub(map, name) {
@@ -437,6 +485,7 @@ export function startLand(map, onUpdate, onError) {
   loop((m) => loadSub(m, "plows"), PLOW_POLL_MS, () => sub.plows);
   loop((m) => loadSub(m, "cameras"), () => (cams?.loading ? CAM_LOADING_MS : 60000), () => sub.cameras);
   loop((m) => loadSub(m, "alpr"), 10000, () => sub.alpr && (!alpr || alpr.loading));
+  loop((m) => loadSub(m, "events"), () => (roadEv?.properties?.loading ? REV_LOADING_MS : 60000), () => sub.events);
   setInterval(() => { if (visible && !document.hidden) draw(map); }, DRAW_MS);
 }
 
@@ -453,7 +502,7 @@ export function refreshLand(map, onUpdate, onError) {
     .then(onUpdate, onError);
 }
 
-export const landInfo = () => ({ vehicles, status, zones, cams, trains, plows: plowDoc, speeds, alpr,
+export const landInfo = () => ({ vehicles, status, zones, cams, trains, plows: plowDoc, speeds, alpr, roadEv,
                                  failed: { ...failed }, sub: { ...sub }, lastPoll, requests, visible, aoi });
 
 // --- cameras: the drawer and the player ---------------------------------------
@@ -672,6 +721,8 @@ export async function setLandSub(map, name, on, { force = false } = {}) {
   document.querySelectorAll("#landtabs button").forEach(
     (b) => b.classList.toggle("on", !!sub[b.dataset.landtab]));
   applyLayers(map);
+  // The hubs are in the Midwest; the default view is DC to Baltimore.
+  if (on && visible && name === "events") ensureInView(map, HUB_BOX);
   if (on && visible && name !== "cameras") await loadSub(map, name).catch(() => {});
   if (name !== "cameras") return;
   const d = camEl(map);
@@ -693,5 +744,6 @@ export const landSub = () => ({ ...sub });
 export const landFleets = () => {
   const off = !visible;
   return { transit: off || !sub.vehicles ? [] : fleet, rail: off || !sub.rail ? [] : rail,
-           plows: off || !sub.plows ? [] : plows, cams: off || !sub.cameras ? [] : (cams?.rows || []) };
+           plows: off || !sub.plows ? [] : plows, cams: off || !sub.cameras ? [] : (cams?.rows || []),
+           events: off || !sub.events ? [] : (roadEv?.features || []) };
 };

@@ -16,10 +16,22 @@ map tiles a day). TomTom takes it in the query string, so it is added here
 and never reaches the browser, a response or an error message (the CARTO
 rule, routes/basemap.py). A tile is kept for two minutes: flow is updated
 about once a minute upstream, and panning back should not spend the quota.
+
+SHARPER AND WIDER, 2026-11-07. Joshua found the lines thin, faint and
+blurry. TomTom's `relative0` style takes no `thickness` parameter, so the
+width is changed here: each tile is asked for at 512 px (the same z/x/y,
+twice the pixels, so it stays sharp on a high-resolution screen and when the
+map sits between zoom levels) and every line is widened by WIDEN_PX on each
+side, by laying the tile over itself shifted in a small disc. Colours are
+TomTom's own and unchanged; the antialiased edges come out bolder. This
+needs Pillow (declared in the `forensics` extra; matplotlib brings it too).
+Without it the tile is served as TomTom draws it at 256 px, as before, and
+/traffic/status says so.
 """
 
 from __future__ import annotations
 
+import io
 import os
 import time
 import urllib.error
@@ -37,6 +49,7 @@ router = APIRouter(prefix="/traffic", tags=["traffic"])
 ENV = "TOMTOM_API_KEY"
 FLOW = "https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png"
 MAX_Z = 18
+WIDEN_PX = 1          # at 512 px: half a screen pixel each side at 256 (2 was too bulky, 2026-11-07)
 TTL_S = 120
 _cache: OrderedDict[str, tuple[float, bytes]] = OrderedDict()
 _CACHE_MAX = 2000
@@ -44,6 +57,36 @@ _CACHE_MAX = 2000
 
 def _key() -> str:
     return os.getenv(ENV, "").strip()
+
+
+def _pillow():
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    return Image
+
+
+def widen(png: bytes, px: int = WIDEN_PX) -> bytes | None:
+    """The tile with every line widened by `px` on each side, or None when
+    Pillow is missing or the bytes are not an image (served as they came)."""
+    Image = _pillow()
+    if Image is None:
+        return None
+    try:
+        im = Image.open(io.BytesIO(png)).convert("RGBA")
+    except Exception:                       # noqa: BLE001 - not an image: pass it through
+        return None
+    out = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    for dx in range(-px, px + 1):
+        for dy in range(-px, px + 1):
+            if (dx, dy) == (0, 0) or dx * dx + dy * dy > px * px + 1:
+                continue
+            out.alpha_composite(im, dest=(max(dx, 0), max(dy, 0)), source=(max(-dx, 0), max(-dy, 0)))
+    out.alpha_composite(im)                 # the line's own centre on top
+    buf = io.BytesIO()
+    out.save(buf, "PNG")
+    return buf.getvalue()
 
 
 def _get(url: str) -> bytes:
@@ -55,6 +98,8 @@ def _get(url: str) -> bytes:
 @router.get("/status")
 def status() -> dict:
     return {"flow": bool(_key()), "how": f"set {ENV} in .env and restart the API",
+            "tiles": ("512 px, lines widened" if _pillow() else
+                      "256 px as TomTom draws them; install Pillow for sharper, wider lines"),
             "source": "TomTom Traffic Flow, relative to free-flow speed",
             "means": "aggregate speed per road segment; no vehicle is identified"}
 
@@ -71,13 +116,15 @@ def flow(z: int, x: int, y: int) -> Response:
     if hit and time.time() - hit[0] < TTL_S:
         png = hit[1]
     else:
-        url = FLOW.format(z=z, x=x, y=y) + "?" + urllib.parse.urlencode({"key": key, "tileSize": 256})
+        size = 512 if _pillow() else 256
+        url = FLOW.format(z=z, x=x, y=y) + "?" + urllib.parse.urlencode({"key": key, "tileSize": size})
         try:
             png = _get(url)
         except urllib.error.HTTPError as exc:
             raise HTTPException(502, f"TomTom answered HTTP {exc.code}") from None
         except (urllib.error.URLError, TimeoutError, OSError):
             raise HTTPException(502, "TomTom did not answer") from None
+        png = widen(png) or png
         _cache[name] = (time.time(), png)
         _cache.move_to_end(name)
         while len(_cache) > _CACHE_MAX:

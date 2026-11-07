@@ -301,7 +301,8 @@ export class Fleet {
       }
       this.place(it, nowMs);
       const w = it.now;
-      const alpha = w.stale ? Math.min(it.alpha, 0.35) : it.alpha;
+      // Stale is faded, not hidden: 0.35 read as gone (2026-11-07).
+      const alpha = w.stale ? Math.min(it.alpha, 0.5) : it.alpha;
       it.bb.color = this.colour(it.tint, alpha);
       if (it.heading != null && (it.rotates || it.tick)) {
         // Recomputed when the course or the position (to 0.01 degree) changes.
@@ -379,14 +380,17 @@ export class Fleet {
       if (!keep.has(it)) { if (it.lbl) it.lbl.show = false; continue; }
       const text = this.labelOf(it.props);
       if (!it.lbl) {
-        // The 2D viewer's label: dark mono on a white halo.
+        // The 2D viewer's label: dark mono, here on a white tab rather than
+        // a halo, so it reads over imagery and the dark globe too (2026-11-07;
+        // a 3 px halo blurred to grey there).
         it.lbl = this.labels.add({
           text,
-          font: "600 11px 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace",
+          font: "600 12px 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace",
           fillColor: C.Color.fromCssColorString("#0e1a24"),
-          outlineColor: C.Color.WHITE,
-          outlineWidth: 3,
-          style: C.LabelStyle.FILL_AND_OUTLINE,
+          style: C.LabelStyle.FILL,
+          showBackground: true,
+          backgroundColor: C.Color.WHITE.withAlpha(0.85),
+          backgroundPadding: new C.Cartesian2(4, 2),
           verticalOrigin: C.VerticalOrigin.TOP,
           pixelOffset: new C.Cartesian2(0, (it.bb.height || this.basePx) / 2 + 3),
           disableDepthTestDistance: NO_DEPTH,

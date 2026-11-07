@@ -62,13 +62,13 @@ export const GROUPS = [
     subtypes: ["fishing"] },
   { key: "government", label: "Gov / military", color: "#4a3aa7",
     subtypes: ["government"] },
-  { key: "other", label: "Other traffic", color: "#6b7c89",
+  { key: "other", label: "Other traffic", color: "#5f7487",
     subtypes: ["tug", "service", "pleasure", "other"] },
   { key: "unknown", label: "Undeclared", color: null,
     subtypes: ["unknown"] },
 ];
 
-const HOLLOW = "#6b7c89";          // stroke of an undeclared vessel
+const HOLLOW = "#4f5d69";          // stroke of an undeclared vessel; darker 2026-11-07, as ops/icons.js
 export const SUBTYPE_LABEL = {
   cargo: "cargo", tanker: "tanker", passenger: "passenger",
   highspeed: "high-speed", fishing: "fishing", government: "gov/military",
@@ -211,7 +211,7 @@ export function addVessels(map) {
         ["==", ["get", "group"], "unknown"], 0.7, 1],
       "circle-stroke-color": RING,
       "circle-stroke-width": ["case", ["==", ["get", "group"], "unknown"], 1.5, 1.2],
-      "circle-stroke-opacity": ["case", ["get", "stale"], 0.35, 1],
+      "circle-stroke-opacity": ["case", ["get", "stale"], 0.5, 1],
     },
   });
   map.addLayer({
@@ -231,7 +231,7 @@ export function addVessels(map) {
       "icon-ignore-placement": true,
       "symbol-sort-key": ["get", "rank"],
     },
-    paint: { "icon-opacity": ["case", ["get", "stale"], 0.35, 1] },
+    paint: { "icon-opacity": ["case", ["get", "stale"], 0.5, 1] },
   });
 
   // Own layer, in a try/catch, for the same reason as the aircraft labels: a

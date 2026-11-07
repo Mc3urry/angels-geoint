@@ -150,8 +150,9 @@ There are two viewers on one API, and `.\app.ps1` serves both:
 
 They have the same layers:
 
-- **Cooperative:** aircraft, vessels, transit, intercity rail, DOT plows and
-  declared work zones.
+- **Cooperative:** aircraft, vessels, transit, intercity rail, DOT plows,
+  declared work zones, and road events declared by five states' 511
+  systems (IN, KS, MN, NE, through the CARS hub).
 - **Observed:** Sentinel-1 unexplained returns, with the fixed structures
   removed from them, and a probe that answers "when did the radar last look
   here".
@@ -206,6 +207,7 @@ pointless.
 | Census TIGERweb | state boundaries | public domain |
 | Maryland CHART, state DOT and 511 feeds | traffic cameras, counts | public; some free keys (viewer only) |
 | TomTom | road speeds, place search | free key (viewer only) |
+| CARS hub (Castle Rock Associates) | road events, IN KS MN NE | login by request (viewer only) |
 | CelesTrak, OpenStreetMap | satellites, ALPR locations | public (viewer context) |
 
 Credentials go in `.env` (see `.env.example`); it is gitignored and nothing in
@@ -579,7 +581,11 @@ the project does not:
   every US GTFS-Realtime feed in the registry (keyed ones when a key is in
   `.env`), intercity trains (Amtrak, VIA, Brightline), and state DOT
   snowplows;
-- **live road speeds** on every road, from TomTom's traffic-flow layer.
+- **live road speeds** on every road, from TomTom's traffic-flow layer;
+- **road events** (incidents, closures, roadwork, restrictions, surface
+  and weather) declared by Indiana, Kansas, Minnesota and Nebraska,
+  read from the CARS hub with a login Castle Rock Associates issued on
+  request (added 2026-11-07).
 
 Private cars are not on this list, and the exception does not extend to
 them. A private car does not broadcast its position as an aircraft or a
@@ -610,6 +616,14 @@ widen any analysis:
   the last poll is held in memory. The land question's evidence stays the
   38 border feeds the research collector archives (G2b). Nothing from the
   national layer enters it.
+- Road events from the CARS hub are held in memory for five minutes and
+  never archived. Their operator comments, which the hub marks as not for
+  the public, are never read. They are not part of Phase G: the registered
+  test takes each state's regime from the WZDx registry as committed at
+  registration, and its declared set from the WZDx feeds alone. The hub
+  login is sent over https to the hub hosts only (and, for Kansas, to
+  KanDrive's kscars.kandrive.gov, where its hub redirects). Iowa's hub
+  redirects to the DOT's home page and is a named gap.
 - The viewers keep nothing. No track, trail, search or click is written to
   disk, and the trail behind a followed contact is gone when the tab is
   closed.

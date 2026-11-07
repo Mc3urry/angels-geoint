@@ -21,11 +21,12 @@ import { trackCardData } from "../views/map.js";
 
 const C = () => window.Cesium;
 
-// Older passes fade, as in 2D: 0 days 0.95, 60 days 0.75, 240 days 0.45.
+// Older passes fade, as in 2D: 0 days 0.95, 60 days 0.85, 240 days 0.65
+// (floor raised from 0.45, 2026-11-07).
 function ageAlpha(days) {
   if (days == null) return 0.95;
-  if (days <= 60) return 0.95 - (0.2 * days) / 60;
-  return Math.max(0.45, 0.75 - (0.3 * (days - 60)) / 180);
+  if (days <= 60) return 0.95 - (0.1 * days) / 60;
+  return Math.max(0.65, 0.85 - (0.2 * (days - 60)) / 180);
 }
 
 export class Observed {

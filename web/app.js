@@ -29,6 +29,7 @@ import { addVessels, startVessels, vesselInfo, setVisible as setSeaVisible,
 import { addLand, startLand, setVisible as setLandVisible, setLandAoi,
          refreshLand, landInfo, setLandSub, ensureInView, landFleets, openCamera } from "./views/land.js";
 import * as G from "./ops/icons.js";
+import { hubLine } from "./ops/roadevents.js";
 import { addFinder, nowOf } from "./views/finder.js";
 import { addSats, setSats, satsInfo, satList, satPosition } from "./views/sats.js";
 import { esc } from "./views/popup.js";
@@ -820,6 +821,13 @@ function searchSources() {
       label: (r) => r.name || "camera", sub: (r) => `camera ${r.state || ""}`,
       hay: (r) => `${r.name} ${r.state} ${r.src}`, where: (r) => [r.lon, r.lat], id: (r) => r.id,
       onPick: (r) => openCamera(map, r) },
+    { items: L.events || [], moves: false, zoom: 12, max: 5,
+      icon: (f) => G.tinted(G.roadEvent(), (G.ROAD_EVENT_KINDS[f.properties.kind] || G.ROAD_EVENT_KINDS.other).color),
+      label: (f) => f.properties.headline || "road event",
+      sub: (f) => `${f.properties.road || ""} ${f.properties.state}`.trim(),
+      hay: (f) => `${f.properties.headline} ${f.properties.road} ${f.properties.state} ${f.properties.text || ""}`,
+      where: (f) => (f.geometry.type === "Point" ? f.geometry.coordinates : f.geometry.coordinates[0]),
+      id: (f) => f.properties.id },
     { items: satList(), moves: true, zoom: 3,
       icon: (s) => G.tinted(G.satellite(), s.color), label: (s) => s.name, sub: () => "satellite",
       hay: (s) => `${s.name} ${s.norad}`, where: (s) => satPosition(s), id: (s) => s.norad },
@@ -890,11 +898,20 @@ function landBlock() {
       <span class="l">Road speeds against free flow</span></div>
       <div class="keyrow"><span class="ramp" style="background:linear-gradient(90deg,#3ec46d,#f7c948,#e8590c,#8b1a1a)"></span>
         <span>free flow to stopped</span></div>
-      <p class="meta">TomTom's aggregate of probe data per road. No vehicle is in it.</p>${fail("speeds")}` : ""}
+      <p class="meta">TomTom's aggregate of probe data per road. No vehicle is in it.${
+        L.speeds?.tiles && !L.speeds.tiles.startsWith("512") ? ` Tiles: ${esc(L.speeds.tiles)}.` : ""}</p>${fail("speeds")}` : ""}
     ${L.sub.alpr ? `<div class="stat"><span class="n">${L.alpr && !L.alpr.loading ? L.alpr.n.toLocaleString() : "&mdash;"}</span>
       <span class="l"><img class="ic" src="${G.tinted(G.alpr(), G.COL.alpr)}" alt="">ALPR cameras mapped in the US</span></div>
       <p class="meta">Context, not evidence: locations volunteers mapped in OpenStreetMap, drawn from zoom 6.${
-        L.alpr && !L.alpr.loading ? "" : " Asking OpenStreetMap for the whole country: a few minutes the first time."}</p>${fail("alpr")}` : ""}`;
+        L.alpr && !L.alpr.loading ? "" : " Asking OpenStreetMap for the whole country: a few minutes the first time."}</p>${fail("alpr")}` : ""}
+    ${L.sub.events ? `<div class="stat"><span class="n">${L.roadEv ? L.roadEv.properties.n.toLocaleString() : "&mdash;"}</span>
+      <span class="l"><img class="ic" src="${G.tinted(G.roadEvent(), G.ROAD_EVENT_KINDS.incident.color)}" alt="">Road events, IN KS MN NE${
+        L.roadEv?.properties.loading ? " &middot; asking the hubs" : ""}</span></div>
+      <div class="keyrow">${Object.values(G.ROAD_EVENT_KINDS).map((k) =>
+        `<span><img src="${G.tinted(G.roadEvent(), k.color)}" alt="">${k.label}</span>`).join("")}</div>
+      <p class="meta">Declared by each state's 511 system through the CARS hub; the login stays on the API.
+        Context only: never archived, and not part of the registered land test.${
+        L.roadEv ? ` ${esc(hubLine(L.roadEv.properties))}.` : ""}</p>${fail("events")}` : ""}`;
 }
 
 // --- filters --------------------------------------------------------------

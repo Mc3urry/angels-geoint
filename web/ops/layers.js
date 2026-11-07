@@ -316,7 +316,8 @@ export class Cameras {
     this.viewer = viewer;
     this.key = "cam";
     this.on = false;
-    this.pts = new StaticPoints(viewer, { px: 22, dotPx: 7, dotAbove: 1.2e6,
+    // Dots above 100 km (was 1,200), as ALPR: 2026-11-07.
+    this.pts = new StaticPoints(viewer, { px: 22, dotPx: 7, dotAbove: 1e5,
       scaler: new Cs.NearFarScalar(3e3, 1.1, 5e6, 0.6) });
     this.rows = [];
     this.meta = null;

@@ -144,7 +144,10 @@ export class Satellites {
 // nothing a count does not.
 
 export const ALPR_SHOW_BELOW_M = 1.5e6;
-export const ALPR_CONE_BELOW_M = 2e5;
+// The wedge shows only where its hexagon is drawn full size (below the
+// hexagons' dot height, 60 km); above it the wedges outweighed the dots
+// (2026-11-07; was 200 km).
+export const ALPR_CONE_BELOW_M = 6e4;
 
 export class Alpr {
   constructor(viewer) {
@@ -152,12 +155,14 @@ export class Alpr {
     this.key = "alpr";
     this.on = false;
     const Cs = C();
-    // Which way each faces: a wedge under its hexagon, shown within 200 km.
+    // Which way each faces: a wedge under its hexagon, shown within 60 km.
     // Made first so the hexagons draw over it.
     this.cones = new StaticPoints(viewer, { px: 46, dotAbove: Infinity,
       ddc: new Cs.DistanceDisplayCondition(0, ALPR_CONE_BELOW_M),
       scaler: new Cs.NearFarScalar(1e3, 1.2, ALPR_CONE_BELOW_M, 0.6) });
-    this.pts = new StaticPoints(viewer, { px: 24, dotPx: 7, dotAbove: 6e5,
+    // Dots above 60 km (was 600): at metro scale the hexagons were one
+    // magenta mass over every other layer (2026-11-07).
+    this.pts = new StaticPoints(viewer, { px: 22, dotPx: 6, dotAbove: 6e4,
       ddc: new Cs.DistanceDisplayCondition(0, ALPR_SHOW_BELOW_M),
       scaler: new Cs.NearFarScalar(2e3, 1.1, ALPR_SHOW_BELOW_M, 0.6) });
     this.rows = [];

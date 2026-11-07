@@ -20,8 +20,8 @@ from fastapi.staticfiles import StaticFiles
 
 from angels import __version__
 from angels.api.routes import (basemap, cameras, context, coverage, dossier,
-                                events, geo, labels, land, live, tracks, traffic,
-                                vehicles)
+                                events, geo, labels, land, live, roads, tracks,
+                                traffic, vehicles)
 from angels.config import AOI_AIR, AOI_SEA, REGION, REGION_NAME, ROOT
 
 app = FastAPI(
@@ -76,6 +76,8 @@ app.include_router(geo.router)
 app.include_router(cameras.router)
 app.include_router(vehicles.router)
 app.include_router(traffic.router)
+# Road events from the CARS hubs (IN, KS, MN, NE), 2026-11-07: viewer only.
+app.include_router(roads.router)
 
 class RevalidatingStatic(StaticFiles):
     """Static files that the browser must check before reusing.

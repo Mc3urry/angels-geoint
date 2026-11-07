@@ -202,7 +202,7 @@ export function addLive(map) {
       "circle-opacity": ["case", ["get", "stale"], 0.25, 0.9],
       "circle-stroke-color": "#ffffff",
       "circle-stroke-width": 1.2,
-      "circle-stroke-opacity": ["case", ["get", "stale"], 0.3, 0.9],
+      "circle-stroke-opacity": ["case", ["get", "stale"], 0.45, 0.9],
     },
   });
 
@@ -219,7 +219,7 @@ export function addLive(map) {
       "icon-ignore-placement": true,
     },
     paint: {
-      "icon-opacity": ["case", ["get", "stale"], 0.4, 1],
+      "icon-opacity": ["case", ["get", "stale"], 0.5, 1],
     },
   });
 
